@@ -1,0 +1,7 @@
+{
+  "extents": ["stylelint-config-standard"]
+  "rules": {
+    "unit-blacklist": ["px"],
+    "scale-un"
+  }
+}
