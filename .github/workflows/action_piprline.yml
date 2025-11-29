@@ -1,0 +1,39 @@
+name: pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  setup-and-build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: ['20.x', '22.x', '24.x']
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node ${{matrix.node-version}}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{matrix.node-version}}
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.x
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cache Turbo Output
+        uses: actions/cache@4
+        with:
+          path: .turbo
+          key: turbo-${{github.sha}}
+          restore-keys: turbo-
+
+      - name: Build all packages
+        run: pnpm turbo run build
