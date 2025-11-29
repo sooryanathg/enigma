@@ -20,14 +20,19 @@ jobs:
         with:
           node-version: 20 
           cache: "pnpm"
-      - run: npm install -g pnpm@10
+
+      - name: Install pnpm (working)
+        run: npm install -g pnpm@9
           
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
-          standalone: true
+      # - name: Setup pnpm
+      #   uses: pnpm/action-setup@v4
+      #   with:
+      #     version: 10
+      #     standalone: true
+
+      - name: Verify pnpm
+        run: pnpm --version
           
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
