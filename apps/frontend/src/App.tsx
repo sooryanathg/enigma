@@ -1,7 +1,20 @@
-import AppRouter from './router';
+import { useState, useEffect } from "react";
+import AppRouter from "./router";
+import { LoadingScreen } from "./components/home/LoadingScreen";
 
 function App() {
-  return <AppRouter />;
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <>
+      {isLoading ? <LoadingScreen loadingDelay={2000} /> : <AppRouter />}
+    </>
+  );
 }
 
 export default App;

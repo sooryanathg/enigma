@@ -19,6 +19,7 @@ export default {
     },
     extend: {
       fontFamily: {
+        whirlyBirdie: ["WhirlyBirdie", "sans-serif"],
         sans: ['Inter', 'Helvetica', 'Arial', 'sans-serif'],
         orbitron: ['var(--font-orbitron)', 'sans-serif'],
         montserrat: ['var(--font-montserrat)', 'sans-serif'],

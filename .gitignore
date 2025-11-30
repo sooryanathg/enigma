@@ -3,6 +3,7 @@ node_modules
 dist
 *.log
 .crush
+**.DS_Store
 
 # Environment variables - contain sensitive information
 .env

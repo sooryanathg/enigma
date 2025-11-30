@@ -1,0 +1,100 @@
+name: pipeline
+
+on:
+  push:
+    branches: [dev]
+  pull_request:
+
+jobs:
+
+  validate-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Validate Commit message
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            COMMITS=$(git log --format=%H ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          else
+            COMMITS=$(git log --format=%H ${{github.event.before}}..${{github.event.after}})
+          fi
+
+          Valid_Prefixes="^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?:"
+
+          echo "Validating commit message"
+          Invalid_Commits=""
+
+          for commit in $COMMITS; do
+            Message=$(git log --format=%B -n 1 $commit | head -n 1)
+
+            if [ -z "$Message"]; then
+              echo "Commit $commit has no message"
+              Invalid_Commits="$Invalid_Commits\n $commit: $Message"
+            else
+              echo " Valid commit message: $Message"
+            fi
+          done
+
+          if [ -n "$INVALID_COMMITS" ]; then
+            echo ""
+            echo "=========================================="
+            echo "COMMIT MESSAGE VALIDATION FAILED"
+            echo "=========================================="
+            echo -e "Invalid commits:$INVALID_COMMITS"
+            echo ""
+            echo "Valid format examples:"
+            echo "  - feat: add new feature"
+            echo "  - feat(api): add new endpoint"
+            echo "  - fix: resolve bug in login"
+            echo "  - docs: update README"
+            echo "  - [feat] add new feature"
+            echo "  - [fix] resolve bug"
+            echo ""
+            echo "Valid prefixes: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
+            exit 1
+          fi
+
+          echo ""
+          echo "All commit messages are valid!"
+
+
+
+  setup-and-build:
+    needs: validate-commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+
+      - name: Verify pnpm
+        run: pnpm --version
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Cache Turbo Output
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: turbo-${{ github.sha }}
+          restore-keys: turbo-
+
+      # -  name: Run lint
+      #    run: pnpm run lint
+      - name: Build all packages
+        run: pnpm turbo run build
