@@ -132,3 +132,26 @@
   --x: 50%;
   --y: 50%;
 }
+
+@font-face {
+  font-family: "WhirlyBirdie";
+  src: url("/src/assets/fonts/WhirlyBirdie-WideLight.woff2") format("woff2");
+  font-weight: 300; /* Light weight */
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "WhirlyBirdie";
+  src: url("/src/assets/fonts/WhirlyBirdie-WideBold.woff2") format("woff2");
+  font-weight: 700; /* Bold weight */
+  font-style: normal;
+}
+
+@keyframes spin-slow {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 16s linear infinite;
+}
