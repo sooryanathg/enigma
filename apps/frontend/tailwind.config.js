@@ -25,6 +25,8 @@ export default {
         montserrat: ['var(--font-montserrat)', 'sans-serif'],
         pavelt: ['var(--font-pavelt)', 'sans-serif'],
         inter: ['Inter', 'sans-serif'],
+        poppins: ["Poppins", "sans-serif"],
+        whirly: ["WhirlyBirdie", "sans-serif"],
       },
       colors: {
         border: 'hsl(var(--border))',
