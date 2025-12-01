@@ -64,7 +64,7 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 border-b border-black bg-transparent transition-transform duration-300",
+        "fixed top-0 left-0 right-0 z-50 border-b border-black bg-[#FFF2E4] transition-transform duration-300",
         visible ? "translate-y-0" : "-translate-y-full",
         className
       )}

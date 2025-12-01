@@ -98,7 +98,8 @@ const CircularText = () => {
 
 const AboutUs = () => {
   return (
-    <div className="relative w-full min-h-[2000px] bg-gray-900 overflow-hidden">
+    <div className="relative w-full min-h-[2000px] overflow-hidden mt-[-18px]" style={{ backgroundColor: '#FFF2E4' }}>
+
       {/* ========== DESKTOP LAYOUT - EXACT ORIGINAL (hidden on mobile) ========== */}
       <div className="hidden xl:block">
         {/* ========== RECTANGLE 1 ========== */}
