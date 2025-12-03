@@ -1,123 +1,187 @@
-import { motion } from "framer-motion";
-import { cn } from "../lib/utils";
-
-interface RuleSection {
-  title: string;
-  icon: string;
-  descriptions: string;
-}
+import React from "react";
 
 const Rules = () => {
-  const rulesSections: RuleSection[] = [
-    {
-      title: "Verification",
-      icon: "",
-      descriptions: "Winners will have to prove they’re real humans (and real students) before collecting their glory."
+  // Style generator for frames
+  const frameStyle = (top: number): React.CSSProperties => ({
+    width: "1451px",
+    height: "248px",
+    left: "calc(50% - 1451px/2)",
+    top: `${top}px`,
+    position: "absolute",
+  });
+
+  // Diagonal line style generator
+  const diagonal = (left: number): React.CSSProperties => ({
+    width: "128.46px",
+    border: "1px solid #FFFFFF",
+    left: `${left}px`,
+    top: "51px",
+    transform: "rotate(-54.83deg)",
+    position: "absolute",
+  });
+
+  // Shared text styles inside each frame
+  const textStyle = {
+    number: {
+      width: "22px",
+      height: "49px",
+      left: "64px",
+      top: "29px",
+      fontFamily: "'WhirlyBirdie'",
+      fontWeight: 700,
+      fontSize: "48px",
+      lineHeight: "49px",
+      display: "flex",
+      alignItems: "center",
+      letterSpacing: "0.01em",
+      color: "#FFFFFF",
+      position: "absolute" as const,
     },
-    {
-      title: "Ranking",
-      icon: "",
-      descriptions: "It’s not just about solving — it’s about how fast you solve. The quickest minds rise to the top, no second chances with time."
+    title: {
+      width: "266px",
+      height: "49px",
+      left: "282px",
+      top: "29px",
+      fontFamily: "'WhirlyBirdie'",
+      fontWeight: 700,
+      fontSize: "24px",
+      lineHeight: "49px",
+      display: "flex",
+      alignItems: "center",
+      letterSpacing: "0.01em",
+      color: "#FFFFFF",
+      position: "absolute" as const,
     },
-    {
-      title: "Hints",
-      icon: "",
-      descriptions: "We might drop a few hints here and there… or maybe not. Keep an eye on the question page; surprises happen when you least expect them."
+    desc: {
+      width: "1189px",
+      height: "78px",
+      left: "64px",
+      top: "134px",
+      fontFamily: "'Poppins'",
+      fontWeight: 500,
+      fontSize: "28px",
+      lineHeight: "39px",
+      display: "flex",
+      alignItems: "center",
+      letterSpacing: "0.01em",
+      color: "#FFFFFF",
+      position: "absolute" as const,
     },
-    {
-      title: "Timer",
-      icon: "",
-      descriptions: "The second you create your account, the game begins. The clock’s been your enemy all along — you just didn’t know it."
-    },
-    {
-      title: "Fair Play",
-      icon: "",
-      descriptions: "The team holds every right to take action if things go sideways. Play clean, or watch your spot disappear like your last wrong guess."
-    },
-    {
-      title: "Use Your Tools",
-      icon: "",
-      descriptions: "Google’s your sidekick. Think like a coder, search like a detective. The answer’s always out there — somewhere between logic and luck."
-    },
-    {
-      title: "Hackers",
-      icon: "",
-      descriptions: "We see you. We like your confidence. But no — just no."
-    }
-  ];
+  };
+
+  // top positions for 7 identical frames (20px gap)
+  const frames = [436, 704, 972, 1240, 1508, 1776, 2044];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="h-screen w-full relative overflow-hidden bg-transparent pt-12">
+    <div className="relative w-full min-h-screen overflow-y-auto">
+      {/* Header Rectangle */}
+      <div
+        className="absolute bg-black"
+        style={{
+          width: "1452px",
+          height: "104px",
+          left: "29.01px",
+          top: "121px",
+        }}
+      ></div>
 
-      {/* Page container, no scroll */}
-      <div className="relative z-10 h-full flex flex-col items-center pt-20 pb-20 px-2 overflow-hidden">
-
-        {/* Title */}
-        <h1
-          className={cn(
-            "text-4xl md:text-5xl font-semibold text-center mb-3",
-            "text-white tracking-tight",
-            "font-sans",
-            "[text-shadow:_0_0_10px_rgba(79,70,229,0.6)]"
-          )}
-        >
-          Game Rules
-        </h1>
-
-        <p className="text-lg text-center text-gray-300 mb-8 max-w-xl leading-relaxed">
-          Master the challenge with these essential guidelines
-        </p>
-
-        <div
-          className={cn(
-            "bg-white/6 backdrop-blur-xl rounded-2xl border border-white/15",
-            "p-8 md:p-10 space-y-6 w-full max-w-4xl font-sans",
-            "h-[65vh] overflow-y-auto relative",
-            "scrollbar-thin scrollbar-thumb-purple-600/40 scrollbar-track-transparent"
-          )}
-        >
-          {rulesSections.map((section, index) => (
-            <div key={index}>
-              <div className="flex items-center">
-                <span className="text-3xl mr-3">{section.icon}</span>
-                <h2 className="text-xl font-semibold text-white tracking-tight">
-                  {section.title}
-                </h2>
-              </div>
-
-              <ul className="space-y-2 w-full border-white/10 ml-2">
-                <div className="p-2 w-full min-h-[100px] text-gray-200 leading-relaxed">
-                  {section.descriptions}
-                </div>
-              </ul>
-
-              {index < rulesSections.length - 1 && (
-                <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-              )}
-            </div>
-          ))}
-        </div>
-        {/* CTA */}
-        <div className="md:pt-0 pt-8">
-          <button
-            onClick={() => (window.location.href = "/play")}
-            className={cn(
-              "md:mt-6 px-8 py-3 rounded-full font-orbitron font-semibold tracking-wide",
-              "bg-white",
-              "text-black shadow-lg hover:shadow-white/10 transition-all duration-300",
-              "transform hover:-translate-y-1"
-            )}
-          >
-            START PLAYING
-          </button>
-        </div>
-
+      {/* RULES */}
+      <div
+        className="absolute text-white"
+        style={{
+          width: "130px",
+          height: "29px",
+          left: "60.01px",
+          top: "157px",
+          fontFamily: "'WhirlyBirdie'",
+          fontWeight: 700,
+          fontSize: "24px",
+          lineHeight: "29px",
+        }}
+      >
+        RULES
       </div>
-    </motion.div>
+
+      {/* GAME RULES */}
+      <div
+        className="absolute"
+        style={{
+          width: "370px",
+          height: "43px",
+          left: "calc(50% - 370px/2)",
+          top: "293px",
+          fontFamily: "'WhirlyBirdie'",
+          fontWeight: 700,
+          fontSize: "36px",
+          lineHeight: "43px",
+          textAlign: "center",
+          letterSpacing: "-0.02em",
+          color: "#000000",
+        }}
+      >
+        game rules
+      </div>
+
+      {/* Subtitle */}
+      <div
+        className="absolute"
+        style={{
+          width: "651px",
+          height: "62px",
+          left: "calc(50% - 651px/2 + 0.5px)",
+          top: "334px",
+          fontFamily: "'Poppins'",
+          fontWeight: 500,
+          fontSize: "24px",
+          lineHeight: "62px",
+          display: "flex",
+          alignItems: "center",
+          textAlign: "center",
+          letterSpacing: "0.01em",
+          color: "#000000",
+        }}
+      >
+        Master the challenge with these essential guidelines
+      </div>
+
+      {/* 7 IDENTICAL FRAMES */}
+      {frames.map((top, index) => (
+        <div
+          key={index}
+          className="relative box-border bg-black border border-white"
+          style={frameStyle(top)}
+        >
+          {/* Diagonal Lines */}
+          <div style={diagonal(153)}></div>
+          <div style={diagonal(853)}></div>
+          <div style={diagonal(1053)}></div>
+          <div style={diagonal(1253)}></div>
+
+          {/* Horizontal Divider */}
+          <div
+            className="absolute"
+            style={{
+              width: "100%",
+              height: 0,
+              top: "104px",
+              borderTop: "1px solid #FFFFFF",
+            }}
+          ></div>
+
+          {/* Number */}
+          <div style={textStyle.number}>1</div>
+
+          {/* Title */}
+          <div style={textStyle.title}>verification</div>
+
+          {/* Description */}
+          <div style={textStyle.desc}>
+            winners will have to prove they’re real humans ( and real students )
+            before collecting their glory.
+          </div>
+        </div>
+      ))}
+    </div>
   );
 };
 
