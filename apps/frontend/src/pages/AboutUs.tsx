@@ -1,10 +1,91 @@
 import EnigmaLogo from "@/assets/circular logo.webp";
 import Enigma3D from "@/assets/enig-anim-org.webm";
+import InventoLogo from "@/assets/invento.webp";
+import Invento3D from "@/assets/invento.webm";
 
 /*
- * CircularText
- * Renders the rotating "ENIGMA" text ring around the logo.
- * Values are taken directly from Figma (left, top, rotation).
+ * CircularTextInvento
+ * Renders the rotating "INVENTO" text ring around the Invento logo.
+ */
+const CircularTextInvento = () => {
+  type LetterDef = {
+    char: string;
+    left: string;
+    top: string;
+    rotate: number;
+  };
+
+  // Generate letters in a perfect circle
+  const generateLetters = (): LetterDef[] => {
+    const word = "INVENTO";
+    const count = 5; // repetitions
+    const radius = 52;
+    const letters: LetterDef[] = [];
+    const centerX = 50;
+    const centerY = 50;
+    const letterSpacing = 0.85;
+
+    for (let j = 0; j < count; j++) {
+      for (let i = 0; i < word.length; i++) {
+        const baseAngle = (j / count) * 2 * Math.PI;
+        const charAngle =
+          baseAngle +
+          ((i - word.length / 2) *
+            ((2 * Math.PI) / (word.length * count)) *
+            letterSpacing);
+
+        const x = centerX + radius * Math.cos(charAngle);
+        const y = centerY + radius * Math.sin(charAngle);
+        const rotation = (charAngle * 180) / Math.PI + 90;
+
+        letters.push({
+          char: word[i],
+          left: `${x}%`,
+          top: `${y}%`,
+          rotate: rotation,
+        });
+      }
+    }
+
+    return letters;
+  };
+
+  const letters = generateLetters();
+
+  return (
+    <div className="absolute inset-0 animate-spin-slow">
+      <div className="relative w-full h-full">
+        {letters.map((l, i) => (
+          <span
+            key={i}
+            className="
+              absolute
+              text-white
+              font-inter
+              text-[11px] md:text-[15px]
+              leading-[14px] md:leading-[18px]
+              pointer-events-none
+              transform -translate-x-1/2 -translate-y-1/2
+              whitespace-nowrap
+              font-medium
+              tracking-tight
+            "
+            style={{
+              left: l.left,
+              top: l.top,
+              transform: `translate(-50%, -50%) rotate(${l.rotate}deg)`,
+            }}
+          >
+            {l.char}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+/*
+ * CircularText (ENIGMA ring)
  */
 const CircularText = () => {
   type LetterDef = {
@@ -78,8 +159,8 @@ const CircularText = () => {
               absolute
               text-white
               font-inter
-              text-[18.5px]
-              leading-[22px]
+              text-[11px] md:text-[18.5px]
+              leading-[14px] md:leading-[22px]
               pointer-events-none
             "
             style={{
@@ -98,140 +179,69 @@ const CircularText = () => {
 
 const AboutUs = () => {
   return (
-    <div className="relative w-full min-h-[2000px] bg-gray-900 overflow-hidden">
-      {/* ========== DESKTOP LAYOUT - EXACT ORIGINAL (hidden on mobile) ========== */}
+    <div className="relative w-full min-h-[2000px] overflow-hidden">
+      {/* ========== DESKTOP LAYOUT ========== */}
       <div className="hidden xl:block">
-        {/* ========== RECTANGLE 1 ========== */}
+        {/* RECTANGLE 1 (ENIGMA) – unchanged desktop */}
         <section
           className="
             absolute
             w-[1444px]
             h-[804px]
             bg-black
-            top-[139px]
+            top-[120px]
             left-[34px]
             relative
           "
         >
-          {/* === GRID LINES (horizontal) === */}
-
-          {/* Line 27 */}
+          {/* grid lines etc – unchanged */}
           <div
             className="absolute border border-white"
-            style={{
-              width: "799px",
-              height: "0px",
-              left: "0px",
-              top: "322px",
-            }}
+            style={{ width: "799px", height: "0px", left: "0px", top: "322px" }}
           />
-
-          {/* Line 28 (extended to full width for layout) */}
           <div
             className="absolute border border-white"
-            style={{
-              width: "1444px",
-              height: "0px",
-              left: "0px",
-              top: "482px",
-            }}
+            style={{ width: "1444px", height: "0px", left: "0px", top: "482px" }}
           />
-
-          {/* Line 29 */}
           <div
             className="absolute border border-white"
-            style={{
-              width: "643px",
-              height: "0px",
-              left: "0px",
-              top: "642px",
-            }}
+            style={{ width: "643px", height: "0px", left: "0px", top: "642px" }}
           />
-
-          {/* Line 34 – small horizontal under ENIGMA description */}
           <div
             className="absolute border border-white"
-            style={{
-              width: "477px",
-              height: "0px",
-              left: "322px",
-              top: "157px",
-            }}
+            style={{ width: "477px", height: "0px", left: "322px", top: "157px" }}
           />
 
-          {/* === GRID LINES (vertical segments) === */}
-
-          {/* Line 31 – breaks where it intersects content */}
-          {/* Top segment */}
           <div
             className="absolute border-l border-white"
-            style={{
-              left: "322.5px",
-              top: "0px",
-              height: "322px",
-            }}
+            style={{ left: "322.5px", top: "0px", height: "322px" }}
           />
-          {/* Bottom segment */}
           <div
             className="absolute border-l border-white"
-            style={{
-              left: "322.5px",
-              top: "642px",
-              height: "164px",
-            }}
+            style={{ left: "322.5px", top: "642px", height: "164px" }}
           />
-
-          {/* Line 32 – two segments */}
-          {/* Top segment */}
           <div
             className="absolute border-l border-white"
-            style={{
-              left: "483.5px",
-              top: "0px",
-              height: "157px",
-            }}
+            style={{ left: "483.5px", top: "0px", height: "157px" }}
           />
-          {/* Bottom segment */}
           <div
             className="absolute border-l border-white"
-            style={{
-              left: "483.5px",
-              top: "642px",
-              height: "157px",
-            }}
+            style={{ left: "483.5px", top: "642px", height: "157px" }}
+          />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "643.5px", top: "0px", height: "157px" }}
+          />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "643.5px", top: "482px", height: "322px" }}
+          />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "795.5px", top: "0px", height: "482px" }}
           />
 
-          {/* Line 33 – two segments */}
-          {/* Top segment */}
-          <div
-            className="absolute border-l border-white"
-            style={{
-              left: "643.5px",
-              top: "0px",
-              height: "157px",
-            }}
-          />
-          {/* Lower segment */}
-          <div
-            className="absolute border-l border-white"
-            style={{
-              left: "643.5px",
-              top: "482px",
-              height: "322px",
-            }}
-          />
-
-          {/* Line 35 – right-side vertical near 3D block */}
-          <div
-            className="absolute border-l border-white"
-            style={{
-              left: "795.5px",
-              top: "0px",
-              height: "482px",
-            }}
-          />
-
-          {/* === ENIGMA LOGO + ROTATING TEXT RING === */}
+          {/* ENIGMA circular logo */}
           <div
             className="
               absolute
@@ -242,8 +252,6 @@ const AboutUs = () => {
             "
           >
             <CircularText />
-
-            {/* Inner circular ENIGMA logo */}
             <img
               src={EnigmaLogo}
               alt="Enigma Logo"
@@ -258,9 +266,7 @@ const AboutUs = () => {
             />
           </div>
 
-          {/* === TEXT CONTENT === */}
-
-          {/* Intro paragraph */}
+          {/* text */}
           <p
             className="
               absolute
@@ -276,11 +282,10 @@ const AboutUs = () => {
               text-white
             "
           >
-            Enigma is the ultimate puzzle hunter under Invento, GEC Palakkad — a game
-            where curiosity meets chaos and logic meets imagination.
+            Enigma is the ultimate puzzle hunter under Invento, GEC Palakkad — a
+            game where curiosity meets chaos and logic meets imagination.
           </p>
 
-          {/* Paragraph 2 */}
           <p
             className="
               absolute
@@ -302,7 +307,6 @@ const AboutUs = () => {
             uncover the final answer.
           </p>
 
-          {/* Paragraph 3 */}
           <p
             className="
               absolute
@@ -318,11 +322,10 @@ const AboutUs = () => {
               antialiased
             "
           >
-            It's not just a quiz — it's a journey through riddles, symbols, and subtle
-            hints that test your observation, reasoning, and creativity.
+            It's not just a quiz — it's a journey through riddles, symbols, and
+            subtle hints that test your observation, reasoning, and creativity.
           </p>
 
-          {/* CTA line */}
           <p
             className="
               absolute
@@ -341,7 +344,6 @@ const AboutUs = () => {
             So, ready to dive into the mystery?
           </p>
 
-          {/* ENIGMA Heading (Whirly font) */}
           <p
             className="
               absolute
@@ -361,7 +363,6 @@ const AboutUs = () => {
             ENIGMA
           </p>
 
-          {/* === 3D ANIMATED ICON (right side) with fallback image === */}
           <div
             className="
               absolute
@@ -373,21 +374,11 @@ const AboutUs = () => {
               mix-blend-screen
             "
           >
-            {/* Static fallback image */}
             <img
               src="/src/assets/enigma-static.webp"
               alt="Enigma static"
-              className="
-                w-full
-                h-full
-                object-cover
-                absolute
-                top-0
-                left-0
-              "
+              className="w-full h-full object-cover absolute top-0 left-0"
             />
-
-            {/* Animated 3D Video */}
             <video
               src={Enigma3D}
               autoPlay
@@ -416,80 +407,358 @@ const AboutUs = () => {
           </div>
         </section>
 
-        {/* Rectangle 2 – reserved for later */}
+        {/* RECTANGLE 2 (INVENTO) – unchanged desktop */}
         <section
           className="
             absolute
             w-[1444px]
             h-[804px]
             bg-black
-            top-[1049px]
+            top-[250px]
             left-[34px]
+            relative
           "
-        />
-      </div>
+        >
+          {/* grid lines – same as first rect */}
+          <div
+            className="absolute border border-white"
+            style={{ width: "799px", height: "0px", left: "0px", top: "322px" }}
+          />
+          <div
+            className="absolute border border-white"
+            style={{ width: "1444px", height: "0px", left: "0px", top: "482px" }}
+          />
+          <div
+            className="absolute border border-white"
+            style={{ width: "643px", height: "0px", left: "0px", top: "642px" }}
+          />
+          <div
+            className="absolute border border-white"
+            style={{ width: "477px", height: "0px", left: "322px", top: "157px" }}
+          />
 
-      {/* ========== MOBILE/TABLET RESPONSIVE LAYOUT (shown on smaller screens) ========== */}
-      <div className="block xl:hidden px-4 py-8 md:px-8 md:py-12">
-        <section className="max-w-4xl mx-auto space-y-8">
-          {/* Circular Logo */}
-          <div className="relative w-[180px] h-[180px] md:w-[214px] md:h-[214px] mx-auto">
-            <CircularText />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "322.5px", top: "0px", height: "322px" }}
+          />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "322.5px", top: "642px", height: "164px" }}
+          />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "483.5px", top: "0px", height: "157px" }}
+          />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "483.5px", top: "642px", height: "157px" }}
+          />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "643.5px", top: "0px", height: "157px" }}
+          />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "643.5px", top: "482px", height: "322px" }}
+          />
+          <div
+            className="absolute border-l border-white"
+            style={{ left: "795.5px", top: "0px", height: "482px" }}
+          />
+
+          {/* INVENTO circular logo */}
+          <div
+            className="
+              absolute
+              top-[75px]
+              left-[70px]
+              w-[214px]
+              h-[214px]
+            "
+          >
+            <CircularTextInvento />
             <img
-              src={EnigmaLogo}
-              alt="Enigma Logo"
-              className="absolute w-[80px] h-[50px] md:w-[100.55px] md:h-[63px] top-[50px] left-[50px] md:top-[75px] md:left-[57px] object-contain"
+              src={InventoLogo}
+              alt="Invento Logo"
+              className="
+                absolute
+                w-[90px]
+                h-auto
+                top-1/2
+                left-1/2
+                -translate-x-1/2
+                -translate-y-1/2
+                object-contain
+                z-10
+                transform
+              "
             />
           </div>
 
-          {/* Intro paragraph */}
-          <p className="font-poppins text-base md:text-xl leading-relaxed tracking-[-0.02em] text-white text-center">
-            Enigma is the ultimate puzzle hunter under Invento, GEC Palakkad — a game
-            where curiosity meets chaos and logic meets imagination.
+          <p
+            className="
+              absolute
+              w-[458px]
+              h-[120px]
+              top-[177px]
+              left-[345px]
+              font-poppins
+              text-[20px]
+              font-normal
+              leading-[26px]
+              tracking-[-0.02em]
+              text-white
+            "
+          >
+            Invento, the annual techno-cultural fest of Government Engineering
+            College, Palakkad, is where innovation, creativity, and collaboration
+            collide.
           </p>
 
-          {/* 3D Video */}
-          <div className="w-full aspect-[4/3] overflow-hidden rounded-lg mix-blend-screen">
+          <p
+            className="
+              absolute
+              w-[729px]
+              top-[341px]
+              left-[22px]
+              font-poppins
+              text-[20px]
+              font-normal
+              leading-[26px]
+              tracking-[-0.02em]
+              text-white
+              antialiased
+            "
+          >
+            With a vibrant mix of events ranging from hackathons and workshops to
+            cultural nights and intellectual games, Invento celebrates the spirit of
+            learning, building, and exploring beyond classrooms.
+          </p>
+
+          <p
+            className="
+              absolute
+              w-[567px]
+              top-[515px]
+              left-[22px]
+              font-poppins
+              text-[20px]
+              font-normal
+              leading-[26px]
+              tracking-[-0.02em]
+              text-white
+              antialiased
+            "
+          >
+            It brings together students from all departments and colleges to
+            showcase their technical skills, creative ideas, and passion for
+            discovery.
+          </p>
+
+          <p
+            className="
+              absolute
+              w-[489px]
+              top-[605px]
+              left-[799px]
+              font-whirly
+              text-[80px]
+              font-bold
+              leading-[80px]
+              tracking-[-0.02em]
+              text-center
+              text-white
+              antialiased
+            "
+          >
+            INVENTO
+          </p>
+
+          <div
+            className="
+              absolute
+              w-[650px]
+              h-[486px]
+              top-[0px]
+              left-[796px]
+              overflow-hidden
+              mix-blend-screen
+            "
+          >
+            <img
+              src="/src/assets/inventologo.webp"
+              alt="Invento static"
+              className="w-full h-full object-cover absolute top-0 left-0"
+            />
             <video
-              src={Enigma3D}
+              src={Invento3D}
               autoPlay
               loop
               muted
               playsInline
-              className="w-full h-full object-cover"
-              onTouchStart={(e) => {
+              className="
+                w-full
+                h-full
+                object-cover
+                absolute
+                inset-0
+                opacity-0
+                transition-opacity duration-500
+                z-10
+              "
+              onLoadedData={(e) => (e.currentTarget.style.opacity = "1")}
+              onError={(e) => (e.currentTarget.style.display = "none")}
+              onMouseEnter={(e) => {
                 e.currentTarget.playbackRate = 5;
               }}
-              onTouchEnd={(e) => {
+              onMouseLeave={(e) => {
                 e.currentTarget.playbackRate = 1;
               }}
             />
           </div>
-
-          {/* Paragraph 2 */}
-          <p className="font-poppins text-base md:text-xl leading-relaxed tracking-[-0.02em] text-white">
-            Each day brings a single, mind-bending question — it could be an image,
-            a waveform, a phrase, or even a mysterious sound clip. The challenge?
-            Decode the hidden meaning behind each clue and connect them all to
-            uncover the final answer.
-          </p>
-
-          {/* Paragraph 3 */}
-          <p className="font-poppins text-base md:text-xl leading-relaxed tracking-[-0.02em] text-white">
-            It's not just a quiz — it's a journey through riddles, symbols, and subtle
-            hints that test your observation, reasoning, and creativity.
-          </p>
-
-          {/* CTA line */}
-          <p className="font-poppins text-xl md:text-3xl font-semibold leading-relaxed tracking-[-0.02em] text-white text-center">
-            So, ready to dive into the mystery?
-          </p>
-
-          {/* ENIGMA Heading */}
-          <p className="font-whirly text-5xl md:text-7xl font-bold tracking-[-0.02em] text-center text-white">
-            ENIGMA
-          </p>
         </section>
+      </div>
+
+      {/* ========== MOBILE / TABLET LAYOUT ========== */}
+      <div className="xl:hidden bg-[var(--page-bg,#f6efe6)] py-8">
+        <div className="w-full max-w-[480px] mx-auto space-y-10 px-3">
+          {/* ENIGMA – improved mobile layout */}
+          <section className="relative bg-black text-white px-4 py-8 overflow-hidden">
+            {/* top: circular logo, intro text, vertical ENIGMA */}
+            <div className="flex items-start gap-4">
+              {/* circular logo smaller on mobile */}
+              <div className="relative w-[110px] h-[110px] shrink-0">
+                <CircularText />
+                <img
+                  src={EnigmaLogo}
+                  alt="Enigma Logo"
+                  className="absolute w-[70px] h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-contain"
+                />
+              </div>
+
+              {/* intro paragraph */}
+              <div className="flex-1 text-[13px] leading-relaxed">
+                <p>
+                  Enigma is the ultimate puzzle hunter under Invento, GEC Palakkad —
+                  a game where curiosity meets chaos and logic meets imagination.
+                </p>
+              </div>
+
+              {/* vertical ENIGMA heading */}
+              <div className="ml-1 flex flex-col items-center justify-center">
+                {["E", "N", "I", "G", "M", "A"].map((ch) => (
+                  <span
+                    key={ch}
+                    className="font-whirly text-[20px] leading-[20px] tracking-[0.2em]"
+                  >
+                    {ch}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* remaining paragraphs */}
+            <div className="mt-6 text-[13px] leading-relaxed space-y-3">
+              <p>
+                Each day brings a single, mind-bending question — it could be an
+                image, a waveform, a phrase, or even a mysterious sound clip. The
+                challenge? Decode the hidden meaning behind each clue and connect
+                them all to uncover the final answer.
+              </p>
+              <p>
+                It&apos;s not just a quiz — it&apos;s a journey through riddles,
+                symbols, and subtle hints that test your observation, reasoning, and
+                creativity.
+              </p>
+              <p className="text-[15px] font-semibold mt-1">
+                So, ready to dive into the mystery?
+              </p>
+            </div>
+
+            {/* video */}
+            <div className="mt-6 w-full aspect-[4/3] overflow-hidden mix-blend-screen">
+              <video
+                src={Enigma3D}
+                autoPlay
+                loop
+                muted
+                playsInline
+                className="w-full h-full object-cover"
+                onTouchStart={(e) => {
+                  e.currentTarget.playbackRate = 5;
+                }}
+                onTouchEnd={(e) => {
+                  e.currentTarget.playbackRate = 1;
+                }}
+              />
+            </div>
+          </section>
+
+          {/* INVENTO CARD – unchanged for now */}
+          <section className="relative bg-black text-white px-5 py-8 overflow-hidden">
+            {/* top row: circular logo + text */}
+            <div className="flex gap-4">
+              <div className="relative w-[140px] h-[140px] shrink-0 mx-auto">
+                <CircularTextInvento />
+                <img
+                  src={InventoLogo}
+                  alt="Invento Logo"
+                  className="absolute w-[80px] h-auto top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-contain"
+                />
+              </div>
+
+              <div className="hidden sm:block flex-1 text-sm leading-relaxed">
+                <p className="mb-3">
+                  Invento, the annual techno-cultural fest of Government Engineering
+                  College, Palakkad, is where innovation, creativity, and
+                  collaboration collide.
+                </p>
+              </div>
+            </div>
+
+            {/* text stack */}
+            <div className="mt-5 text-sm leading-relaxed space-y-3">
+              <p className="sm:hidden">
+                Invento, the annual techno-cultural fest of Government Engineering
+                College, Palakkad, is where innovation, creativity, and
+                collaboration collide.
+              </p>
+              <p>
+                With a vibrant mix of events ranging from hackathons and workshops to
+                cultural nights and intellectual games, Invento celebrates the spirit
+                of learning, building, and exploring beyond classrooms.
+              </p>
+              <p>
+                It brings together students from all departments and colleges to
+                showcase their technical skills, creative ideas, and passion for
+                discovery.
+              </p>
+            </div>
+
+            {/* video + heading */}
+            <div className="mt-6 space-y-4">
+              <div className="w-full aspect-[4/3] overflow-hidden rounded-lg mix-blend-screen">
+                <video
+                  src={Invento3D}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                  onTouchStart={(e) => {
+                    e.currentTarget.playbackRate = 5;
+                  }}
+                  onTouchEnd={(e) => {
+                    e.currentTarget.playbackRate = 1;
+                  }}
+                />
+              </div>
+              <p className="font-whirly text-4xl text-center tracking-[0.2em]">
+                INVENTO
+              </p>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );
