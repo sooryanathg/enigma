@@ -170,10 +170,10 @@ const generateCircularLetters = (
 type CircularTextConfig = {
   word: string;
   repetitions: number;
-  radius: number;
+  radius: number | { mobile: number; desktop: number };
   centerX?: number;
   centerY?: number;
-  letterSpacing?: number;
+  letterSpacing?: number | { mobile: number; desktop: number };
   useTranslate?: boolean;
   startAngleOffset?: number; // Offset in degrees to adjust starting position
   textSize?: {
@@ -216,13 +216,49 @@ const CircularText = ({ config }: CircularTextProps) => {
     className = "",
   } = config;
 
+  // Handle responsive radius
+  const [currentRadius, setCurrentRadius] = React.useState(() => {
+    return typeof radius === 'number' ? radius : radius.mobile;
+  });
+
+  // Handle responsive letter spacing
+  const [currentLetterSpacing, setCurrentLetterSpacing] = React.useState(() => {
+    return typeof letterSpacing === 'number' ? letterSpacing : letterSpacing.mobile;
+  });
+
+  React.useEffect(() => {
+    if (typeof radius === 'number') return;
+    
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const updateRadius = () => {
+      setCurrentRadius(mediaQuery.matches ? radius.desktop : radius.mobile);
+    };
+    
+    updateRadius();
+    mediaQuery.addEventListener('change', updateRadius);
+    return () => mediaQuery.removeEventListener('change', updateRadius);
+  }, [radius]);
+
+  React.useEffect(() => {
+    if (typeof letterSpacing === 'number') return;
+    
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const updateLetterSpacing = () => {
+      setCurrentLetterSpacing(mediaQuery.matches ? letterSpacing.desktop : letterSpacing.mobile);
+    };
+    
+    updateLetterSpacing();
+    mediaQuery.addEventListener('change', updateLetterSpacing);
+    return () => mediaQuery.removeEventListener('change', updateLetterSpacing);
+  }, [letterSpacing]);
+
   const letters = generateCircularLetters(
     word,
     repetitions,
-    radius,
+    currentRadius,
     centerX,
     centerY,
-    letterSpacing,
+    currentLetterSpacing,
     startAngleOffset
   );
 
@@ -262,6 +298,14 @@ const CircularTextEnigma = () => {
     <CircularText
       config={{
         ...CIRCULAR_TEXT_CONFIG.ENIGMA,
+        radius: {
+          mobile: 58, // Increased radius on mobile to create blank space between word repetitions
+          desktop: 52, // Keep original radius on desktop
+        },
+        letterSpacing: {
+          mobile: 1.1, // Increased spacing on mobile for better readability
+          desktop: 0.85, // Keep original spacing on desktop
+        },
         textSize: {
           mobile: "text-[11px]",
           desktop: "md:text-[18.5px]",
@@ -284,6 +328,10 @@ const CircularTextInvento = () => {
     <CircularText
       config={{
         ...CIRCULAR_TEXT_CONFIG.INVENTO,
+        radius: {
+          mobile: 58, // Increased from 52 for more padding on mobile
+          desktop: 52, // Keep original for desktop
+        },
         textSize: {
           mobile: "text-[11px]",
           desktop: "md:text-[15px]",
@@ -343,10 +391,58 @@ const VideoPlayer = ({
   className = "",
 }: VideoPlayerProps) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
+  const animationFrameRef = React.useRef<number | null>(null);
+  const isHoveringRef = React.useRef<boolean>(false);
+  const NORMAL_PLAYBACK_RATE = 1.0;
+  const FAST_PLAYBACK_RATE = 5.0; // 5x the normal rate
+  const targetRateRef = React.useRef<number>(NORMAL_PLAYBACK_RATE);
+
+  // Smooth playback rate transition
+  const transitionPlaybackRate = React.useCallback(
+    (targetRate: number) => {
+      if (!videoRef.current) return;
+
+      targetRateRef.current = targetRate;
+      const video = videoRef.current;
+      const startRate = video.playbackRate;
+      const rateDifference = targetRate - startRate;
+      const duration = 200; // Transition duration in ms
+      const startTime = performance.now();
+
+      const animate = (currentTime: number) => {
+        if (!videoRef.current) return;
+
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Ease-out function for smooth transition
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentRate = startRate + rateDifference * easeOut;
+
+        videoRef.current.playbackRate = currentRate;
+
+        if (progress < 1) {
+          animationFrameRef.current = requestAnimationFrame(animate);
+        } else {
+          videoRef.current.playbackRate = targetRate;
+          animationFrameRef.current = null;
+        }
+      };
+
+      // Cancel any existing animation
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+
+      animationFrameRef.current = requestAnimationFrame(animate);
+    },
+    []
+  );
 
   const handleLoadedData = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
     video.style.opacity = "1";
+    video.playbackRate = NORMAL_PLAYBACK_RATE;
     // Ensure video plays
     video.play().catch((err) => {
       console.warn("Video autoplay failed:", err);
@@ -356,6 +452,7 @@ const VideoPlayer = ({
   const handleCanPlay = (e: React.SyntheticEvent<HTMLVideoElement>) => {
     const video = e.currentTarget;
     video.style.opacity = "1";
+    video.playbackRate = NORMAL_PLAYBACK_RATE;
     // Ensure video plays
     video.play().catch((err) => {
       console.warn("Video autoplay failed:", err);
@@ -367,34 +464,83 @@ const VideoPlayer = ({
     e.currentTarget.style.display = "none";
   };
 
-  const handleMouseEnter = (e: React.MouseEvent<HTMLVideoElement>) => {
-    e.currentTarget.playbackRate = 5;
+  // Minimal time update - only ensure video is playing, let browser handle rate
+  const handleTimeUpdate = React.useCallback(() => {
+    if (!videoRef.current) return;
+    
+    // Only ensure video is playing - don't constantly check rate to avoid lag
+    if (videoRef.current.paused) {
+      videoRef.current.play().catch(() => {});
+    }
+  }, []);
+
+  // Handle seeking events (happens during loop transitions)
+  const handleSeeking = React.useCallback(() => {
+    if (!videoRef.current) return;
+    
+    // Maintain the target rate during seek
+    const targetRate = targetRateRef.current;
+    videoRef.current.playbackRate = targetRate;
+  }, []);
+
+  // Handle when seek completes - ensure smooth loop
+  const handleSeeked = React.useCallback(() => {
+    if (!videoRef.current) return;
+    
+    const video = videoRef.current;
+    const targetRate = targetRateRef.current;
+    
+    // Restore target rate after seek
+    video.playbackRate = targetRate;
+    
+    // Ensure video keeps playing
+    if (video.paused) {
+      video.play().catch(() => {});
+    }
+  }, []);
+
+  const handleMouseEnter = (_e: React.MouseEvent<HTMLVideoElement>) => {
+    isHoveringRef.current = true;
+    transitionPlaybackRate(FAST_PLAYBACK_RATE);
   };
 
-  const handleMouseLeave = (e: React.MouseEvent<HTMLVideoElement>) => {
-    e.currentTarget.playbackRate = 1;
+  const handleMouseLeave = (_e: React.MouseEvent<HTMLVideoElement>) => {
+    isHoveringRef.current = false;
+    transitionPlaybackRate(NORMAL_PLAYBACK_RATE);
   };
 
-  const handleTouchStart = (e: React.TouchEvent<HTMLVideoElement>) => {
-    e.currentTarget.playbackRate = 5;
+  const handleTouchStart = (_e: React.TouchEvent<HTMLVideoElement>) => {
+    isHoveringRef.current = true;
+    transitionPlaybackRate(FAST_PLAYBACK_RATE);
   };
 
-  const handleTouchEnd = (e: React.TouchEvent<HTMLVideoElement>) => {
-    e.currentTarget.playbackRate = 1;
+  const handleTouchEnd = (_e: React.TouchEvent<HTMLVideoElement>) => {
+    isHoveringRef.current = false;
+    transitionPlaybackRate(NORMAL_PLAYBACK_RATE);
   };
 
   // Ensure video plays when component mounts
   React.useEffect(() => {
     if (videoRef.current) {
+      videoRef.current.playbackRate = NORMAL_PLAYBACK_RATE;
       videoRef.current.play().catch((err) => {
         console.warn("Video autoplay failed on mount:", err);
       });
     }
   }, []);
 
+  // Cleanup animation frame on unmount
+  React.useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div
-      className={`overflow-hidden mix-blend-screen ${className}`}
+      className={`overflow-hidden ${className}`}
       style={{
         imageRendering: "crisp-edges" as const,
         transform: "translateZ(0)", // Force hardware acceleration
@@ -406,6 +552,8 @@ const VideoPlayer = ({
         className="w-full h-full object-cover absolute top-0 left-0"
         style={{
           imageRendering: "auto" as const,
+          transform: "scale(1.02)",
+          transformOrigin: "center",
         }}
         loading="eager"
       />
@@ -413,14 +561,15 @@ const VideoPlayer = ({
         ref={videoRef}
         src={src}
         autoPlay
-        loop
+        loop={true}
         muted
         playsInline
         preload="auto"
         className="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-500 z-10"
         style={{
           willChange: "opacity",
-          transform: "translateZ(0)", // Force hardware acceleration
+          transform: "translateZ(0) scale(1.02)", // Force hardware acceleration and scale to cover edges
+          transformOrigin: "center",
           backfaceVisibility: "hidden",
           WebkitBackfaceVisibility: "hidden",
           imageRendering: "auto" as const,
@@ -428,6 +577,9 @@ const VideoPlayer = ({
         onLoadedData={handleLoadedData}
         onCanPlay={handleCanPlay}
         onError={handleError}
+        onTimeUpdate={handleTimeUpdate}
+        onSeeking={handleSeeking}
+        onSeeked={handleSeeked}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
@@ -527,12 +679,14 @@ const DesktopSection = ({
       </p>
 
       {/* Video */}
-      <VideoPlayer
-        src={content.videoSrc}
-        staticImageSrc={content.staticImageSrc}
-        staticImageAlt={content.staticImageAlt}
-        className="absolute w-[650px] h-[486px] top-[0px] left-[796px]"
-      />
+      <div className="absolute w-[650px] h-[486px] top-[0px] left-[796px] mix-blend-screen overflow-hidden">
+        <VideoPlayer
+          src={content.videoSrc}
+          staticImageSrc={content.staticImageSrc}
+          staticImageAlt={content.staticImageAlt}
+          className="w-full h-full"
+        />
+      </div>
         </section>
   );
 };
@@ -554,15 +708,15 @@ const MobileSection = ({
   logoSize = { width: "70px", height: "auto" },
 }: MobileSectionProps) => {
   return (
-    <section className="relative bg-black text-white px-4 sm:px-6 md:px-8 py-6 sm:py-8 md:py-10 overflow-hidden rounded-lg">
+    <section className="relative bg-black text-white px-3 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-7 md:py-9 lg:py-10 overflow-hidden rounded-lg shadow-lg">
       {/* Top Row: Logo, Intro, Optional Vertical Title */}
-      <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
+      <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 md:gap-5 lg:gap-6">
         {/* Logo Container */}
         <div
           className={`relative shrink-0 mx-auto sm:mx-0 ${
             showVerticalTitle
-              ? "w-[90px] h-[90px] sm:w-[110px] sm:h-[110px] md:w-[130px] md:h-[130px]"
-              : "w-[120px] h-[120px] sm:w-[140px] sm:h-[140px] md:w-[160px] md:h-[160px]"
+              ? "w-[80px] h-[80px] xs:w-[90px] xs:h-[90px] sm:w-[100px] sm:h-[100px] md:w-[110px] md:h-[110px] lg:w-[130px] lg:h-[130px]"
+              : "w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] md:w-[140px] md:h-[140px] lg:w-[160px] lg:h-[160px]"
           }`}
         >
           <CircularTextComponent />
@@ -579,15 +733,15 @@ const MobileSection = ({
 
         {/* Intro Text and Vertical Title */}
         {showVerticalTitle ? (
-          <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
-            <div className="flex-1 text-xs sm:text-sm md:text-base leading-relaxed">
+          <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-5 w-full sm:w-auto">
+            <div className="flex-1 text-[11px] xs:text-xs sm:text-sm md:text-base leading-relaxed">
               <p>{content.intro}</p>
             </div>
-            <div className="flex flex-row sm:flex-col items-center justify-center gap-1 sm:gap-0 mx-auto sm:mx-0">
+            <div className="flex flex-row sm:flex-col items-center justify-center gap-0.5 sm:gap-1 md:gap-0 mx-auto sm:mx-0">
               {content.title.split("").map((char) => (
                 <span
                   key={char}
-                  className="font-whirly text-lg sm:text-xl md:text-2xl leading-tight tracking-[0.2em]"
+                  className="font-whirly text-base sm:text-lg md:text-xl lg:text-2xl leading-tight tracking-[0.15em] sm:tracking-[0.2em]"
                 >
                   {char}
                 </span>
@@ -595,30 +749,33 @@ const MobileSection = ({
             </div>
           </div>
         ) : (
-          <div className="hidden sm:block flex-1 text-sm md:text-base leading-relaxed">
-            <p className="mb-3">{content.intro}</p>
+          <div className="hidden sm:block flex-1 text-xs sm:text-sm md:text-base leading-relaxed">
+            <p className="mb-2 sm:mb-3">{content.intro}</p>
           </div>
         )}
       </div>
 
       {/* Paragraphs */}
       <div
-        className={`text-xs sm:text-sm md:text-base leading-relaxed space-y-3 sm:space-y-4 ${
-          showVerticalTitle ? "mt-4 sm:mt-6" : "mt-4 sm:mt-5"
+        className={`text-[11px] xs:text-xs sm:text-sm md:text-base leading-relaxed space-y-2.5 sm:space-y-3 md:space-y-4 ${
+          showVerticalTitle ? "mt-4 sm:mt-5 md:mt-6" : "mt-4 sm:mt-5"
         }`}
       >
         {!showVerticalTitle && (
-          <p className="sm:hidden text-xs sm:text-sm leading-relaxed">
+          <p className="sm:hidden text-[11px] xs:text-xs leading-relaxed">
             {content.intro}
           </p>
         )}
         {content.paragraphs.map((paragraph, index) => (
-          <p key={`para-${index}`} className="text-xs sm:text-sm md:text-base">
+          <p
+            key={`para-${index}`}
+            className="text-[11px] xs:text-xs sm:text-sm md:text-base"
+          >
             {paragraph}
           </p>
         ))}
         {content.cta && (
-          <p className="text-sm sm:text-base md:text-lg font-semibold mt-2 sm:mt-3">
+          <p className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold mt-2 sm:mt-2.5 md:mt-3">
             {content.cta}
           </p>
         )}
@@ -626,17 +783,8 @@ const MobileSection = ({
 
       {/* Video and Title */}
       {showVerticalTitle ? (
-        <div className="mt-4 sm:mt-6 w-full aspect-[4/3] overflow-hidden mix-blend-screen rounded-lg">
-          <VideoPlayer
-            src={content.videoSrc}
-            staticImageSrc={content.staticImageSrc}
-            staticImageAlt={content.staticImageAlt}
-            className="w-full h-full"
-          />
-        </div>
-      ) : (
-        <div className="mt-4 sm:mt-6 space-y-4 sm:space-y-6">
-          <div className="w-full aspect-[4/3] overflow-hidden rounded-lg mix-blend-screen">
+        <div className="mt-4 sm:mt-5 md:mt-6 w-full aspect-[4/3] overflow-hidden sm:rounded-lg bg-black relative">
+          <div className="absolute inset-0 w-full h-full sm:mix-blend-screen">
             <VideoPlayer
               src={content.videoSrc}
               staticImageSrc={content.staticImageSrc}
@@ -644,7 +792,20 @@ const MobileSection = ({
               className="w-full h-full"
             />
           </div>
-          <p className="font-whirly text-2xl sm:text-3xl md:text-4xl lg:text-5xl text-center tracking-[0.2em]">
+        </div>
+      ) : (
+        <div className="mt-4 sm:mt-5 md:mt-6 space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
+          <div className="w-full aspect-[4/3] overflow-hidden sm:rounded-lg bg-black relative">
+            <div className="absolute inset-0 w-full h-full sm:mix-blend-screen">
+              <VideoPlayer
+                src={content.videoSrc}
+                staticImageSrc={content.staticImageSrc}
+                staticImageAlt={content.staticImageAlt}
+                className="w-full h-full"
+              />
+            </div>
+          </div>
+          <p className="font-whirly text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center tracking-[0.15em] sm:tracking-[0.2em]">
             {content.title}
           </p>
         </div>
@@ -657,7 +818,7 @@ const MobileSection = ({
 const AboutUs = () => {
   return (
     <div className="relative w-full min-h-screen overflow-hidden">
-      {/* Desktop Layout - XL screens and above */}
+      {/* Desktop Layout - XL screens and above (1280px+) */}
       <div className="hidden xl:block">
         <DesktopSection
           content={CONTENT.enigma}
@@ -684,9 +845,9 @@ const AboutUs = () => {
         />
       </div>
 
-      {/* Mobile/Tablet Layout - Below XL screens */}
-      <div className="xl:hidden bg-[var(--page-bg,#f6efe6)] py-4 sm:py-6 md:py-8 lg:py-10">
-        <div className="w-full max-w-full sm:max-w-[640px] md:max-w-[768px] lg:max-w-[1024px] mx-auto space-y-6 sm:space-y-8 md:space-y-10 px-4 sm:px-6 md:px-8">
+      {/* Mobile/Tablet Layout - Below XL screens (0-1279px) */}
+      <div className="xl:hidden bg-[var(--page-bg,#f6efe6)] py-4 sm:py-6 md:py-8 lg:py-10 min-h-screen">
+        <div className="w-full max-w-full sm:max-w-[640px] md:max-w-[768px] lg:max-w-[1024px] mx-auto space-y-6 sm:space-y-8 md:space-y-10 px-4 sm:px-6 md:px-8 lg:px-10">
           <MobileSection
             content={CONTENT.enigma}
             CircularTextComponent={CircularTextEnigma}
