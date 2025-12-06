@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, useMotionValue, useTransform, MotionValue } from "framer-motion";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
