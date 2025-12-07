@@ -20,17 +20,38 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
   const { currentUser, signOut } = useAuth();
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
+  const isAboutUsPage = location.pathname === "/about-us";
+  const isRulesPage = location.pathname === "/rules";
+  const hasCustomScroll = isAboutUsPage || isRulesPage;
 
   useEffect(() => {
+    // Reset scroll position when page changes
+    lastScrollY.current = 0;
+    setVisible(true); // Show navbar when page changes
+    
     const handleScroll = () => {
-      const current = window.scrollY;
+      let current: number;
+      
+      if (hasCustomScroll) {
+        let scrollElement: HTMLElement | null = null;
+        if (isAboutUsPage) {
+          scrollElement = document.querySelector('[data-about-us-scroll]') as HTMLElement;
+        } else if (isRulesPage) {
+          scrollElement = document.querySelector('[data-rules-scroll]') as HTMLElement;
+        }
+        if (!scrollElement) return;
+        current = scrollElement.scrollTop;
+      } else {
+        current = window.scrollY;
+      }
+      
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
           if (current <= 0) {
             setVisible(true);
-          } else if (current > lastScrollY.current && current > 80) {
+          } else if (current > lastScrollY.current && current > 50) {
             setVisible(false); // scrolled down -> hide
-          } else {
+          } else if (current < lastScrollY.current) {
             setVisible(true); // scrolled up -> show
           }
           lastScrollY.current = current;
@@ -40,9 +61,37 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    if (hasCustomScroll) {
+      // Use a small delay to ensure the element exists
+      const timeoutId = setTimeout(() => {
+        let scrollElement: HTMLElement | null = null;
+        if (isAboutUsPage) {
+          scrollElement = document.querySelector('[data-about-us-scroll]') as HTMLElement;
+        } else if (isRulesPage) {
+          scrollElement = document.querySelector('[data-rules-scroll]') as HTMLElement;
+        }
+        if (scrollElement) {
+          scrollElement.addEventListener("scroll", handleScroll, { passive: true });
+        }
+      }, 100);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        let scrollElement: HTMLElement | null = null;
+        if (isAboutUsPage) {
+          scrollElement = document.querySelector('[data-about-us-scroll]') as HTMLElement;
+        } else if (isRulesPage) {
+          scrollElement = document.querySelector('[data-rules-scroll]') as HTMLElement;
+        }
+        if (scrollElement) {
+          scrollElement.removeEventListener("scroll", handleScroll);
+        }
+      };
+    } else {
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+  }, [hasCustomScroll, isAboutUsPage, isRulesPage]);
 
   const handleLogout = async () => {
     try {
@@ -64,7 +113,8 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 border-b border-black bg-transparent transition-transform duration-300",
+        "fixed top-0 left-0 right-0 z-50 border-b border-black transition-transform duration-300",
+        hasCustomScroll ? "bg-[var(--page-bg,#f6efe6)]" : "bg-transparent",
         visible ? "translate-y-0" : "-translate-y-full",
         className
       )}

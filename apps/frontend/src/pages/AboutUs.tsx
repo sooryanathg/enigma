@@ -3,14 +3,9 @@ import EnigmaLogo from "@/assets/circular logo.webp";
 import Enigma3D from "@/assets/enig-anim-org.webm";
 import InventoLogo from "@/assets/invento.webp";
 import Invento3D from "@/assets/invento.webm";
+import { CircularText } from "@/components/ui/circular-text";
 
 // ========== TYPES ==========
-  type LetterDef = {
-    char: string;
-    left: string;
-    top: string;
-    rotate: number;
-  };
 
 type GridLine = {
   type: "horizontal" | "vertical";
@@ -34,35 +29,11 @@ type ContentSection = {
 
 // ========== CONSTANTS ==========
 const CIRCULAR_TEXT_CONFIG = {
-  ENIGMA: {
-    word: "ENIGMA ", // ENIGMA + 1 space (similar to INVENTO approach)
-    repetitions: 5,
-    radius: 52,
-    centerX: 50,
-    centerY: 50,
-    letterSpacing: 0.85,
-    useTranslate: true, // Same as INVENTO - uses translate transform for proper centering
-    startAngleOffset: 0,
-  },
-  INVENTO: {
-    word: "INVENTO",
-    repetitions: 5,
-    radius: 52,
-    centerX: 50,
-    centerY: 50,
-    letterSpacing: 0.85,
-    useTranslate: true, // INVENTO uses translate transform
-    startAngleOffset: 0,
-  },
+  ENIGMA: { word: "ENIGMA ", repetitions: 5, radius: 52, centerX: 50, centerY: 50, letterSpacing: 0.85, useTranslate: true, startAngleOffset: 0 },
+  INVENTO: { word: "INVENTO", repetitions: 5, radius: 52, centerX: 50, centerY: 50, letterSpacing: 0.85, useTranslate: true, startAngleOffset: 0 },
 } as const;
 
-const DESKTOP_LAYOUT = {
-  sectionWidth: 1444,
-  sectionHeight: 804,
-  sectionLeft: 34,
-  enigmaTop: 120,
-  inventoTop: 250,
-} as const;
+const DESKTOP_LAYOUT = { sectionWidth: 1444, sectionHeight: 804, sectionLeft: 34, enigmaTop: 0, inventoTop: 0 } as const;
 
 const GRID_LINES: GridLine[] = [
   // Horizontal lines
@@ -114,237 +85,21 @@ const CONTENT: Record<"enigma" | "invento", ContentSection> = {
   },
 };
 
-// ========== UTILITY FUNCTIONS ==========
-/**
- * Generates circular text letters programmatically using trigonometry
- * @param word - The text to display in a circle
- * @param repetitions - Number of times to repeat the word around the circle
- * @param radius - Radius of the circle (in percentage)
- * @param centerX - X coordinate of circle center (in percentage)
- * @param centerY - Y coordinate of circle center (in percentage)
- * @param letterSpacing - Spacing factor between letters (0-1)
- * @returns Array of letter definitions with position and rotation
- */
-const generateCircularLetters = (
-  word: string,
-  repetitions: number,
-  radius: number,
-  centerX: number = 50,
-  centerY: number = 50,
-  letterSpacing: number = 0.85,
-  startAngleOffset: number = 0
-): LetterDef[] => {
-    const letters: LetterDef[] = [];
-  const offsetRadians = (startAngleOffset * Math.PI) / 180;
-
-  for (let j = 0; j < repetitions; j++) {
-      for (let i = 0; i < word.length; i++) {
-      const baseAngle = (j / repetitions) * 2 * Math.PI + offsetRadians;
-        const charAngle =
-          baseAngle +
-          ((i - word.length / 2) *
-          ((2 * Math.PI) / (word.length * repetitions)) *
-            letterSpacing);
-
-        const x = centerX + radius * Math.cos(charAngle);
-        const y = centerY + radius * Math.sin(charAngle);
-        const rotation = (charAngle * 180) / Math.PI + 90;
-
-        letters.push({
-          char: word[i],
-          left: `${x}%`,
-          top: `${y}%`,
-          rotate: rotation,
-        });
-      }
-    }
-
-    return letters;
-  };
-
 // ========== COMPONENTS ==========
-
-/**
- * Circular text configuration type
- */
-type CircularTextConfig = {
-  word: string;
-  repetitions: number;
-  radius: number | { mobile: number; desktop: number };
-  centerX?: number;
-  centerY?: number;
-  letterSpacing?: number | { mobile: number; desktop: number };
-  useTranslate?: boolean;
-  startAngleOffset?: number; // Offset in degrees to adjust starting position
-  textSize?: {
-    mobile: string;
-    desktop: string;
-  };
-  lineHeight?: {
-    mobile: string;
-    desktop: string;
-  };
-  className?: string;
-};
-
-/**
- * Reusable circular text component that renders text in a rotating circle
- * Uses CSS animations for smooth, performant rotation
- */
-interface CircularTextProps {
-  config: CircularTextConfig;
-}
-
-const CircularText = ({ config }: CircularTextProps) => {
-  const {
-    word,
-    repetitions,
-    radius,
-    centerX = 50,
-    centerY = 50,
-    letterSpacing = 0.85,
-    useTranslate = false,
-    startAngleOffset = 0,
-    textSize = {
-      mobile: "text-[11px]",
-      desktop: "md:text-[15px]",
-    },
-    lineHeight = {
-      mobile: "leading-[14px]",
-      desktop: "md:leading-[18px]",
-    },
-    className = "",
-  } = config;
-
-  // Handle responsive radius
-  const [currentRadius, setCurrentRadius] = React.useState(() => {
-    return typeof radius === 'number' ? radius : radius.mobile;
-  });
-
-  // Handle responsive letter spacing
-  const [currentLetterSpacing, setCurrentLetterSpacing] = React.useState(() => {
-    return typeof letterSpacing === 'number' ? letterSpacing : letterSpacing.mobile;
-  });
-
-  React.useEffect(() => {
-    if (typeof radius === 'number') return;
-    
-    const mediaQuery = window.matchMedia('(min-width: 768px)');
-    const updateRadius = () => {
-      setCurrentRadius(mediaQuery.matches ? radius.desktop : radius.mobile);
-    };
-    
-    updateRadius();
-    mediaQuery.addEventListener('change', updateRadius);
-    return () => mediaQuery.removeEventListener('change', updateRadius);
-  }, [radius]);
-
-  React.useEffect(() => {
-    if (typeof letterSpacing === 'number') return;
-    
-    const mediaQuery = window.matchMedia('(min-width: 768px)');
-    const updateLetterSpacing = () => {
-      setCurrentLetterSpacing(mediaQuery.matches ? letterSpacing.desktop : letterSpacing.mobile);
-    };
-    
-    updateLetterSpacing();
-    mediaQuery.addEventListener('change', updateLetterSpacing);
-    return () => mediaQuery.removeEventListener('change', updateLetterSpacing);
-  }, [letterSpacing]);
-
-  const letters = generateCircularLetters(
-    word,
-    repetitions,
-    currentRadius,
-    centerX,
-    centerY,
-    currentLetterSpacing,
-    startAngleOffset
-  );
-
-  const baseClasses = `absolute text-white font-inter ${textSize.mobile} ${textSize.desktop} ${lineHeight.mobile} ${lineHeight.desktop} pointer-events-none whitespace-nowrap ${className}`;
-  const transformClasses = useTranslate
-    ? "transform -translate-x-1/2 -translate-y-1/2"
-    : "";
-
-  return (
-    <div className="absolute inset-0 animate-spin-slow">
-      <div className="relative w-full h-full">
-        {letters.map((letter, index) => (
-          <span
-            key={`${letter.char}-${index}-${letter.left}-${letter.top}`}
-            className={`${baseClasses} ${transformClasses}`}
-            style={{
-              left: letter.left,
-              top: letter.top,
-              transform: useTranslate
-                ? `translate(-50%, -50%) rotate(${letter.rotate}deg)`
-                : `rotate(${letter.rotate}deg)`,
-            }}
-          >
-            {letter.char}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-};
 
 /**
  * Renders rotating "ENIGMA" text ring around the Enigma logo
  */
-const CircularTextEnigma = () => {
-  return (
-    <CircularText
-      config={{
-        ...CIRCULAR_TEXT_CONFIG.ENIGMA,
-        radius: {
-          mobile: 58, // Increased radius on mobile to create blank space between word repetitions
-          desktop: 52, // Keep original radius on desktop
-        },
-        letterSpacing: {
-          mobile: 1.1, // Increased spacing on mobile for better readability
-          desktop: 0.85, // Keep original spacing on desktop
-        },
-        textSize: {
-          mobile: "text-[11px]",
-          desktop: "md:text-[18.5px]",
-        },
-        lineHeight: {
-          mobile: "leading-[14px]",
-          desktop: "md:leading-[22px]",
-        },
-        className: "", // No additional classes, similar to INVENTO base
-      }}
-    />
-  );
-};
+const CircularTextEnigma = () => (
+  <CircularText config={{ ...CIRCULAR_TEXT_CONFIG.ENIGMA, radius: { mobile: 58, desktop: 52 }, letterSpacing: { mobile: 1.1, desktop: 0.85 }, textSize: { mobile: "text-[11px]", desktop: "md:text-[18.5px]" }, lineHeight: { mobile: "leading-[14px]", desktop: "md:leading-[22px]" }, className: "" }} />
+);
 
 /**
  * Renders rotating "INVENTO" text ring around the Invento logo
  */
-const CircularTextInvento = () => {
-  return (
-    <CircularText
-      config={{
-        ...CIRCULAR_TEXT_CONFIG.INVENTO,
-        radius: {
-          mobile: 58, // Increased from 52 for more padding on mobile
-          desktop: 52, // Keep original for desktop
-        },
-        textSize: {
-          mobile: "text-[11px]",
-          desktop: "md:text-[15px]",
-        },
-        lineHeight: {
-          mobile: "leading-[14px]",
-          desktop: "md:leading-[18px]",
-        },
-        className: "font-medium tracking-tight",
-      }}
-    />
-  );
-};
+const CircularTextInvento = () => (
+  <CircularText config={{ ...CIRCULAR_TEXT_CONFIG.INVENTO, radius: { mobile: 58, desktop: 52 }, textSize: { mobile: "text-[11px]", desktop: "md:text-[15px]" }, lineHeight: { mobile: "leading-[14px]", desktop: "md:leading-[18px]" }, className: "font-medium tracking-tight" }} />
+);
 
 /**
  * Grid lines component for desktop layout
@@ -360,13 +115,7 @@ const GridLines = () => {
             className={`absolute border border-white ${
               isHorizontal ? "border-t" : "border-l"
             }`}
-            style={{
-              ...(isHorizontal
-                ? { width: `${line.width}px`, height: "0px" }
-                : { width: "0px", height: `${line.height}px` }),
-              left: `${line.left}px`,
-              top: `${line.top}px`,
-            }}
+            style={{ ...(isHorizontal ? { width: `${line.width}px`, height: "0px" } : { width: "0px", height: `${line.height}px` }), left: `${line.left}px`, top: `${line.top}px` }}
           />
         );
       })}
@@ -539,52 +288,9 @@ const VideoPlayer = ({
   }, []);
 
   return (
-    <div
-      className={`overflow-hidden ${className}`}
-      style={{
-        imageRendering: "crisp-edges" as const,
-        transform: "translateZ(0)", // Force hardware acceleration
-      }}
-    >
-      <img
-        src={staticImageSrc}
-        alt={staticImageAlt}
-        className="w-full h-full object-cover absolute top-0 left-0"
-        style={{
-          imageRendering: "auto" as const,
-          transform: "scale(1.02)",
-          transformOrigin: "center",
-        }}
-        loading="eager"
-      />
-      <video
-        ref={videoRef}
-        src={src}
-        autoPlay
-        loop={true}
-        muted
-        playsInline
-        preload="auto"
-        className="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-500 z-10"
-        style={{
-          willChange: "opacity",
-          transform: "translateZ(0) scale(1.02)", // Force hardware acceleration and scale to cover edges
-          transformOrigin: "center",
-          backfaceVisibility: "hidden",
-          WebkitBackfaceVisibility: "hidden",
-          imageRendering: "auto" as const,
-        }}
-        onLoadedData={handleLoadedData}
-        onCanPlay={handleCanPlay}
-        onError={handleError}
-        onTimeUpdate={handleTimeUpdate}
-        onSeeking={handleSeeking}
-        onSeeked={handleSeeked}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-      />
+    <div className={`overflow-hidden ${className}`} style={{ imageRendering: "crisp-edges" as const, transform: "translateZ(0)" }}>
+      <img src={staticImageSrc} alt={staticImageAlt} className="w-full h-full object-cover absolute top-0 left-0" style={{ imageRendering: "auto" as const, transform: "scale(1.02)", transformOrigin: "center" }} loading="eager" />
+      <video ref={videoRef} src={src} autoPlay loop={true} muted playsInline preload="auto" className="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-500 z-10" style={{ willChange: "opacity", transform: "translateZ(0) scale(1.02)", transformOrigin: "center", backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", imageRendering: "auto" as const }} onLoadedData={handleLoadedData} onCanPlay={handleCanPlay} onError={handleError} onTimeUpdate={handleTimeUpdate} onSeeking={handleSeeking} onSeeked={handleSeeked} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} />
     </div>
   );
 };
@@ -597,15 +303,9 @@ interface TextBlockProps {
   className?: string;
 }
 
-const TextBlock = ({ children, className = "" }: TextBlockProps) => {
-  return (
-    <p
-      className={`font-poppins text-[20px] font-normal leading-[26px] tracking-[-0.02em] text-white antialiased ${className}`}
-    >
-      {children}
-    </p>
-  );
-};
+const TextBlock = ({ children, className = "" }: TextBlockProps) => (
+  <p className={`font-poppins text-sm sm:text-base md:text-lg lg:text-xl xl:text-[20px] font-normal leading-tight sm:leading-normal md:leading-relaxed lg:leading-[26px] tracking-[-0.02em] text-white antialiased ${className}`}>{children}</p>
+);
 
 /**
  * Desktop section component
@@ -624,68 +324,21 @@ const DesktopSection = ({
   logoSize,
 }: DesktopSectionProps) => {
   return (
-    <section
-      className="absolute w-[1444px] h-[804px] bg-black top-[120px] left-[34px] relative"
-      style={{ top: `${top}px` }}
-    >
+    <section className="absolute bg-black relative w-full" style={{ height: `${DESKTOP_LAYOUT.sectionHeight}px`, top: `${top}px`, left: `0px`, minHeight: '100vh' }}>
       <GridLines />
 
-      {/* Circular Logo */}
-      <div className="absolute top-[75px] left-[70px] w-[214px] h-[214px]">
+      <div className="absolute top-[9%] left-[5%] w-[15%] max-w-[214px] aspect-square min-w-[150px]">
         <CircularTextComponent />
-        <img
-          src={content.logo}
-          alt={content.logoAlt}
-          className={`absolute object-contain ${
-            logoSize.top === "50%"
-              ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-              : ""
-          }`}
-          style={{
-            width: logoSize.width,
-            height: logoSize.height === "auto" ? "auto" : logoSize.height,
-            ...(logoSize.top !== "50%" && {
-              top: logoSize.top,
-              left: logoSize.left,
-            }),
-          }}
-            />
-          </div>
+        <img src={content.logo} alt={content.logoAlt} className={`absolute object-contain ${logoSize.top === "50%" ? "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" : ""}`} style={{ width: logoSize.width, height: logoSize.height === "auto" ? "auto" : logoSize.height, ...(logoSize.top !== "50%" && { top: logoSize.top, left: logoSize.left }) }} />
+      </div>
 
-      {/* Intro Text */}
-      <TextBlock className="absolute w-[458px] h-[120px] top-[177px] left-[345px]">
-        {content.intro}
-      </TextBlock>
-
-      {/* Paragraphs */}
-      <TextBlock className="absolute w-[729px] top-[341px] left-[22px]">
-        {content.paragraphs[0]}
-      </TextBlock>
-
-      <TextBlock className="absolute w-[567px] top-[515px] left-[22px]">
-        {content.paragraphs[1]}
-      </TextBlock>
-
-      {/* CTA (only for Enigma) */}
-      {content.cta && (
-        <TextBlock className="absolute w-[258px] top-[677px] left-[22px] text-[30px] font-semibold leading-[34px]">
-          {content.cta}
-        </TextBlock>
-      )}
-
-      {/* Title */}
-      <p className="absolute w-[489px] top-[605px] left-[799px] font-whirly text-[80px] font-bold leading-[80px] tracking-[-0.02em] text-center text-white antialiased">
-        {content.title}
-      </p>
-
-      {/* Video */}
-      <div className="absolute w-[650px] h-[486px] top-[0px] left-[796px] mix-blend-screen overflow-hidden">
-        <VideoPlayer
-          src={content.videoSrc}
-          staticImageSrc={content.staticImageSrc}
-          staticImageAlt={content.staticImageAlt}
-          className="w-full h-full"
-        />
+      <TextBlock className="absolute w-[32%] max-w-[458px] h-auto top-[22%] left-[24%]">{content.intro}</TextBlock>
+      <TextBlock className="absolute w-[50%] max-w-[729px] top-[42%] left-[1.5%]">{content.paragraphs[0]}</TextBlock>
+      <TextBlock className="absolute w-[39%] max-w-[567px] top-[64%] left-[1.5%]">{content.paragraphs[1]}</TextBlock>
+      {content.cta && <TextBlock className="absolute w-[18%] max-w-[258px] top-[84%] left-[1.5%] text-xl 2xl:text-[30px] font-semibold leading-tight 2xl:leading-[34px]">{content.cta}</TextBlock>}
+      <p className="absolute w-[34%] max-w-[489px] top-[75%] left-[55%] font-whirly text-4xl xl:text-6xl 2xl:text-[80px] font-bold leading-tight xl:leading-[80px] tracking-[-0.02em] text-center text-white antialiased">{content.title}</p>
+      <div className="absolute w-[45%] max-w-[650px] h-[60%] max-h-[486px] top-0 left-[55%] mix-blend-screen overflow-hidden">
+        <VideoPlayer src={content.videoSrc} staticImageSrc={content.staticImageSrc} staticImageAlt={content.staticImageAlt} className="w-full h-full" />
       </div>
         </section>
   );
@@ -699,6 +352,7 @@ interface MobileSectionProps {
   CircularTextComponent: React.ComponentType;
   showVerticalTitle?: boolean;
   logoSize?: { width: string; height: string };
+  isFirst?: boolean;
 }
 
 const MobileSection = ({
@@ -706,9 +360,10 @@ const MobileSection = ({
   CircularTextComponent,
   showVerticalTitle = false,
   logoSize = { width: "70px", height: "auto" },
+  isFirst = false,
 }: MobileSectionProps) => {
   return (
-    <section className="relative bg-black text-white px-3 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-7 md:py-9 lg:py-10 overflow-hidden rounded-lg shadow-lg">
+    <section className={`relative bg-black text-white px-3 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-7 md:py-9 lg:py-10 overflow-hidden ${isFirst ? 'rounded-t-lg' : 'rounded-b-lg'}`}>
       {/* Top Row: Logo, Intro, Optional Vertical Title */}
       <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 md:gap-5 lg:gap-6">
         {/* Logo Container */}
@@ -724,10 +379,7 @@ const MobileSection = ({
             src={content.logo}
             alt={content.logoAlt}
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-contain"
-            style={{
-              width: logoSize.width,
-              height: logoSize.height,
-            }}
+            style={{ width: logoSize.width, height: logoSize.height }}
           />
         </div>
 
@@ -785,12 +437,7 @@ const MobileSection = ({
       {showVerticalTitle ? (
         <div className="mt-4 sm:mt-5 md:mt-6 w-full aspect-[4/3] overflow-hidden sm:rounded-lg bg-black relative">
           <div className="absolute inset-0 w-full h-full sm:mix-blend-screen">
-            <VideoPlayer
-              src={content.videoSrc}
-              staticImageSrc={content.staticImageSrc}
-              staticImageAlt={content.staticImageAlt}
-              className="w-full h-full"
-            />
+            <VideoPlayer src={content.videoSrc} staticImageSrc={content.staticImageSrc} staticImageAlt={content.staticImageAlt} className="w-full h-full" />
           </div>
         </div>
       ) : (
@@ -816,51 +463,60 @@ const MobileSection = ({
 
 // ========== MAIN COMPONENT ==========
 const AboutUs = () => {
+  // Calculate scale factor to fill screen - base width is 1444px, we want to use ~95% of viewport width
+  const [scaleFactor, setScaleFactor] = React.useState(1);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  
+  React.useEffect(() => {
+    const updateScale = () => {
+      if (window.innerWidth >= 1280) {
+        // Use full viewport width, base design is 1444px content
+        // Scale to fill the entire screen with no padding
+        const baseContentWidth = DESKTOP_LAYOUT.sectionWidth; // 1444px
+        const viewportWidth = window.innerWidth;
+        
+        // Scale to fill full viewport width
+        const scale = Math.min(viewportWidth / baseContentWidth, 1.5); // Cap at 1.5x
+        setScaleFactor(scale);
+      } else {
+        setScaleFactor(1);
+      }
+    };
+    
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+  
+  // Calculate minimum height for desktop: Invento section top (250px) + section height (804px) + padding
+  const desktopMinHeight = (DESKTOP_LAYOUT.inventoTop + DESKTOP_LAYOUT.sectionHeight + 100) * scaleFactor;
+  
+  // Hide main scrollbar and make this container scrollable
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, []);
+  
   return (
-    <div className="relative w-full min-h-screen overflow-hidden">
+    <div className="relative w-full h-full overflow-y-auto overflow-x-hidden" data-about-us-scroll>
       {/* Desktop Layout - XL screens and above (1280px+) */}
-      <div className="hidden xl:block">
-        <DesktopSection
-          content={CONTENT.enigma}
-          top={DESKTOP_LAYOUT.enigmaTop}
-          CircularTextComponent={CircularTextEnigma}
-          logoSize={{
-            width: "100.55px",
-            height: "63px",
-            top: "75px",
-            left: "57px",
-          }}
-        />
+      <div ref={containerRef} className="hidden xl:block relative" style={{ width: '100%', height: '100%' }}>
+        <div style={{ transform: `scale(${scaleFactor})`, transformOrigin: 'top left', width: `${DESKTOP_LAYOUT.sectionWidth}px`, minHeight: `${desktopMinHeight / scaleFactor}px`, marginLeft: `0px`, marginRight: `0px`, position: 'relative' }}>
+        <DesktopSection content={CONTENT.enigma} top={DESKTOP_LAYOUT.enigmaTop} CircularTextComponent={CircularTextEnigma} logoSize={{ width: "100.55px", height: "63px", top: "75px", left: "57px" }} />
 
-        <DesktopSection
-          content={CONTENT.invento}
-          top={DESKTOP_LAYOUT.inventoTop}
-          CircularTextComponent={CircularTextInvento}
-          logoSize={{
-            width: "90px",
-            height: "auto",
-            top: "50%",
-            left: "50%",
-          }}
-        />
+        <div className="absolute border-t border-white" style={{ width: `${DESKTOP_LAYOUT.sectionWidth}px`, height: "0px", left: "0px", top: `${DESKTOP_LAYOUT.sectionHeight}px`, zIndex: 100, pointerEvents: 'none' }} />
+
+        <DesktopSection content={CONTENT.invento} top={DESKTOP_LAYOUT.inventoTop} CircularTextComponent={CircularTextInvento} logoSize={{ width: "90px", height: "auto", top: "50%", left: "50%" }} />
+        </div>
       </div>
 
       {/* Mobile/Tablet Layout - Below XL screens (0-1279px) */}
-      <div className="xl:hidden bg-[var(--page-bg,#f6efe6)] py-4 sm:py-6 md:py-8 lg:py-10 min-h-screen">
-        <div className="w-full max-w-full sm:max-w-[640px] md:max-w-[768px] lg:max-w-[1024px] mx-auto space-y-6 sm:space-y-8 md:space-y-10 px-4 sm:px-6 md:px-8 lg:px-10">
-          <MobileSection
-            content={CONTENT.enigma}
-            CircularTextComponent={CircularTextEnigma}
-            showVerticalTitle={true}
-            logoSize={{ width: "60px", height: "auto" }}
-          />
-
-          <MobileSection
-            content={CONTENT.invento}
-            CircularTextComponent={CircularTextInvento}
-            showVerticalTitle={false}
-            logoSize={{ width: "70px", height: "auto" }}
-          />
+      <div className="xl:hidden bg-[var(--page-bg,#f6efe6)]">
+        <div className="w-full max-w-full sm:max-w-[640px] md:max-w-[768px] lg:max-w-[1024px] mx-auto">
+          <MobileSection content={CONTENT.enigma} CircularTextComponent={CircularTextEnigma} showVerticalTitle={true} logoSize={{ width: "60px", height: "auto" }} isFirst={true} />
+          <MobileSection content={CONTENT.invento} CircularTextComponent={CircularTextInvento} showVerticalTitle={false} logoSize={{ width: "70px", height: "auto" }} isFirst={false} />
         </div>
       </div>
     </div>

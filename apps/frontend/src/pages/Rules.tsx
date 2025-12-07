@@ -40,45 +40,45 @@ const DIAGONAL_LINES: DiagonalLine[] = [
 const RULES: Rule[] = [
   {
     number: 1,
-    title: "verification",
+    title: "Verification",
     description:
       "winners will have to prove they're real humans ( and real students ) before collecting their glory.",
   },
   {
     number: 2,
-    title: "verification",
+    title: "Ranking",
     description:
-      "winners will have to prove they're real humans ( and real students ) before collecting their glory.",
+      "It’s not just about solving — it’s about how fast you solve. The quickest minds rise to the top, no second chances with time.",
   },
   {
     number: 3,
-    title: "verification",
+    title: "Hints",
     description:
-      "winners will have to prove they're real humans ( and real students ) before collecting their glory.",
+      "We might drop a few hints here and there… or maybe not. Keep an eye on the question page; surprises happen when you least expect them.",
   },
   {
     number: 4,
-    title: "verification",
+    title: "Timer",
     description:
-      "winners will have to prove they're real humans ( and real students ) before collecting their glory.",
+      "The team holds every right to take action if things go sideways. Play clean, or watch your spot disappear like your last wrong guess.",
   },
   {
     number: 5,
-    title: "verification",
+    title: "Fairplay",
     description:
-      "winners will have to prove they're real humans ( and real students ) before collecting their glory.",
+      "The team holds every right to take action if things go sideways. Play clean, or watch your spot disappear like your last wrong guess.",
   },
   {
     number: 6,
-    title: "verification",
+    title: "Use Your Tools",
     description:
-      "winners will have to prove they're real humans ( and real students ) before collecting their glory.",
+      "Google’s your sidekick. Think like a coder, search like a detective. The answer’s always out there — somewhere between logic and luck.",
   },
   {
     number: 7,
-    title: "verification",
+    title: "Hackers",
     description:
-      "winners will have to prove they're real humans ( and real students ) before collecting their glory.",
+      "We see you. We like your confidence. But no — just no.",
   },
 ];
 
@@ -217,7 +217,7 @@ const RuleFrame = ({ rule, index, isMobile }: RuleFrameProps) => {
 // ========== MAIN COMPONENT ==========
 const Rules = () => {
   return (
-    <div className="relative w-full min-h-screen overflow-y-auto bg-[var(--page-bg,#f6efe6)]">
+    <div className="relative w-full min-h-screen overflow-y-auto bg-[var(--page-bg,#f6efe6)]" data-rules-scroll>
       {/* Desktop Layout */}
       <div className="hidden lg:block">
         {/* Header Rectangle */}
