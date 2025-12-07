@@ -29,16 +29,20 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
     lastScrollY.current = 0;
     setVisible(true); // Show navbar when page changes
     
+    const getScrollElement = (): HTMLElement | null => {
+      if (isAboutUsPage) {
+        return document.querySelector('[data-about-us-scroll]') as HTMLElement;
+      } else if (isRulesPage) {
+        return document.querySelector('[data-rules-scroll]') as HTMLElement;
+      }
+      return null;
+    };
+    
     const handleScroll = () => {
       let current: number;
       
       if (hasCustomScroll) {
-        let scrollElement: HTMLElement | null = null;
-        if (isAboutUsPage) {
-          scrollElement = document.querySelector('[data-about-us-scroll]') as HTMLElement;
-        } else if (isRulesPage) {
-          scrollElement = document.querySelector('[data-rules-scroll]') as HTMLElement;
-        }
+        const scrollElement = getScrollElement();
         if (!scrollElement) return;
         current = scrollElement.scrollTop;
       } else {
@@ -62,27 +66,48 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
     };
 
     if (hasCustomScroll) {
-      // Use a small delay to ensure the element exists
-      const timeoutId = setTimeout(() => {
-        let scrollElement: HTMLElement | null = null;
-        if (isAboutUsPage) {
-          scrollElement = document.querySelector('[data-about-us-scroll]') as HTMLElement;
-        } else if (isRulesPage) {
-          scrollElement = document.querySelector('[data-rules-scroll]') as HTMLElement;
-        }
-        if (scrollElement) {
+      let scrollElement: HTMLElement | null = null;
+      let timeoutIds: NodeJS.Timeout[] = [];
+      let observer: MutationObserver | null = null;
+      
+      const setupScrollListener = () => {
+        const element = getScrollElement();
+        if (element && !scrollElement) {
+          scrollElement = element;
           scrollElement.addEventListener("scroll", handleScroll, { passive: true });
+          // Trigger initial check
+          handleScroll();
+          return true;
         }
-      }, 100);
+        return false;
+      };
+      
+      // Try immediately
+      if (!setupScrollListener()) {
+        // Retry with multiple timeouts
+        for (let i = 0; i < 5; i++) {
+          const timeoutId = setTimeout(() => {
+            setupScrollListener();
+          }, 50 * (i + 1)); // 50ms, 100ms, 150ms, 200ms, 250ms
+          timeoutIds.push(timeoutId);
+        }
+        
+        // Also use MutationObserver to watch for element addition
+        observer = new MutationObserver(() => {
+          if (setupScrollListener() && observer) {
+            observer.disconnect();
+          }
+        });
+        
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+        });
+      }
       
       return () => {
-        clearTimeout(timeoutId);
-        let scrollElement: HTMLElement | null = null;
-        if (isAboutUsPage) {
-          scrollElement = document.querySelector('[data-about-us-scroll]') as HTMLElement;
-        } else if (isRulesPage) {
-          scrollElement = document.querySelector('[data-rules-scroll]') as HTMLElement;
-        }
+        timeoutIds.forEach(id => clearTimeout(id));
+        if (observer) observer.disconnect();
         if (scrollElement) {
           scrollElement.removeEventListener("scroll", handleScroll);
         }
