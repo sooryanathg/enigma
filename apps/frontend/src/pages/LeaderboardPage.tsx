@@ -18,7 +18,6 @@ export default function LeaderboardPage() {
   const [currentDay, setCurrentDay] = useState(1);
   const [selectedDay, setSelectedDay] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [userRank, setUserRank] = useState<number | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -38,10 +37,6 @@ export default function LeaderboardPage() {
       const data = await getEnhancedDailyLeaderboard(day, 20);
       setLeaderboard(data);
 
-      if (currentUser) {
-        const userEntry = data.find(entry => entry.id === currentUser.uid);
-        setUserRank(userEntry ? userEntry.rank : null);
-      }
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
     } finally {
@@ -58,21 +53,15 @@ export default function LeaderboardPage() {
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "N/A";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    return date.toLocaleString("en-US", {
+    return [date.toLocaleString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
+    }), date.toLocaleString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
-    });
-  };
-
-  const getRankIcon = (rank: number) => {
-    if (rank === 1) return "🥇";
-    if (rank === 2) return "🥈";
-    if (rank === 3) return "🥉";
-    return `#${rank}`;
+    })];
   };
 
 
@@ -81,24 +70,27 @@ export default function LeaderboardPage() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="min-h-screen bg-transparent pt-14"
+      className="min-h-screen bg-transparent py-14"
     >
-      <div className="container mx-auto px-4 md:px-6 pt-20 font-orbitron">
+      <div className="flex flex-col container mx-auto px-4 md:px-6 pt-8 gap-12">
+        <div className="flex flex-1 p-8 bg-black text-white">
+          <h1 className="font-whirlyBirdie text-2xl font-bold">Leaderboard</h1>
+        </div>
 
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">
+        <div className="text-center mt-4">
+          <h1 className="text-4xl font-bold mb-4 font-whirlyBirdie">
             Daily Leaderboard
           </h1>
-          <p className="text-gray-300 text-lg">
+          <p className="text-lg">
             See who completed challenge the fastest!
           </p>
         </div>
 
         <div className="space-y-6">
           {/* Day Selector */}
-          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
+          <div className="bg-black backdrop-blur-lg border border-white/10 rounded-lg p-6">
+            <h2 className="text-xl font-extrabold mb-4 text-white font-whirlyBirdie">
               Select Day
             </h2>
             <div className="flex flex-wrap gap-2">
@@ -116,12 +108,12 @@ export default function LeaderboardPage() {
                       isSelected
                         ? "bg-white text-black hover:bg-gray-200"
                         : day > currentDay
-                        ? "opacity-40 cursor-not-allowed"
-                        : "bg-transparent border-white/30 text-white hover:bg-white/10"
+                        ? "border-white text-white opacity-40 cursor-not-allowed"
+                        : "border-white text-white  hover:bg-white/10"
                     }`}
                   >
                     <div className="flex flex-col items-center">
-                      <span>Day {day}</span>
+                      <span className="font-whirlyBirdie font-bold">Day {day}</span>
                     </div>
                   </Button>
                 );
@@ -129,29 +121,10 @@ export default function LeaderboardPage() {
             </div>
           </div>
 
-          {/* User Rank */}
-          {currentUser && userRank && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="bg-white/10 backdrop-blur-lg border border-white/20 text-white px-6 py-4 rounded-lg"
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold">Your Ranking</h3>
-                  <p className="text-sm text-gray-300">
-                    You are ranked #{userRank} for Day {selectedDay}
-                  </p>
-                </div>
-                <div className="text-3xl">{getRankIcon(userRank)}</div>
-              </div>
-            </motion.div>
-          )}
-
           {/* Leaderboard */}
-          <div className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-lg overflow-hidden">
-            <div className="bg-white/10 px-6 py-4 border-b border-white/10">
-              <h2 className="text-xl font-semibold text-white">
+          <div className="bg-black overflow-hidden text-white">
+            <div className="px-6 py-8 border border-white">
+              <h2 className="text-xl font-bold font-whirlyBirdie">
                 Day {selectedDay} - Leaderboard
                 {selectedDay === currentDay && " (Today)"}
               </h2>
@@ -168,43 +141,44 @@ export default function LeaderboardPage() {
                 No completions yet for this day.
               </div>
             ) : (
-              <div className="divide-y divide-white/10">
+              <div className="divide-y divide-white">
                 {leaderboard.map((entry, index) => (
                   <motion.div
                     key={entry.id}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`px-6 py-4 flex items-center justify-between transition-colors ${
+                    className={`grid grid-cols-[60px_0.8fr_0.2fr] justify-center transition-colors ${
                       currentUser && entry.id === currentUser.uid
                         ? 'bg-white/15 border-l-4 border-l-white'
                         : 'hover:bg-white/5'
                     }`}
                   >
-                    <div className="flex items-center space-x-4 flex-1">
-                      <div className="text-2xl min-w-[0.5rem] text-white font-bold">
-                        {getRankIcon(entry.rank)}
+
+                      <div className="flex justify-center items-center text-center border-r border-white text-4xl font-bold">
+                        {entry.rank}
                       </div>
-                      <div className="flex flex-1 flex-col md:flex-row">
-                        <div className="flex-1">
-                          <h3 className="text-sm lg:text-lg font-semibold text-white">
-                            {entry.name || 'Anonymous'}
-                            {currentUser && entry.id === currentUser.uid && ' (You)'}
-                          </h3>
-                          <p className="text-xs text-gray-400 mt-1">
-                            Attempts: {entry.attempts}
-                          </p>
-                        </div>
-                        <div className="flex flex-col pt-4 md:pt-0 gap-1 text-white">
-                          <p className="flex text-xs md:justify-end text-gray-400 md:uppercase tracking-wide">
-                            Completed
-                          </p>
-                          <p className="text-[12px] md:text-sm lg:text-lg font-semibold">
-                            {formatTime(entry.completedAt)}
-                          </p>
-                        </div>
+
+                      {/* Name and attempts */}
+                      <div className="border-r border-white p-6 flex-1">
+                        <h3 className="font-whirlyBirdie text-sm lg:text-lg font-semibold">
+                          {entry.name || 'Anonymous'}
+                          {currentUser && entry.id === currentUser.uid && ' (You)'}
+                        </h3>
+                        <p className="text-sm lg:text-lg mt-1">
+                          Attempts: {entry.attempts}
+                        </p>
                       </div>
-                    </div>
+
+                      {/* Completetion time */}
+                      <div className="border-r border-white p-6 flex flex-col gap-1">
+                        <p className="text-[12px] font-whirlyBirdie md:text-sm lg:text-lg font-bold">
+                          {formatTime(entry.completedAt)[0]}
+                        </p>
+                        <p className="text-[12px] font-whirlyBirdie md:text-sm lg:text-lg font-bold">
+                          {formatTime(entry.completedAt)[1]}
+                        </p>
+                      </div>
                   </motion.div>
                 ))}
               </div>
