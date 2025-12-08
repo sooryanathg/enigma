@@ -80,8 +80,10 @@ export const RotatingCanvasText: FC<RotatingCanvasTextProps> = ({
       const elapsed = now - start;
       const progress = Math.min(elapsed / duration, 1);
 
-      // Ease-Out cubic (slows down near end)
-      const eased = 1 - Math.pow(1 - progress, 3);
+      const eased =
+        progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
 
       setPercent(Math.floor(eased * 100));
 
