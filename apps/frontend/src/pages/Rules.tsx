@@ -58,7 +58,7 @@ const Rules = () => {
       <div className="hidden lg:block">
         <div className="absolute bg-black" style={{ width: `${LAYOUT.desktop.headerWidth}px`, height: `${LAYOUT.desktop.headerHeight}px`, left: `${LAYOUT.desktop.headerLeft}px`, top: `${LAYOUT.desktop.headerTop}px` }} />
         <div className="absolute text-white font-whirly font-bold" style={{ width: "130px", height: "29px", left: "60.01px", top: "157px", fontSize: "24px", lineHeight: "29px" }}>RULES</div>
-        <div className="absolute font-whirly font-bold text-center" style={{ width: "370px", height: "43px", left: "calc(50% - 370px/2)", top: "293px", fontSize: "36px", lineHeight: "43px", letterSpacing: "-0.02em", color: "#000000" }}>game rules</div>
+        <div className="absolute font-whirly font-bold text-center" style={{ width: "370px", height: "43px", left: "calc(50% - 370px/2)", top: "293px", fontSize: "36px", lineHeight: "43px", letterSpacing: "-0.02em", color: "#000000" }}>GAME RULES</div>
         <div className="absolute font-poppins font-medium text-center flex items-center" style={{ width: "651px", height: "62px", left: "calc(50% - 651px/2 + 0.5px)", top: "334px", fontSize: "24px", lineHeight: "62px", letterSpacing: "0.01em", color: "#000000" }}>Master the challenge with these essential guidelines</div>
         {RULES.map((rule, index) => <RuleFrame key={index} rule={rule} index={index} isMobile={false} />)}
       </div>
