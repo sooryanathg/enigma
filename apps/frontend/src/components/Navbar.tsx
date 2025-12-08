@@ -33,17 +33,41 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
   const { currentUser, signOut } = useAuth();
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
+  const isAboutUsPage = location.pathname === "/about-us";
+  const isRulesPage = location.pathname === "/rules";
+  const hasCustomScroll = isAboutUsPage || isRulesPage;
 
   useEffect(() => {
+    lastScrollY.current = 0;
+    setVisible(true);
+    
+    const getScrollElement = (): HTMLElement | null => {
+      if (isAboutUsPage) {
+        return document.querySelector('[data-about-us-scroll]') as HTMLElement;
+      } else if (isRulesPage) {
+        return document.querySelector('[data-rules-scroll]') as HTMLElement;
+      }
+      return null;
+    };
+    
     const handleScroll = () => {
-      const current = window.scrollY;
+      let current: number;
+      
+      if (hasCustomScroll) {
+        const scrollElement = getScrollElement();
+        if (!scrollElement) return;
+        current = scrollElement.scrollTop;
+      } else {
+        current = window.scrollY;
+      }
+      
       if (!ticking.current) {
         window.requestAnimationFrame(() => {
           if (current <= 0) {
             setVisible(true);
-          } else if (current > lastScrollY.current && current > 80) {
+          } else if (current > lastScrollY.current && current > 50) {
             setVisible(false);
-          } else {
+          } else if (current < lastScrollY.current) {
             setVisible(true);
           }
           lastScrollY.current = current;
@@ -53,9 +77,54 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
       }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    if (hasCustomScroll) {
+      let scrollElement: HTMLElement | null = null;
+      let timeoutIds: NodeJS.Timeout[] = [];
+      let observer: MutationObserver | null = null;
+      
+      const setupScrollListener = () => {
+        const element = getScrollElement();
+        if (element && !scrollElement) {
+          scrollElement = element;
+          scrollElement.addEventListener("scroll", handleScroll, { passive: true });
+          handleScroll();
+          return true;
+        }
+        return false;
+      };
+      
+      if (!setupScrollListener()) {
+        for (let i = 0; i < 5; i++) {
+          const timeoutId = setTimeout(() => {
+            setupScrollListener();
+          }, 50 * (i + 1));
+          timeoutIds.push(timeoutId);
+        }
+        
+        observer = new MutationObserver(() => {
+          if (setupScrollListener() && observer) {
+            observer.disconnect();
+          }
+        });
+        
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true,
+        });
+      }
+      
+      return () => {
+        timeoutIds.forEach(id => clearTimeout(id));
+        if (observer) observer.disconnect();
+        if (scrollElement) {
+          scrollElement.removeEventListener("scroll", handleScroll);
+        }
+      };
+    } else {
+      window.addEventListener("scroll", handleScroll, { passive: true });
+      return () => window.removeEventListener("scroll", handleScroll);
+    }
+  }, [hasCustomScroll, isAboutUsPage, isRulesPage]);
 
   const handleLogout = async () => {
     try {
@@ -70,7 +139,8 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 border-b border-black bg-transparent transition-transform duration-300",
+        "fixed top-0 left-0 right-0 z-50 border-b border-black transition-transform duration-300",
+        hasCustomScroll ? "bg-[var(--page-bg,#f6efe6)]" : "bg-transparent",
         visible ? "translate-y-0" : "-translate-y-full",
         className
       )}
