@@ -8,11 +8,24 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { LogOut, Menu, X } from "lucide-react";
-import Logo from "@/assets/logo1.png";
+import Logo from "@/assets/Group 113.svg";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 
-export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boolean; className?: string }) {
+interface NavbarProps {
+  isSignInPage?: boolean;
+  className?: string;
+}
+
+const navItems = [
+  { name: "Home", path: "/" },
+  { name: "Rules", path: "/rules" },
+  { name: "Leaderboard", path: "/leaderboard" },
+  { name: "About", path: "/about-us" },
+  { name: "Play", path: "/play" },
+];
+
+export function Navbar({ isSignInPage = false, className }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const navigate = useNavigate();
@@ -29,9 +42,9 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
           if (current <= 0) {
             setVisible(true);
           } else if (current > lastScrollY.current && current > 80) {
-            setVisible(false); // scrolled down -> hide
+            setVisible(false);
           } else {
-            setVisible(true); // scrolled up -> show
+            setVisible(true);
           }
           lastScrollY.current = current;
           ticking.current = false;
@@ -49,17 +62,10 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
       await signOut();
       navigate("/");
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("Failed to sign out", error);
     }
   };
-
-  const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Rules", path: "/rules" },
-    { name: "Leaderboard", path: "/leaderboard" },
-    { name: "About", path: "/about-us" },
-    { name: "Play", path: "/play" },
-  ];
 
   return (
     <header
@@ -71,8 +77,12 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
     >
       <div className="relative z-10 container mx-auto px-6">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center">
-            <img src={Logo} alt="Enigma Logo" className="h-12 w-auto object-contain select-none" />
+          <Link to="/" aria-label="Enigma home" className="flex items-center justify-start">
+            <img
+              src={Logo}
+              alt="Enigma logo"
+        className="h- sm:h-8 md:h-9 w-auto object-contain select-none -ml-12"
+            />
           </Link>
 
           <div className="hidden lg:flex items-center space-x-10">
@@ -99,7 +109,7 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
             {currentUser ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="flex items-center">
+                  <button className="flex items-center" aria-label="Open account menu">
                     <Avatar className="h-9 w-9 border border-black/10">
                       <AvatarImage src={currentUser.photoURL ?? undefined} />
                       <AvatarFallback className="bg-black text-white">
@@ -112,7 +122,9 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent align="end" className="w-48 bg-white border border-black/10">
-                  <DropdownMenuItem className="text-black">{currentUser.email}</DropdownMenuItem>
+                  <DropdownMenuItem className="text-black" aria-disabled>
+                    {currentUser.email}
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleLogout} className="text-red-500">
                     <LogOut className="mr-2 h-4 w-4" />
                     Logout
@@ -130,7 +142,11 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
           </div>
 
           <div className="lg:hidden">
-            <button onClick={() => setOpen(!open)} aria-label="Open menu">
+            <button
+              onClick={() => setOpen(!open)}
+              aria-label={open ? "Close menu" : "Open menu"}
+              className="p-2"
+            >
               {open ? <X className="h-6 w-6 text-black" /> : <Menu className="h-6 w-6 text-black" />}
             </button>
           </div>
@@ -141,13 +157,15 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
             "fixed inset-y-0 left-0 w-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto pt-6",
             open ? "translate-x-0" : "-translate-x-full"
           )}
+          role="dialog"
+          aria-modal={open}
         >
           <div className="flex items-center justify-between p-4 border-b border-black/10">
             <div className="flex items-center space-x-2">
-              <img src={Logo} alt="Enigma Logo" className="h-6 w-auto object-contain" />
+              <img src={Logo} alt="Enigma logo" className="h-6 w-auto object-contain" />
               <span className="font-semibold text-lg text-black">Enigma</span>
             </div>
-            <button onClick={() => setOpen(false)}>
+            <button onClick={() => setOpen(false)} aria-label="Close menu" className="p-2">
               <X className="h-6 w-6 text-black" />
             </button>
           </div>
@@ -167,7 +185,14 @@ export function Navbar({ isSignInPage = false, className }: { isSignInPage?: boo
           </nav>
         </div>
 
-        {open && <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40" onClick={() => setOpen(false)} />}
+        {open && (
+          <button
+            type="button"
+            aria-label="Close mobile menu"
+            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+            onClick={() => setOpen(false)}
+          />
+        )}
       </div>
     </header>
   );
