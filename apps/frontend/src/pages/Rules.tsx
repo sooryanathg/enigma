@@ -1,3 +1,4 @@
+import React from "react";
 
 // ========== TYPES ==========
 type Rule = {
@@ -213,11 +214,15 @@ const RuleFrame = ({ rule, index, isMobile }: RuleFrameProps) => {
     </div>
   );
 };
-
 // ========== MAIN COMPONENT ==========
 const Rules = () => {
+  React.useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
+
   return (
-    <div className="relative w-full min-h-screen overflow-y-auto bg-[var(--page-bg,#f6efe6)]" data-rules-scroll>
+    <div className="relative w-full h-full overflow-y-auto overflow-x-hidden bg-[var(--page-bg,#f6efe6)]" data-rules-scroll>
       {/* Desktop Layout */}
       <div className="hidden lg:block">
         {/* Header Rectangle */}

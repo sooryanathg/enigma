@@ -33,7 +33,7 @@ const LandingLayout = ({ children, isSignInPage = false }: LandingLayoutProps) =
       <main
         className={cn(
           "relative z-20 min-h-screen flex flex-col",
-          location.pathname === "/about-us" && "h-[calc(100vh-4rem)] overflow-hidden"
+          (location.pathname === "/about-us" || location.pathname === "/rules") && "h-[calc(100vh-4rem)] overflow-hidden"
         )}
       >
         {children || <Outlet />}
