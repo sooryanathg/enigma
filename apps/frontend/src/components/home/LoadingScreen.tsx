@@ -1,14 +1,19 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FC } from "react";
 
-import './home.css'
+import "./home.css";
 
 interface TypingTextProps {
   text: string;
   speed?: number;
 }
 
+interface RotatingCanvasTextProps {
+  duration?: number;
+}
+
 interface LoadingScreenProps {
   loadingDelay?: number;
+  onComplete: () => void;
 }
 
 export default function TypingText({ text, speed = 100 }: TypingTextProps) {
@@ -26,15 +31,17 @@ export default function TypingText({ text, speed = 100 }: TypingTextProps) {
   }, [text, speed]);
 
   return (
-    <h1 className="text-black font-bold font-whirlyBirdie text-9xl">
+    <h1 className="text-black font-bold font-whirlyBirdie text-5xl lg:text-9xl">
       {displayedText}
     </h1>
   );
 }
 
-
-const RotatingCanvasText = () => {
+export const RotatingCanvasText: FC<RotatingCanvasTextProps> = ({
+  duration = 0,
+}) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [percent, setPercent] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -66,23 +73,45 @@ const RotatingCanvasText = () => {
     }
   }, []);
 
+  useEffect(() => {
+    const start = performance.now();
+
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+
+      const eased =
+        progress < 0.5
+          ? 4 * progress * progress * progress
+          : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+
+      setPercent(Math.floor(eased * 100));
+
+      if (progress < 1) requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+  }, [duration]);
+
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex flex-col items-center justify-center">
+      {duration > 0 && (
+        <h1 className="font-whirlyBirdie text-4xl font-bold">{percent}%</h1>
+      )}
+
       <canvas ref={canvasRef} className="animate-spin-slow" />
 
-      <img
-        src="/enigma-logo.svg"
-        alt="logo"
-        className="absolute w-28 h-28"
-      />
+      <img src="/enigma-logo.svg" alt="logo" className="absolute w-28 h-28" />
     </div>
   );
 };
 
-export const LoadingScreen: React.FC<LoadingScreenProps> = ({ loadingDelay = 2000 }) => {
+export const LoadingScreen: React.FC<LoadingScreenProps> = ({
+  loadingDelay = 2000,
+  onComplete,
+}) => {
   const MAX_TYPING_TIME = 800;
   const typingDuration = Math.min(MAX_TYPING_TIME, loadingDelay);
-
   const rotatingDuration = loadingDelay - typingDuration;
 
   const [showTyping, setShowTyping] = useState(false);
@@ -90,20 +119,21 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ loadingDelay = 200
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowTyping(true);
+
+      setTimeout(() => {
+        onComplete?.();
+      }, typingDuration + 100);
     }, rotatingDuration);
 
     return () => clearTimeout(timer);
-  }, [rotatingDuration]);
+  }, [rotatingDuration, typingDuration, onComplete]);
 
   return (
-    <section
-      id="loading-screen"
-      className="flex bg-[var(--background)] flex-1 min-h-screen min-w-max z-50 justify-center items-center"
-    >
+    <section className="flex bg-[var(--background)] min-h-screen justify-center items-center">
       {showTyping ? (
-        <TypingText text="ENIGMA" speed={typingDuration / 6} />
+        <TypingText text="ENIGMA" speed={typingDuration / 10} />
       ) : (
-        <RotatingCanvasText />
+        <RotatingCanvasText duration={rotatingDuration} />
       )}
     </section>
   );
