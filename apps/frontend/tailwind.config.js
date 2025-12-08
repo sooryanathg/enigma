@@ -20,13 +20,6 @@ export default {
     extend: {
       fontFamily: {
         whirlyBirdie: ["WhirlyBirdie", "sans-serif"],
-        sans: ['Inter', 'Helvetica', 'Arial', 'sans-serif'],
-        orbitron: ['var(--font-orbitron)', 'sans-serif'],
-        montserrat: ['var(--font-montserrat)', 'sans-serif'],
-        pavelt: ['var(--font-pavelt)', 'sans-serif'],
-        inter: ['Inter', 'sans-serif'],
-        poppins: ["Poppins", "sans-serif"],
-        whirly: ["WhirlyBirdie", "sans-serif"],
       },
       colors: {
         border: 'hsl(var(--border))',

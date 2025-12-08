@@ -1,8 +1,5 @@
 /* Swiss Typography - Inter as primary font */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
-@import url('https://fonts.cdnfonts.com/css/pavelt');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,24 +8,20 @@
 @layer base {
   :root {
     --enigma-ivory-cream: #FFF2E4;
-
     --background: var(--enigma-ivory-cream);
     --foreground: 0 0% 10%;
+    --primary:white;
   }
+}
+
+* {
+  font-family: "Poppins", sans-serif;
 }
 
 @font-face {
   font-family: "WhirlyBirdie";
   src: url("/fonts/WhirlyBirdie-WideLight.otf") format("woff2");
   font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "WhirlyBirdie";
-  src: url("/fonts/WhirlyBirdie-WideBold.otf") format("woff2");
-  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
