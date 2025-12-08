@@ -1,7 +1,8 @@
-import { lazy, Suspense } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import { lazy, Suspense } from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LandingLayout from "./components/LandingLayout";
+import { RotatingCanvasText } from "./components/home/LoadingScreen";
 
 // Lazy loaded pages
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -14,25 +15,22 @@ const HowItWorks = lazy(() => import("./pages/HowitWorks"));
 
 // Fallback loader
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen text-white">
-    Loading...
+  <div className="flex min-h-screen justify-center items-center">
+    <RotatingCanvasText />
   </div>
 );
 
 function AppRouter() {
   const router = createBrowserRouter([
     {
-      path: '/',
-      element: (
-
-          <LandingLayout />
-      ),
+      path: "/",
+      element: <LandingLayout />,
       children: [
         // HOME
         {
           index: true,
           element: (
-            <Suspense fallback={<PageLoader />}>
+            <Suspense>
               <HomePage />
             </Suspense>
           ),
@@ -40,7 +38,7 @@ function AppRouter() {
 
         // ✅ NEW HOW IT WORKS PAGE
         {
-          path: '/how-it-works',
+          path: "/how-it-works",
           element: (
             <Suspense fallback={<PageLoader />}>
               <HowItWorks />
@@ -50,38 +48,38 @@ function AppRouter() {
 
         // RULES
         {
-          path: '/rules',
+          path: "/rules",
           element: (
             <Suspense fallback={<PageLoader />}>
               <Rules />
             </Suspense>
           ),
-          handle: { noScroll: true }
+          handle: { noScroll: true },
         },
 
         // ABOUT
         {
-          path: '/about-us',
+          path: "/about-us",
           element: (
             <Suspense fallback={<PageLoader />}>
               <AboutUs />
             </Suspense>
-          )
+          ),
         },
 
         // SIGN IN
         {
-          path: '/signin',
+          path: "/signin",
           element: (
             <Suspense fallback={<PageLoader />}>
               <SignInPage />
             </Suspense>
-          )
+          ),
         },
 
         // PLAY (Protected)
         {
-          path: '/play',
+          path: "/play",
           element: (
             <ProtectedRoute>
               <Suspense fallback={<PageLoader />}>
@@ -93,7 +91,7 @@ function AppRouter() {
 
         // LEADERBOARD (Protected)
         {
-          path: '/leaderboard',
+          path: "/leaderboard",
           element: (
             <ProtectedRoute>
               <Suspense fallback={<PageLoader />}>
