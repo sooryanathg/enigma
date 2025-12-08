@@ -134,12 +134,15 @@ const PlayMap = () => {
           style={{
             transformStyle: "preserve-3d",
             transform:
-              "rotateX(55deg) rotateZ(-15deg) translateY(-25%) translateX(20%)",
+              "rotateX(55deg) rotateZ(-20deg) translateY(-25%) translateX(20%)",
           }}
         >
           {rows.map((row, rowIndex) => (
             <div
               key={rowIndex}
+              style={{
+                perspective: "1200px",
+              }}
               className={`grid grid-cols-9 ${(rowIndex + 1) % 4 === 2 ? "direction-reverse" : ""} gap-0 items-center justify-center max-w-4xl`}
             >
               {row.map((cell, cellIndex) => (
@@ -148,7 +151,7 @@ const PlayMap = () => {
                   className="flex w-full h-full min-h-[120px] relative"
                 >
                   {cell.type === "day" ? (
-                    <div className="day-cell hover:scale-110 hover:shadow-2xl day-3d w-full h-full bg-black text-white flex items-center justify-center text-sm font-bold border border-black transition-all">
+                    <div className="day-cell w-full h-full bg-black text-white flex items-center justify-center text-base font-whirlyBirdie font-bold border border-black">
                       DAY {cell.day}
                     </div>
                   ) : cell.type === "arrow" ? (
