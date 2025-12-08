@@ -4,6 +4,7 @@ import Enigma3D from "@/assets/enig-anim-org.webm";
 import InventoLogo from "@/assets/invento.webp";
 import Invento3D from "@/assets/invento.webm";
 import { CircularText } from "@/components/ui/circular-text";
+import { VideoPlayer } from "@/components/ui/video-player";
 
 type GridLine = { type: "horizontal" | "vertical"; width?: number; height?: number; left: number; top: number; };
 type ContentSection = { title: string; intro: string; paragraphs: string[]; cta: string; logo: string; logoAlt: string; videoSrc: string; staticImageSrc: string; staticImageAlt: string; };
@@ -60,119 +61,6 @@ const GridLines = () => (
     })}
   </>
 );
-
-interface VideoPlayerProps { src: string; staticImageSrc: string; staticImageAlt: string; className?: string; }
-
-const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "" }: VideoPlayerProps) => {
-  const videoRef = React.useRef<HTMLVideoElement>(null);
-  const animationFrameRef = React.useRef<number | null>(null);
-  const isHoveringRef = React.useRef<boolean>(false);
-  const NORMAL_PLAYBACK_RATE = 1.0;
-  const FAST_PLAYBACK_RATE = 5.0;
-  const targetRateRef = React.useRef<number>(NORMAL_PLAYBACK_RATE);
-
-  const transitionPlaybackRate = React.useCallback((targetRate: number) => {
-    if (!videoRef.current) return;
-    targetRateRef.current = targetRate;
-    const video = videoRef.current;
-    const startRate = video.playbackRate;
-    const rateDifference = targetRate - startRate;
-    const duration = 200;
-    const startTime = performance.now();
-    const animate = (currentTime: number) => {
-      if (!videoRef.current) return;
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const easeOut = 1 - Math.pow(1 - progress, 3);
-      const currentRate = startRate + rateDifference * easeOut;
-      videoRef.current.playbackRate = currentRate;
-      if (progress < 1) {
-        animationFrameRef.current = requestAnimationFrame(animate);
-      } else {
-        videoRef.current.playbackRate = targetRate;
-        animationFrameRef.current = null;
-      }
-    };
-    if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-    animationFrameRef.current = requestAnimationFrame(animate);
-  }, []);
-
-  const handleLoadedData = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = e.currentTarget;
-    video.style.opacity = "1";
-    video.playbackRate = NORMAL_PLAYBACK_RATE;
-    video.play().catch((err) => console.warn("Video autoplay failed:", err));
-  };
-
-  const handleCanPlay = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = e.currentTarget;
-    video.style.opacity = "1";
-    video.playbackRate = NORMAL_PLAYBACK_RATE;
-    video.play().catch((err) => console.warn("Video autoplay failed:", err));
-  };
-
-  const handleError = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    console.error("Video error:", e.currentTarget.error);
-    e.currentTarget.style.display = "none";
-  };
-
-  const handleTimeUpdate = React.useCallback(() => {
-    if (!videoRef.current) return;
-    if (videoRef.current.paused) videoRef.current.play().catch(() => {});
-  }, []);
-
-  const handleSeeking = React.useCallback(() => {
-    if (!videoRef.current) return;
-    videoRef.current.playbackRate = targetRateRef.current;
-  }, []);
-
-  const handleSeeked = React.useCallback(() => {
-    if (!videoRef.current) return;
-    const video = videoRef.current;
-    video.playbackRate = targetRateRef.current;
-    if (video.paused) video.play().catch(() => {});
-  }, []);
-
-  const handleMouseEnter = (_e: React.MouseEvent<HTMLVideoElement>) => {
-    isHoveringRef.current = true;
-    transitionPlaybackRate(FAST_PLAYBACK_RATE);
-  };
-
-  const handleMouseLeave = (_e: React.MouseEvent<HTMLVideoElement>) => {
-    isHoveringRef.current = false;
-    transitionPlaybackRate(NORMAL_PLAYBACK_RATE);
-  };
-
-  const handleTouchStart = (_e: React.TouchEvent<HTMLVideoElement>) => {
-    isHoveringRef.current = true;
-    transitionPlaybackRate(FAST_PLAYBACK_RATE);
-  };
-
-  const handleTouchEnd = (_e: React.TouchEvent<HTMLVideoElement>) => {
-    isHoveringRef.current = false;
-    transitionPlaybackRate(NORMAL_PLAYBACK_RATE);
-  };
-
-  React.useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.playbackRate = NORMAL_PLAYBACK_RATE;
-      videoRef.current.play().catch((err) => console.warn("Video autoplay failed on mount:", err));
-    }
-  }, []);
-
-  React.useEffect(() => {
-    return () => {
-      if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
-    };
-  }, []);
-
-  return (
-    <div className={`overflow-hidden ${className}`} style={{ imageRendering: "crisp-edges" as const, transform: "translateZ(0)" }}>
-      <img src={staticImageSrc} alt={staticImageAlt} className="w-full h-full object-cover absolute top-0 left-0" style={{ imageRendering: "auto" as const, transform: "scale(1.02)", transformOrigin: "center" }} loading="eager" />
-      <video ref={videoRef} src={src} autoPlay loop={true} muted playsInline preload="auto" className="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-500 z-10" style={{ willChange: "opacity", transform: "translateZ(0) scale(1.02)", transformOrigin: "center", backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", imageRendering: "auto" as const }} onLoadedData={handleLoadedData} onCanPlay={handleCanPlay} onError={handleError} onTimeUpdate={handleTimeUpdate} onSeeking={handleSeeking} onSeeked={handleSeeked} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} />
-    </div>
-  );
-};
 
 interface TextBlockProps { children: React.ReactNode; className?: string; }
 const TextBlock = ({ children, className = "" }: TextBlockProps) => <p className={`font-poppins text-sm sm:text-base md:text-lg lg:text-xl xl:text-[20px] font-normal leading-tight sm:leading-normal md:leading-relaxed lg:leading-[26px] tracking-[-0.02em] text-white antialiased ${className}`}>{children}</p>;
