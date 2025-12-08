@@ -1,10 +1,10 @@
 import { useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { getCurrentDay } from '../services/firestoreService';
 import { usePlay } from '../hooks/usePlay';
 import ProgressGrid from '../components/play/ProgressGrid';
 import { Input } from '@/components/ui/input';
-import DayProgress from '@/components/play/DayProgress';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,8 +12,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import tutor1 from '@/assets/tutor1.jpeg';
 import tutor2 from '@/assets/tutor2.jpeg';
 import QuestionImage from '@/components/ui/questionImage';
+import leftArrow from '@/assets/left-arrow.svg';
 
 function PlayPage() {
+  const navigate = useNavigate();
   const [answer, setAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { currentUser } = useAuth();
@@ -29,9 +31,11 @@ function PlayPage() {
   } = usePlay(currentUser);
 
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [squareImagesLoaded, setSquareImagesLoaded] = useState([false, false, false, false]);
 
   useEffect(() => {
     setImageLoaded(false);
+    setSquareImagesLoaded([false, false, false, false]);
   }, [question?.image]);
 
   useEffect(() => {
@@ -81,90 +85,481 @@ function PlayPage() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="min-h-screen bg-transparent pt-14">
+      className="min-h-screen bg-transparent pt-14 relative overflow-y-auto overflow-x-hidden">
       <div className="container mx-auto px-4 md:px-6 pt-20 font-orbitron">
-
-        <div className="space-y-6">
-          <DayProgress day={displayDay} totalDays={progress?.progress.length} setIsOpen={setIsOpen} />
-          <div className='flex flex-col lg:flex-row lg:items-start lg:justify-center gap-8 w-full flex-grow min-h-0'>
-
-            <div className='flex flex-col lg:flex-row gap-6 lg:w-[70%] items-center justify-between flex-shrink-0 mx-auto'>
-              {/*Image area*/}
-              <div className="relative w-[250px] h-[250px] md:w-[380px] md:h-[380px]
-                              bg-black rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-
-                {/* Spinner while image loads */}
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {/* Spinner / Placeholder */}
-                  {!imageLoaded && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-black rounded-lg">
-                      {question?.image ? (
-                        <>
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                          <p className="text-gray-300 mt-2">Loading image...</p>
-                        </>
-                      ) : (
-                        <p className="text-gray-400">No image available for this question</p>
-                      )}
+        {/* Group 78 - Top Rectangle */}
+        <div className="hidden lg:block">
+          <div className="absolute bg-black" style={{ width: "1452px", height: "104px", left: "29.01px", top: "121px" }}>
+            {/* Left Arrow */}
+            <button
+              onClick={() => navigate(-1)}
+              className="absolute flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity"
+              style={{
+                left: "4.03%",
+                top: "34.62%",
+                width: "30px",
+                height: "30px",
+                background: "transparent",
+                border: "none"
+              }}
+            >
+              <img src={leftArrow} alt="Left arrow" className="w-full h-full object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+            </button>
+          </div>
+          {/* Day X Of Y Text */}
+          <div
+            className="absolute font-whirlyBirdie font-bold text-white text-center"
+            style={{
+              width: "210px",
+              height: "29px",
+              left: "130.01px",
+              top: "157px",
+              fontSize: "24px",
+              lineHeight: "29px"
+            }}
+          >
+            Day {displayDay} Of {progress?.progress.length || 10}
+          </div>
+          {/* Tutorial Button */}
+          <button
+            onClick={() => setIsOpen(true)}
+            className="absolute bg-black text-white border border-white px-4 py-2 rounded hover:bg-gray-800 transition-colors"
+            style={{
+              width: "138px",
+              height: "45px",
+              left: "1321px",
+              top: "150px"
+            }}
+          >
+            Tutorial
+          </button>
+          {/* Group 79 - Left Rectangle */}
+          <div className="absolute bg-black border border-black" style={{ width: "918.03px", height: "528px", left: "29px", top: "249px" }}>
+            {/* Question Text */}
+            <div
+              className="absolute font-whirlyBirdie font-bold text-white"
+              style={{
+                width: "733px",
+                height: "60px",
+                left: "calc(50% - 733px/2 - 50px)",
+                top: "0px",
+                paddingTop: "20px",
+                fontSize: "20px",
+                lineHeight: "30px"
+              }}
+            >
+              {question?.question || "I hold two people inside me forever, but i'm not a home. What am i ?"}
+            </div>
+            {/* Line 36 - Divider */}
+            <div
+              className="absolute"
+              style={{
+                width: "918.03px",
+                height: "0px",
+                left: "0px",
+                top: "113.5px",
+                border: "1px solid #FFFFFF"
+              }}
+            />
+          </div>
+          {/* Rectangle 40210 - Square */}
+          <div
+            className="absolute box-border overflow-hidden"
+            style={{
+              width: "165px",
+              height: "165px",
+              left: "321px",
+              top: "389px",
+              border: "1px solid #FFFFFF"
+            }}
+          >
+            {question?.image && (
+              <img
+                src={question.image}
+                onLoad={() => setSquareImagesLoaded(prev => [true, prev[1], prev[2], prev[3]])}
+                onError={() => setSquareImagesLoaded(prev => [true, prev[1], prev[2], prev[3]])}
+                className={`w-full h-full object-cover ${squareImagesLoaded[0] ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
+                alt="Question image 1"
+              />
+            )}
+            {!squareImagesLoaded[0] && question?.image && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              </div>
+            )}
+          </div>
+          {/* Rectangle 40211 - Square */}
+          <div
+            className="absolute box-border overflow-hidden"
+            style={{
+              width: "165px",
+              height: "165px",
+              left: "496px",
+              top: "389px",
+              border: "1px solid #FFFFFF"
+            }}
+          >
+            {question?.image && (
+              <img
+                src={question.image}
+                onLoad={() => setSquareImagesLoaded(prev => [prev[0], true, prev[2], prev[3]])}
+                onError={() => setSquareImagesLoaded(prev => [prev[0], true, prev[2], prev[3]])}
+                className={`w-full h-full object-cover ${squareImagesLoaded[1] ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
+                alt="Question image 2"
+              />
+            )}
+            {!squareImagesLoaded[1] && question?.image && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                     </div>
                   )}
-
-                  {/* Actual Image */}
-                  <QuestionImage
-                    src={question?.image}
-                    imageLoaded={imageLoaded}
-                    setImageLoaded={setImageLoaded}
-                  />
-                </div>
+          </div>
+          {/* Rectangle 40212 - Square */}
+          <div
+            className="absolute box-border overflow-hidden"
+            style={{
+              width: "165px",
+              height: "165px",
+              left: "321px",
+              top: "564px",
+              border: "1px solid #FFFFFF"
+            }}
+          >
+            {question?.image && (
+              <img
+                src={question.image}
+                onLoad={() => setSquareImagesLoaded(prev => [prev[0], prev[1], true, prev[3]])}
+                onError={() => setSquareImagesLoaded(prev => [prev[0], prev[1], true, prev[3]])}
+                className={`w-full h-full object-cover ${squareImagesLoaded[2] ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
+                alt="Question image 3"
+              />
+            )}
+            {!squareImagesLoaded[2] && question?.image && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
               </div>
-
-              {/*Answer Area*/}
-              <div className='flex flex-col lg:w-[50%] max-w-[500px] justify-center items-center text-center lg:text-left'>
-                {question?.isCompleted ? (
-                  <div >
-                    <div>{question?.question}</div>
-                    <div className='text-center py-6'>
-                      <div className="text-4xl">🎉</div>
-                      <div className="mt-2">You've completed this question.</div>
+            )}
+                </div>
+          {/* Rectangle 40213 - Square */}
+          <div
+            className="absolute box-border overflow-hidden"
+            style={{
+              width: "165px",
+              height: "165px",
+              left: "496px",
+              top: "564px",
+              border: "1px solid #FFFFFF"
+            }}
+          >
+            {question?.image && (
+              <img
+                src={question.image}
+                onLoad={() => setSquareImagesLoaded(prev => [prev[0], prev[1], prev[2], true])}
+                onError={() => setSquareImagesLoaded(prev => [prev[0], prev[1], prev[2], true])}
+                className={`w-full h-full object-cover ${squareImagesLoaded[3] ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
+                alt="Question image 4"
+              />
+            )}
+            {!squareImagesLoaded[3] && question?.image && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+              </div>
+            )}
                     </div>
+          {/* ANSWER : Text */}
+          <div
+            className="absolute font-whirlyBirdie font-bold text-black text-center"
+            style={{
+              width: "191px",
+              height: "29px",
+              left: "29px",
+              top: "808px",
+              fontSize: "24px",
+              lineHeight: "29px"
+            }}
+          >
+            ANSWER :
                   </div>
-                ) : (
-                  <div className='flex flex-col gap-12 p-1 md:p-0'>
-                    <div>{question?.question}</div>
-                    <div className='flex flex-col gap-2 '>
-
-                      <div className='md:text-3xl text-xl'>Answer :</div>
+          {/* Group 82 - Answer Input Field */}
+          <div
+            className="absolute"
+            style={{
+              width: "701px",
+              height: "73px",
+              left: "29.01px",
+              top: "851px"
+            }}
+          >
                       <Input
                         id="answer-input"
-                        placeholder="Enter answer"
+              placeholder=""
                         value={answer}
                         onChange={(e: any) => setAnswer(e.target.value)}
                         disabled={cooldownSeconds > 0 || submitting}
                         onKeyDown={(e: any) => e.key === 'Enter' && handleSubmit()}
-                      />
-                      <div className="mt-3 flex gap-2">
-                        <Button onClick={handleSubmit} disabled={submitting || cooldownSeconds > 0} className="flex-1">
-                          {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'Submit'}
+              className="w-full h-full"
+            />
+          </div>
+          {/* Enter Your Answer Text */}
+          {!answer && (
+            <div
+              className="absolute pointer-events-none font-poppins font-medium"
+              style={{
+                width: "218px",
+                height: "36px",
+                left: "60px",
+                top: "872px",
+                fontSize: "24px",
+                lineHeight: "36px",
+                color: "#6B6B6B"
+              }}
+            >
+              Enter Your Answer
+            </div>
+          )}
+          {/* Group 77 - Submit Button */}
+          <div
+            className="absolute"
+            style={{
+              width: "216px",
+              height: "73px",
+              left: "731px",
+              top: "851px"
+            }}
+          >
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting || cooldownSeconds > 0}
+              className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center"
+              style={{
+                fontSize: "24px",
+                lineHeight: "29px"
+              }}
+            >
+              {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
                         </Button>
                       </div>
-                      {message && <div className="mt-3 text-sm text-muted-foreground">{message}</div>}
-
+          {/* Rectangle 40202 - Right Rectangle */}
+          <div
+            className="absolute bg-black"
+            style={{
+              width: "514px",
+              height: "675px",
+              left: "968.02px",
+              top: "249px"
+            }}
+          >
+            {/* Your progress Text */}
+            <div
+              className="absolute font-whirlyBirdie font-bold text-white text-center"
+              style={{
+                width: "332px",
+                height: "29px",
+                left: "25px",
+                top: "55px",
+                fontSize: "24px",
+                lineHeight: "29px"
+              }}
+            >
+              Your progress
+            </div>
+            {/* Day 1 Box */}
+            <div
+              className="absolute bg-white"
+              style={{
+                width: "126.08px",
+                height: "94px",
+                left: "24.99px",
+                top: "114px"
+              }}
+            />
+            <div
+              className="absolute font-whirlyBirdie font-bold text-black text-center"
+              style={{
+                width: "89px",
+                height: "24px",
+                left: "42.99px",
+                top: "139px",
+                fontSize: "20px",
+                lineHeight: "24px",
+                whiteSpace: "nowrap"
+              }}
+            >
+              day 1
+            </div>
+            <div
+              className="absolute font-poppins font-medium text-black text-center"
+              style={{
+                width: "105px",
+                height: "24px",
+                left: "34.99px",
+                top: "161px",
+                fontSize: "16px",
+                lineHeight: "24px"
+              }}
+            >
+              {progress?.progress[0]?.isCompleted ? "Completed" : "In Progress"}
+            </div>
+            {/* Day 2 Box */}
+            <div
+              className="absolute bg-white"
+              style={{
+                width: "126.08px",
+                height: "94px",
+                left: "171.07px",
+                top: "114px"
+              }}
+            />
+            <div
+              className="absolute font-whirlyBirdie font-bold text-black text-center"
+              style={{
+                width: "89px",
+                height: "24px",
+                left: "189.07px",
+                top: "139px",
+                fontSize: "20px",
+                lineHeight: "24px",
+                whiteSpace: "nowrap"
+              }}
+            >
+              day 2
+            </div>
+            <div
+              className="absolute font-poppins font-medium text-black text-center"
+              style={{
+                width: "105px",
+                height: "24px",
+                left: "181.07px",
+                top: "161px",
+                fontSize: "16px",
+                lineHeight: "24px"
+              }}
+            >
+              {progress?.progress[1]?.isCompleted ? "Completed" : "In Progress"}
+            </div>
+            {/* Day 3 Box */}
+            <div
+              className="absolute bg-white"
+              style={{
+                width: "126.08px",
+                height: "94px",
+                left: "317.15px",
+                top: "114px"
+              }}
+            />
+            <div
+              className="absolute font-whirlyBirdie font-bold text-black text-center"
+              style={{
+                width: "89px",
+                height: "24px",
+                left: "335.15px",
+                top: "139px",
+                fontSize: "20px",
+                lineHeight: "24px",
+                whiteSpace: "nowrap"
+              }}
+            >
+              day 3
                     </div>
+            <div
+              className="absolute font-poppins font-medium text-black text-center"
+              style={{
+                width: "105px",
+                height: "24px",
+                left: "327.15px",
+                top: "161px",
+                fontSize: "16px",
+                lineHeight: "24px"
+              }}
+            >
+              {progress?.progress[2]?.isCompleted ? "Completed" : "In Progress"}
                   </div>
-                )}
-              </div>
+            {/* Day 4 Box */}
+            <div
+              className="absolute bg-white"
+              style={{
+                width: "126.08px",
+                height: "94px",
+                left: "24.99px",
+                top: "228px"
+              }}
+            />
+            <div
+              className="absolute font-whirlyBirdie font-bold text-black text-center"
+              style={{
+                width: "89px",
+                height: "24px",
+                left: "42.99px",
+                top: "253px",
+                fontSize: "20px",
+                lineHeight: "24px",
+                whiteSpace: "nowrap"
+              }}
+            >
+              day 4
             </div>
-
-            <div className="lg:w-[30%] w-full flex flex-col min-h-0">
-              <ProgressGrid
-                days={progress?.progress as any}
-                displayDay={displayDay}
-                onSelectDay={(d) => handleSelectDay(d)}
-              />
+            <div
+              className="absolute font-poppins font-medium text-black text-center"
+              style={{
+                width: "105px",
+                height: "24px",
+                left: "34.99px",
+                top: "275px",
+                fontSize: "16px",
+                lineHeight: "24px"
+              }}
+            >
+              {progress?.progress[3]?.isCompleted ? "Completed" : "In Progress"}
             </div>
-
-
+            {/* Day 5 Box */}
+            <div
+              className="absolute bg-white"
+              style={{
+                width: "126.08px",
+                height: "94px",
+                left: "171.07px",
+                top: "228px"
+              }}
+            />
+            <div
+              className="absolute font-whirlyBirdie font-bold text-black text-center"
+              style={{
+                width: "89px",
+                height: "24px",
+                left: "189.07px",
+                top: "253px",
+                fontSize: "20px",
+                lineHeight: "24px",
+                whiteSpace: "nowrap"
+              }}
+            >
+              day 5
+            </div>
+            <div
+              className="absolute font-poppins font-medium text-black text-center"
+              style={{
+                width: "105px",
+                height: "24px",
+                left: "181.07px",
+                top: "275px",
+                fontSize: "16px",
+                lineHeight: "24px"
+              }}
+            >
+              {progress?.progress[4]?.isCompleted ? "Completed" : "In Progress"}
+            </div>
+            {/* Group 106 - Progress Bar */}
+            <div
+              className="absolute bg-white"
+              style={{
+                width: "15px",
+                height: "523px",
+                left: "473.99px",
+                top: "114px"
+              }}
+            />
           </div>
+        </div>
 
           {/* Popup */}
           <AnimatePresence>
@@ -223,7 +618,6 @@ function PlayPage() {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
 
         <AnimatePresence>
   {showFinalCongrats && (
