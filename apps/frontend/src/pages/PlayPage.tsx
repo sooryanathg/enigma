@@ -29,6 +29,7 @@ function PlayPage() {
   const [answer, setAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { currentUser } = useAuth();
+  const [message, setMessage] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [showFinalCongrats, setShowFinalCongrats] = useState(false);
   const [squareImagesLoaded, setSquareImagesLoaded] = useState([false, false, false, false]);
@@ -49,15 +50,34 @@ function PlayPage() {
     }
   }, [question, displayDay, progress]);
 
+  // Auto-clear success messages after 5 seconds
+  useEffect(() => {
+    if (message && (message.includes('Correct') || message.includes('Success') || message.includes('🎉'))) {
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   const handleSubmit = async () => {
-    if (!answer.trim()) return;
+    if (!answer.trim()) {
+      setMessage('Please enter an answer');
+      return;
+    }
     setSubmitting(true);
+    setMessage(null);
     try {
       const res = await submitAnswer(answer.trim());
-      if (res.ok) {
-        setAnswer('');
-        await fetchQuestion(displayDay);
+      if (!res.ok) {
+        setMessage(res.message || (res.data && res.data.result) || 'Submission failed');
+      } else {
+        setMessage(res.data?.result || 'Submitted');
+        if (res.data?.correct) {
+          setAnswer('');
+          await fetchQuestion(displayDay);
+        }
       }
+    } catch (error) {
+      setMessage('Error submitting answer');
     } finally {
       setSubmitting(false);
     }
@@ -114,6 +134,21 @@ function PlayPage() {
               {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
             </Button>
           </div>
+          
+          {/* Message Display */}
+          {message && (
+            <div 
+              className="absolute font-poppins text-base font-medium" 
+              style={{ 
+                left: "29px", 
+                top: "940px", 
+                color: message.includes('Correct') || message.includes('Success') || message.includes('🎉') ? "#10b981" : "#ef4444",
+                maxWidth: "900px"
+              }}
+            >
+              {message}
+            </div>
+          )}
           
           {/* Right Rectangle */}
           <div className="absolute bg-black" style={{ width: "514px", height: "675px", left: "968.02px", top: "249px" }}>
