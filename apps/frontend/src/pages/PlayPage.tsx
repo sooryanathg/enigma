@@ -72,6 +72,21 @@ function PlayPage() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
+  // Normalize images: if array, use it; if string, duplicate for all 4 squares; if undefined, empty array
+  const getQuestionImages = (): (string | undefined)[] => {
+    if (!question?.image) return [undefined, undefined, undefined, undefined];
+    if (Array.isArray(question.image)) {
+      // If array, pad or slice to exactly 4 elements
+      const images: (string | undefined)[] = [...question.image];
+      while (images.length < 4) images.push(undefined);
+      return images.slice(0, 4);
+    }
+    // If string, duplicate for all 4 squares (backward compatibility)
+    return [question.image, question.image, question.image, question.image];
+  };
+
+  const questionImages = getQuestionImages();
+
   useEffect(() => {
     setSquareImagesLoaded([false, false, false, false]);
   }, [question?.image]);
@@ -159,7 +174,7 @@ function PlayPage() {
             <ImageSquare 
               key={i} 
               index={i} 
-              image={question?.image} 
+              image={questionImages[i]} 
               loaded={squareImagesLoaded[i]} 
               onLoad={() => setSquareImagesLoaded(prev => prev.map((val, idx) => idx === i ? true : val))} 
             />
@@ -238,16 +253,16 @@ function PlayPage() {
           <div className="grid grid-cols-2 gap-2 mt-4">
             {[0, 1, 2, 3].map(i => (
               <div key={i} className="relative aspect-square border border-white rounded overflow-hidden bg-black">
-                {question?.image && (
+                {questionImages[i] && (
                   <img 
-                    src={question?.image} 
+                    src={questionImages[i]} 
                     alt={`Question image ${i + 1}`}
                     className={`w-full h-full object-cover transition-opacity duration-300 ${squareImagesLoaded[i] ? "opacity-100" : "opacity-0"}`}
                     onLoad={() => setSquareImagesLoaded(prev => prev.map((val, idx) => idx === i ? true : val))}
                     onError={() => setSquareImagesLoaded(prev => prev.map((val, idx) => idx === i ? true : val))}
                   />
                 )}
-                {!squareImagesLoaded[i] && question?.image && (
+                {!squareImagesLoaded[i] && questionImages[i] && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                   </div>
