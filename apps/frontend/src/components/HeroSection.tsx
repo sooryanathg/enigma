@@ -107,7 +107,7 @@ const HeroSection = () => {
         {w > 0 && h > 0 && (
           <>
             <motion.div
-              className="pointer-events-none fixed z-30 hidden md:flex items-center justify-center rounded-full border border-black bg-black/90 shadow-md"
+              className="pointer-events-none fixed z-30 hidden md:flex items-center justify-center rounded-full border border-black bg-peach/90 shadow-md"
               style={{
                 width: "48px",
                 height: "48px",
@@ -151,14 +151,14 @@ const HeroSection = () => {
             <motion.h1
               variants={fadeIn}
               style={{ fontFamily: "WhirlyBirdie", fontSize: "144px" }}
-              className={cn("font-bold text-black tracking-[0.08em] leading-[0.85] mb-4")}
+              className={cn("font-bold text-black tracking-[0.08em] leading-[0.85] mb-8")}
             >
               ENIGMA
             </motion.h1>
 
             <motion.p
-              variants={fadeIn}
-              className="text-2xl sm:text-3xl md:text-4xl text-black mb-10 max-w-2xl mx-auto font-normal font-orbitron"
+              variants={fadeIn}        
+                className="text-2xl sm:text-3xl md:text-5xl text-black mb-10 max-w-2xl mx-auto font-[400] font-whirlybird"
             >
               Online Treasure Hunt
             </motion.p>
@@ -167,7 +167,7 @@ const HeroSection = () => {
               <motion.div variants={fadeUp}>
                 <Link
                   to={currentUser ? "/play" : "/signin"}
-                  className="px-12 py-4 rounded-full text-lg font-medium border border-black text-black hover:bg-black hover:text-white transition-all duration-200"
+                  className="px-12 py-4 square-full text-lg font-medium border border-black text-black hover:bg-black hover:text-white transition-all duration-200"
                 >
                   Get Started
                 </Link>

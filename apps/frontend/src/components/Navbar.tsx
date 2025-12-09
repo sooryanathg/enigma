@@ -140,7 +140,7 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 border-b border-black transition-transform duration-300",
-        hasCustomScroll ? "bg-[var(--page-bg,#f6efe6)]" : "bg-transparent",
+        hasCustomScroll ? "bg-[var(--page-bg,#f6efe6)]" : "bg-peach",
         visible ? "translate-y-0" : "-translate-y-full",
         className
       )}
@@ -151,7 +151,7 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
             <img
               src={Logo}
               alt="Enigma logo"
-        className="h- sm:h-8 md:h-9 w-auto object-contain select-none -ml-12"
+        className="h-7 sm:h-8 md:h-9 w-auto object-contain select-none -ml-12"
             />
           </Link>
 
