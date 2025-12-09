@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { usePlay } from '../hooks/usePlay';
@@ -33,8 +33,40 @@ function PlayPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [showFinalCongrats, setShowFinalCongrats] = useState(false);
   const [squareImagesLoaded, setSquareImagesLoaded] = useState([false, false, false, false]);
+  const [scaleX, setScaleX] = useState(1);
+  const [scaleY, setScaleY] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const { displayDay, question, progress, cooldownSeconds, initialize, fetchQuestion, submitAnswer } = usePlay(currentUser);
+
+  // Calculate scale factors to fit content in viewport perfectly
+  useEffect(() => {
+    const updateScale = () => {
+      if (window.innerWidth >= 1024) {
+        // Base design dimensions
+        const baseWidth = 1510; // Adjust this to control width stretching
+        const baseHeight = 900; // Keep this fixed - height is perfect
+        
+        // Available viewport dimensions (accounting for navbar ~64px)
+        const availableWidth = window.innerWidth;
+        const availableHeight = window.innerHeight - 64;
+        
+        // Calculate scale factors independently
+        const newScaleX = availableWidth / baseWidth;
+        const newScaleY = availableHeight / baseHeight;
+        
+        // Set independent scales - height stays perfect, width can stretch
+        setScaleX(Math.max(newScaleX, 0.7));
+        setScaleY(Math.max(newScaleY, 0.7));
+      } else {
+        setScaleX(1);
+        setScaleY(1);
+      }
+    };
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
 
   useEffect(() => {
     setSquareImagesLoaded([false, false, false, false]);
@@ -88,8 +120,16 @@ function PlayPage() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="min-h-screen bg-transparent pt-14 relative overflow-y-auto overflow-x-hidden">
-      <div className="container mx-auto px-4 md:px-6 pt-20 font-orbitron">
+    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="h-screen bg-transparent relative overflow-hidden" ref={containerRef}>
+      <div 
+        className="font-orbitron absolute top-0 left-0" 
+        style={{ 
+          transform: `scale(${scaleX}, ${scaleY})`, 
+          transformOrigin: 'top left',
+          width: `${100 / scaleX}%`,
+          height: `${100 / scaleY}%`
+        }}
+      >
         <div className="hidden lg:block">
           {/* Top Rectangle */}
           <div className="absolute bg-black" style={{ width: "1452px", height: "104px", left: "29.01px", top: "121px" }}>
