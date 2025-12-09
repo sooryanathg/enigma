@@ -9,15 +9,84 @@ import tutor1 from '@/assets/tutor1.jpeg';
 import tutor2 from '@/assets/tutor2.jpeg';
 import leftArrow from '@/assets/left-arrow.svg';
 
-const ImageSquare = ({ index, image, loaded, onLoad }: { index: number; image?: string; loaded: boolean; onLoad: () => void }) => {
-  const positions = [
-    { left: "321px", top: "389px" },
-    { left: "496px", top: "389px" },
-    { left: "321px", top: "564px" },
-    { left: "496px", top: "564px" }
-  ];
+// Calculate optimal grid layout based on number of images
+const calculateGridLayout = (imageCount: number, containerWidth: number, containerHeight: number, startTop: number, startLeft: number) => {
+  if (imageCount === 0) return [];
+  
+  if (imageCount === 1) {
+    // Single large square, centered
+    const size = Math.min(400, containerWidth - 100, containerHeight - 150);
+    const left = startLeft + (containerWidth - size) / 2;
+    const top = startTop + 50;
+    return [{ left, top, width: size, height: size }];
+  }
+  
+  if (imageCount === 2) {
+    // Two squares side by side
+    const gap = 20;
+    const size = Math.min(200, (containerWidth - gap - 40) / 2);
+    const totalWidth = size * 2 + gap;
+    const leftStart = startLeft + (containerWidth - totalWidth) / 2;
+    const top = startTop + 50;
+    return [
+      { left: leftStart, top, width: size, height: size },
+      { left: leftStart + size + gap, top, width: size, height: size }
+    ];
+  }
+  
+  if (imageCount === 3) {
+    // Two on top, one below (centered)
+    const gap = 20;
+    const size = Math.min(180, (containerWidth - gap - 40) / 2);
+    const topRowLeft = startLeft + (containerWidth - (size * 2 + gap)) / 2;
+    const bottomLeft = startLeft + (containerWidth - size) / 2;
+    return [
+      { left: topRowLeft, top: startTop + 50, width: size, height: size },
+      { left: topRowLeft + size + gap, top: startTop + 50, width: size, height: size },
+      { left: bottomLeft, top: startTop + 50 + size + gap, width: size, height: size }
+    ];
+  }
+  
+  // For 4+ images, calculate optimal grid
+  const gap = 15;
+  let cols = 2;
+  let rows = Math.ceil(imageCount / cols);
+  
+  // Optimize column count for better layout
+  if (imageCount >= 6) cols = 3;
+  if (imageCount >= 9) cols = 3;
+  if (imageCount >= 12) cols = 4;
+  
+  rows = Math.ceil(imageCount / cols);
+  
+  const maxSize = Math.min(
+    200,
+    (containerWidth - (cols - 1) * gap - 40) / cols,
+    (containerHeight - (rows - 1) * gap - 100) / rows
+  );
+  
+  const totalWidth = cols * maxSize + (cols - 1) * gap;
+  const leftStart = startLeft + (containerWidth - totalWidth) / 2;
+  const topStart = startTop + 50;
+  
+  const positions = [];
+  for (let i = 0; i < imageCount; i++) {
+    const row = Math.floor(i / cols);
+    const col = i % cols;
+    positions.push({
+      left: leftStart + col * (maxSize + gap),
+      top: topStart + row * (maxSize + gap),
+      width: maxSize,
+      height: maxSize
+    });
+  }
+  
+  return positions;
+};
+
+const ImageSquare = ({ position, image, loaded, onLoad, index }: { position: { left: number; top: number; width: number; height: number }; image?: string; loaded: boolean; onLoad: () => void; index: number }) => {
   return (
-    <div className="absolute box-border overflow-hidden" style={{ width: "165px", height: "165px", ...positions[index], border: "1px solid #FFFFFF" }}>
+    <div className="absolute box-border overflow-hidden" style={{ left: `${position.left}px`, top: `${position.top}px`, width: `${position.width}px`, height: `${position.height}px`, border: "1px solid #FFFFFF" }}>
       {image && <img src={image} onLoad={onLoad} onError={onLoad} className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`} alt={`Question image ${index + 1}`} />}
       {!loaded && image && <div className="absolute inset-0 flex items-center justify-center bg-black"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div></div>}
     </div>
@@ -48,7 +117,7 @@ function PlayPage() {
   const [message, setMessage] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [showFinalCongrats, setShowFinalCongrats] = useState(false);
-  const [squareImagesLoaded, setSquareImagesLoaded] = useState([false, false, false, false]);
+  const [squareImagesLoaded, setSquareImagesLoaded] = useState<boolean[]>([]);
   const [scaleX, setScaleX] = useState(1);
   const [scaleY, setScaleY] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,24 +141,31 @@ function PlayPage() {
     return () => window.removeEventListener('resize', updateScale);
   }, []);
 
-  // Normalize images: if array, use it; if string, duplicate for all 4 squares; if undefined, empty array
-  const getQuestionImages = (): (string | undefined)[] => {
-    if (!question?.image) return [undefined, undefined, undefined, undefined];
+  // Get actual images array from question
+  const getQuestionImages = (): string[] => {
+    if (!question?.image) return [];
     if (Array.isArray(question.image)) {
-      // If array, pad or slice to exactly 4 elements
-      const images: (string | undefined)[] = [...question.image];
-      while (images.length < 4) images.push(undefined);
-      return images.slice(0, 4);
+      return question.image;
     }
-    // If string, duplicate for all 4 squares (backward compatibility)
-    return [question.image, question.image, question.image, question.image];
+    // If string, return as single element array (backward compatibility)
+    return [question.image];
   };
 
   const questionImages = getQuestionImages();
+  
+  // Calculate grid layout for desktop
+  const desktopImageLayout = calculateGridLayout(
+    questionImages.length,
+    918.03, // container width
+    414.5,  // available height (528 - 113.5 for question area)
+    362.5,  // start top (after divider line)
+    29      // start left (container left)
+  );
 
   useEffect(() => {
-    setSquareImagesLoaded([false, false, false, false]);
-  }, [question?.image]);
+    // Reset loaded state when images change
+    setSquareImagesLoaded(new Array(questionImages.length).fill(false));
+  }, [questionImages.length]);
 
   useEffect(() => {
     if (currentUser) initialize();
@@ -169,15 +245,22 @@ function PlayPage() {
             <div className="absolute" style={{ width: "918.03px", height: "0px", left: "0px", top: "113.5px", border: "1px solid #FFFFFF" }} />
           </div>
           
-          {/* Image Squares */}
-          {[0, 1, 2, 3].map(i => (
-            <ImageSquare 
-              key={i} 
-              index={i} 
-              image={questionImages[i]} 
-              loaded={squareImagesLoaded[i]} 
-              onLoad={() => setSquareImagesLoaded(prev => prev.map((val, idx) => idx === i ? true : val))} 
-            />
+          {/* Image Squares - Dynamic Grid */}
+          {questionImages.map((image, i) => (
+            desktopImageLayout[i] && (
+              <ImageSquare 
+                key={i} 
+                index={i} 
+                position={desktopImageLayout[i]}
+                image={image} 
+                loaded={squareImagesLoaded[i] || false} 
+                onLoad={() => setSquareImagesLoaded(prev => {
+                  const newState = [...prev];
+                  newState[i] = true;
+                  return newState;
+                })} 
+              />
+            )
           ))}
           
           {/* ANSWER Text */}
@@ -249,20 +332,47 @@ function PlayPage() {
           </div>
           <div className="w-full h-px bg-white my-3" />
           
-          {/* Image Grid */}
-          <div className="grid grid-cols-2 gap-2 mt-4">
-            {[0, 1, 2, 3].map(i => (
-              <div key={i} className="relative aspect-square border border-white rounded overflow-hidden bg-black">
-                {questionImages[i] && (
+          {/* Image Grid - Dynamic */}
+          <div 
+            className="mt-4"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: questionImages.length === 1 
+                ? '1fr' 
+                : questionImages.length === 2 
+                  ? 'repeat(2, 1fr)' 
+                  : questionImages.length === 3
+                    ? 'repeat(2, 1fr)'
+                    : questionImages.length <= 4
+                      ? 'repeat(2, 1fr)'
+                      : 'repeat(3, 1fr)',
+              gap: '8px'
+            }}
+          >
+            {questionImages.map((image, i) => (
+              <div 
+                key={i} 
+                className="relative aspect-square border border-white rounded overflow-hidden bg-black"
+                style={questionImages.length === 1 ? { maxWidth: '300px', margin: '0 auto' } : {}}
+              >
+                {image && (
                   <img 
-                    src={questionImages[i]} 
+                    src={image} 
                     alt={`Question image ${i + 1}`}
                     className={`w-full h-full object-cover transition-opacity duration-300 ${squareImagesLoaded[i] ? "opacity-100" : "opacity-0"}`}
-                    onLoad={() => setSquareImagesLoaded(prev => prev.map((val, idx) => idx === i ? true : val))}
-                    onError={() => setSquareImagesLoaded(prev => prev.map((val, idx) => idx === i ? true : val))}
+                    onLoad={() => setSquareImagesLoaded(prev => {
+                      const newState = [...prev];
+                      newState[i] = true;
+                      return newState;
+                    })}
+                    onError={() => setSquareImagesLoaded(prev => {
+                      const newState = [...prev];
+                      newState[i] = true;
+                      return newState;
+                    })}
                   />
                 )}
-                {!squareImagesLoaded[i] && questionImages[i] && (
+                {!squareImagesLoaded[i] && image && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                   </div>
