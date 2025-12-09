@@ -151,8 +151,15 @@ const PlayMap = () => {
                   className="flex w-full h-full min-h-[120px] relative"
                 >
                   {cell.type === "day" ? (
-                    <div className="day-cell w-full h-full bg-black text-white flex items-center justify-center text-base font-whirlyBirdie font-bold border border-black">
+                    <div
+                      style={{
+                        boxShadow: "-16px 19px 13px rgba(0, 0, 0, 0.25)",
+                      }}
+                      className="group day-cell w-full h-full bg-black text-white flex items-center justify-center text-base font-whirlyBirdie font-bold border border-black"
+                    >
+                      <div className="day-cell-side" />
                       DAY {cell.day}
+                      <div className="day-cell-bottom" />
                     </div>
                   ) : cell.type === "arrow" ? (
                     <div className="w-full h-full flex items-center justify-center border border-black">
