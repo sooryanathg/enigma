@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
+import { motion, useAnimation, useInView } from "framer-motion";
 
 const steps = [
   { id: 1, number: "01", title: "REGISTER", description: "Create an account or sign in with Google" },
@@ -7,41 +8,103 @@ const steps = [
   { id: 4, number: "04", title: "REPEAT", description: "Come back tomorrow for the next challenge!" }
 ];
 
+const textContainerVariants = {
+  hidden: { opacity: 0, y: -32 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: "easeOut",
+      staggerChildren: 0.15
+    }
+  }
+};
+
+const headingVariants = {
+  hidden: { opacity: 0, y: -24 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } }
+};
+
+const subheadingVariants = {
+  hidden: { opacity: 0, y: -16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut", delay: 0.05 } }
+};
+
 const tilesContainerVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.18, when: "beforeChildren" } }
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      when: "beforeChildren",
+      staggerChildren: 0.18,
+      delayChildren: 0.15
+    }
+  }
 };
 
 const tileVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: "easeOut" } }
+  hidden: {
+    opacity: 0,
+    y: 32,
+    scale: 0.96,
+    filter: "blur(6px)"
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    filter: "blur(0px)",
+    transition: {
+      duration: 0.65,
+      ease: "easeOut"
+    }
+  }
 };
 
 const HowItWorksSection = () => {
+  const controls = useAnimation();
+  const ref = useRef<HTMLDivElement | null>(null);
+  const inView = useInView(ref, { amount: 0.35 });
+
+  useEffect(() => {
+    if (inView) {
+      controls.start("visible");
+    } else {
+      controls.start("hidden");
+    }
+  }, [inView, controls]);
+
   return (
     <section id="how-it-works-section" className="pt-24 pb-32 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto">
-        <h2
-          style={{ fontFamily: "WhirlyBirdie" }}
-          className="text-4xl md:text-5xl font-bold text-black text-center mb-6"
-        >
-          HOW IT WORKS
-        </h2>
+      <div className="max-w-6xl mx-auto" ref={ref}>
+        <motion.div className="mb-12" variants={textContainerVariants} initial="hidden" animate={controls}>
+          <motion.h2
+            style={{ fontFamily: "WhirlyBirdie" }}
+            className="text-4xl md:text-5xl font-bold text-black text-center mb-6"
+            variants={headingVariants}
+          >
+            HOW IT WORKS
+          </motion.h2>
 
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <p className="text-2xl md:text-3xl font-bold text-black/90">
-            Join our 10-day treasure hunt!!
-          </p>
-          <p className="text-md md:text-lg font-bold text-black/70 mt-4">
-            One question per day, compete for the fastest completion time, and climb the daily leaderboard
-          </p>
-        </div>
+          <motion.div
+            className="text-center max-w-3xl mx-auto"
+            variants={subheadingVariants}
+          >
+            <p className="text-2xl md:text-3xl font-bold text-black/90">
+              Join our 10-day treasure hunt!!
+            </p>
+            <p className="text-md md:text-lg font-bold text-black/70 mt-4">
+              One question per day, compete for the fastest completion time, and climb the daily leaderboard
+            </p>
+          </motion.div>
+        </motion.div>
 
         <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
           variants={tilesContainerVariants}
           initial="hidden"
-          animate="visible"
+          animate={controls}
         >
           {steps.map((step) => (
             <motion.div

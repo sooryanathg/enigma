@@ -1,5 +1,5 @@
-import  { useEffect, useState } from "react";
-import { motion, useMotionValue, useTransform } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
+import { motion, useMotionValue, useTransform, useAnimation, useInView } from "framer-motion";
 import { Link } from "react-router-dom";
 import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
@@ -38,6 +38,19 @@ const fadeIn = {
   visible: { opacity: 1, transition: { duration: 0.9 } }
 };
 
+const heroContainerVariants = {
+  hidden: { opacity: 0, y: 32 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.7,
+      ease: "easeOut",
+      staggerChildren: 0.18
+    }
+  }
+};
+
 const HeroSection = () => {
   const { currentUser } = useAuth();
 
@@ -48,6 +61,18 @@ const HeroSection = () => {
   const smoothX = useMotionValue(0);
   const smoothY = useMotionValue(0);
 
+  const heroControls = useAnimation();
+  const heroRef = useRef<HTMLDivElement | null>(null);
+  const heroInView = useInView(heroRef, { amount: 0.6 });
+
+  useEffect(() => {
+    if (heroInView) {
+      heroControls.start("visible");
+    } else {
+      heroControls.start("hidden");
+    }
+  }, [heroInView, heroControls]);
+
   useEffect(() => {
     const update = () => setVp({ w: window.innerWidth, h: window.innerHeight });
     update();
@@ -57,7 +82,6 @@ const HeroSection = () => {
 
   const { w, h } = vp;
 
-  // Mouse position → normalized target values (-1 to 1)
   useEffect(() => {
     const move = (e: MouseEvent) => {
       if (!w || !h) return;
@@ -71,7 +95,6 @@ const HeroSection = () => {
     return () => window.removeEventListener("mousemove", move);
   }, [w, h, targetX, targetY]);
 
-  // Smooth lag pointer and parallax driver
   useEffect(() => {
     let frame: number;
     const animate = () => {
@@ -102,7 +125,7 @@ const HeroSection = () => {
   };
 
   return (
-    <motion.div className="flex flex-col" initial="hidden" animate="visible" variants={containerVariants}>
+    <div className="flex flex-col">
       <section className="relative flex min-h-screen flex-col justify-center overflow-hidden">
         {w > 0 && h > 0 && (
           <>
@@ -146,7 +169,13 @@ const HeroSection = () => {
           </>
         )}
 
-        <div className="relative z-20 flex px-4 sm:px-6 lg:px-8 pt-[9rem] items-start justify-center select-none">
+        <motion.div
+          ref={heroRef}
+          className="relative z-20 flex px-4 sm:px-6 lg:px-8 pt-[9rem] items-start justify-center select-none"
+          initial="hidden"
+          animate={heroControls}
+          variants={heroContainerVariants}
+        >
           <div className="max-w-5xl mx-auto text-center w-full">
             <motion.h1
               variants={fadeIn}
@@ -157,8 +186,8 @@ const HeroSection = () => {
             </motion.h1>
 
             <motion.p
-              variants={fadeIn}        
-                className="text-2xl sm:text-3xl md:text-5xl text-black mb-10 max-w-2xl mx-auto font-[400] font-whirlybird"
+              variants={fadeIn}
+              className="text-2xl sm:text-3xl md:text-5xl text-black mb-10 max-w-2xl mx-auto font-[400] font-whirlybird"
             >
               Online Treasure Hunt
             </motion.p>
@@ -197,12 +226,12 @@ const HeroSection = () => {
               </motion.button>
             </motion.div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       <HowItWorksSection />
       <Footer />
-    </motion.div>
+    </div>
   );
 };
 

@@ -139,8 +139,8 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 border-b border-black transition-transform duration-300",
-        hasCustomScroll ? "bg-[var(--page-bg,#f6efe6)]" : "bg-peach",
+        "fixed top-0 left-0 right-0 z-50 border-b border-black transition-transform duration-300 !bg-peach",
+        hasCustomScroll && "!bg-[var(--page-bg,#f6efe6)]",
         visible ? "translate-y-0" : "-translate-y-full",
         className
       )}
