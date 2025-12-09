@@ -1,115 +1,16 @@
 import { MoveRight, MoveLeft, MoveDown } from "lucide-react";
 
 import "./page.css";
-
-function generateMap(dayCount: number) {
-  const rows = [];
-  let currentDay = 1;
-  let goingRight = true;
-
-  while (currentDay <= dayCount) {
-    const row = [];
-
-    // Determine how many days fit in this row (max 3 days per row)
-    const daysInThisRow = Math.min(3, dayCount - currentDay + 1);
-
-    if (goingRight) {
-      // Fill row going RIGHT
-      for (let dayInRow = 0; dayInRow < daysInThisRow; dayInRow++) {
-        // Add day cell
-        const isLastDayInRow = dayInRow === daysInThisRow - 1;
-        const isLastDay = currentDay === dayCount;
-
-        row.push({
-          day: currentDay,
-          type: "day",
-          arrow: isLastDay
-            ? "none"
-            : isLastDayInRow && currentDay < dayCount
-              ? "down"
-              : "right",
-        });
-
-        currentDay++;
-
-        // Add arrow cells between days (2 arrows between each day)
-        if (dayInRow < daysInThisRow - 1) {
-          row.push({ type: "arrow", arrow: "right" });
-          row.push({ type: "arrow", arrow: "right" });
-        }
-      }
-
-      // Add down arrows at the end if not last day
-      if (currentDay <= dayCount) {
-        row.push({ type: "arrow", arrow: "right" });
-        row.push({ type: "arrow", arrow: "down" });
-      }
-
-      // Fill remaining cells with empty boxes to reach 9 columns
-      while (row.length < 9) {
-        row.push({ type: "empty" });
-      }
-    } else {
-      // Fill row going LEFT (need to build in reverse)
-      const tempRow = [];
-
-      for (let dayInRow = 0; dayInRow < daysInThisRow; dayInRow++) {
-        const isLastDayInRow = dayInRow === daysInThisRow - 1;
-        const isLastDay = currentDay === dayCount;
-
-        tempRow.push({
-          day: currentDay,
-          type: "day",
-          arrow: isLastDay
-            ? "none"
-            : isLastDayInRow && currentDay < dayCount
-              ? "down"
-              : "left",
-        });
-
-        currentDay++;
-
-        // Add arrow cells between days
-        if (dayInRow < daysInThisRow - 1) {
-          tempRow.push({ type: "arrow", arrow: "left" });
-          tempRow.push({ type: "arrow", arrow: "left" });
-        }
-      }
-
-      // Reverse the row for left direction
-      row.push(...tempRow.reverse());
-
-      // Add down arrow at the beginning if not last day
-      if (currentDay <= dayCount) {
-        row.unshift({ type: "arrow", arrow: "left" });
-        row.unshift({ type: "arrow", arrow: "down" });
-      }
-
-      // Fill remaining cells with empty boxes to reach 9 columns
-      while (row.length < 9) {
-        row.unshift({ type: "empty" });
-      }
-    }
-
-    rows.push(row);
-
-    // Add transition row (single down arrow) if not last row
-    if (currentDay <= dayCount) {
-      const transitionRow = [];
-      transitionRow.push({ type: "arrow", arrow: "down" });
-      // Fill remaining cells with empty boxes
-      while (transitionRow.length < 9) {
-        transitionRow.push({ type: "empty" });
-      }
-      rows.push(transitionRow);
-      goingRight = !goingRight; // Switch direction
-    }
-  }
-
-  return rows;
-}
+import { DayTile } from "@/components/progressMap/dayTile";
+import { generateMap } from "@/components/progressMap/mapGenerator";
+import { usePlay } from "@/hooks/usePlay";
+import { useAuth } from "@/contexts/AuthContext";
 
 const PlayMap = () => {
+  const { currentUser } = useAuth();
+  const { progress, fetchProgress } = usePlay(currentUser);
+  fetchProgress(true);
+
   const renderArrow = (direction: string) => {
     switch (direction) {
       case "right":
@@ -123,14 +24,38 @@ const PlayMap = () => {
     }
   };
 
-  const rows = generateMap(15);
+  const isDayComplete = (day: number): boolean => {
+    return (
+      (progress?.progress &&
+        progress.progress.length >= day &&
+        progress.progress[day - 1]?.isCompleted === true) ||
+      false
+    );
+  };
+
+  const isArrowActive = (cellIndex: number, row: any[]): boolean => {
+    // Find the next day cell after this arrow
+    for (let i = cellIndex + 1; i < row.length; i++) {
+      if (row[i].type === "day") {
+        const nextDay = row[i].day!;
+        return (
+          nextDay > 1 &&
+          (isDayComplete(nextDay) ||
+            (isDayComplete(nextDay - 1) && !isDayComplete(nextDay)))
+        );
+      }
+    }
+    return false;
+  };
+
+  const rows = generateMap(progress?.progress.length || 0);
 
   return (
-    <div className="min-h-screen flex items-center justify-center pt-20 p-8">
-      <div className="w-full max-w-6xl">
+    <div className="min-h-screen flex items-center justify-center pt-20 p-8 overflow-visible">
+      <div className="w-full max-w-6xl overflow-visible">
         {/* Map Container with 3D perspective */}
         <div
-          className="relative"
+          className="relative overflow-visible"
           style={{
             transformStyle: "preserve-3d",
             transform:
@@ -143,26 +68,26 @@ const PlayMap = () => {
               style={{
                 perspective: "1200px",
               }}
-              className={`grid grid-cols-9 ${(rowIndex + 1) % 4 === 2 ? "direction-reverse" : ""} gap-0 items-center justify-center max-w-4xl`}
+              className={`grid grid-cols-9 ${(rowIndex + 1) % 4 === 2 ? "direction-reverse" : ""} gap-0 items-center justify-center max-w-4xl overflow-visible`}
             >
               {row.map((cell, cellIndex) => (
                 <div
                   key={cellIndex}
-                  className="flex w-full h-full min-h-[120px] relative"
+                  className="flex w-full h-full min-h-[120px] relative overflow-visible"
                 >
                   {cell.type === "day" ? (
-                    <div
-                      style={{
-                        boxShadow: "-16px 19px 13px rgba(0, 0, 0, 0.25)",
-                      }}
-                      className="group day-cell w-full h-full bg-black text-white flex items-center justify-center text-base font-whirlyBirdie font-bold border border-black"
-                    >
-                      <div className="day-cell-side" />
-                      DAY {cell.day}
-                      <div className="day-cell-bottom" />
-                    </div>
+                    <DayTile
+                      day={cell.day!}
+                      isComplete={isDayComplete(cell.day!)}
+                    />
                   ) : cell.type === "arrow" ? (
-                    <div className="w-full h-full flex items-center justify-center border border-black">
+                    <div
+                      className={`w-full h-full flex items-center justify-center border -z-10 ${
+                        isArrowActive(cellIndex, row)
+                          ? "bg-black text-white border-white/20"
+                          : "border-black"
+                      }`}
+                    >
                       {renderArrow(cell.arrow!)}
                     </div>
                   ) : (
