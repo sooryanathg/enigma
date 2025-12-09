@@ -9,12 +9,20 @@ import tutor1 from '@/assets/tutor1.jpeg';
 import tutor2 from '@/assets/tutor2.jpeg';
 import leftArrow from '@/assets/left-arrow.svg';
 
-const ImageSquare = ({ index, image, loaded, setLoaded }: { index: number; image?: string; loaded: boolean; setLoaded: (loaded: boolean) => void }) => (
-  <div className="absolute box-border overflow-hidden" style={{ width: "165px", height: "165px", left: index % 2 === 0 ? "321px" : "496px", top: index < 2 ? "389px" : "564px", border: "1px solid #FFFFFF" }}>
-    {image && <img src={image} onLoad={() => setLoaded(true)} onError={() => setLoaded(true)} className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`} alt={`Question image ${index + 1}`} />}
-    {!loaded && image && <div className="absolute inset-0 flex items-center justify-center bg-black"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div></div>}
-  </div>
-);
+const ImageSquare = ({ index, image, loaded, onLoad }: { index: number; image?: string; loaded: boolean; onLoad: () => void }) => {
+  const positions = [
+    { left: "321px", top: "389px" },
+    { left: "496px", top: "389px" },
+    { left: "321px", top: "564px" },
+    { left: "496px", top: "564px" }
+  ];
+  return (
+    <div className="absolute box-border overflow-hidden" style={{ width: "165px", height: "165px", ...positions[index], border: "1px solid #FFFFFF" }}>
+      {image && <img src={image} onLoad={onLoad} onError={onLoad} className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`} alt={`Question image ${index + 1}`} />}
+      {!loaded && image && <div className="absolute inset-0 flex items-center justify-center bg-black"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div></div>}
+    </div>
+  );
+};
 
 const DayBox = ({ day, left, top, dayTop, statusTop, isCompleted }: { day: number; left: string; top: string; dayTop: string; statusTop: string; isCompleted?: boolean }) => (
   <>
@@ -23,6 +31,14 @@ const DayBox = ({ day, left, top, dayTop, statusTop, isCompleted }: { day: numbe
     <div className="absolute font-poppins font-medium text-black text-center" style={{ width: "105px", height: "24px", left: `${parseFloat(left) + 10}px`, top: statusTop, fontSize: "16px", lineHeight: "24px" }}>{isCompleted ? "Completed" : "In Progress"}</div>
   </>
 );
+
+const DAY_BOXES = [
+  { day: 1, left: "24.99px", top: "114px", dayTop: "139px", statusTop: "161px" },
+  { day: 2, left: "171.07px", top: "114px", dayTop: "139px", statusTop: "161px" },
+  { day: 3, left: "317.15px", top: "114px", dayTop: "139px", statusTop: "161px" },
+  { day: 4, left: "24.99px", top: "228px", dayTop: "253px", statusTop: "275px" },
+  { day: 5, left: "171.07px", top: "228px", dayTop: "253px", statusTop: "275px" }
+];
 
 function PlayPage() {
   const navigate = useNavigate();
@@ -39,25 +55,13 @@ function PlayPage() {
   
   const { displayDay, question, progress, cooldownSeconds, initialize, fetchQuestion, submitAnswer } = usePlay(currentUser);
 
-  // Calculate scale factors to fit content in viewport perfectly
   useEffect(() => {
     const updateScale = () => {
       if (window.innerWidth >= 1024) {
-        // Base design dimensions
-        const baseWidth = 1510; // Adjust this to control width stretching
-        const baseHeight = 900; // Keep this fixed - height is perfect
-        
-        // Available viewport dimensions (accounting for navbar ~64px)
-        const availableWidth = window.innerWidth;
-        const availableHeight = window.innerHeight - 64;
-        
-        // Calculate scale factors independently
-        const newScaleX = availableWidth / baseWidth;
-        const newScaleY = availableHeight / baseHeight;
-        
-        // Set independent scales - height stays perfect, width can stretch
-        setScaleX(Math.max(newScaleX, 0.7));
-        setScaleY(Math.max(newScaleY, 0.7));
+        const baseWidth = 1510;
+        const baseHeight = 900;
+        setScaleX(Math.max(window.innerWidth / baseWidth, 0.7));
+        setScaleY(Math.max((window.innerHeight - 64) / baseHeight, 0.7));
       } else {
         setScaleX(1);
         setScaleY(1);
@@ -115,10 +119,6 @@ function PlayPage() {
     }
   };
 
-  const updateSquareLoaded = (index: number) => {
-    setSquareImagesLoaded(prev => prev.map((val, i) => i === index ? true : val));
-  };
-
   return (
     <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="h-screen bg-transparent relative overflow-hidden" ref={containerRef}>
       <div 
@@ -155,7 +155,15 @@ function PlayPage() {
           </div>
           
           {/* Image Squares */}
-          {[0, 1, 2, 3].map(i => <ImageSquare key={i} index={i} image={question?.image} loaded={squareImagesLoaded[i]} setLoaded={() => updateSquareLoaded(i)} />)}
+          {[0, 1, 2, 3].map(i => (
+            <ImageSquare 
+              key={i} 
+              index={i} 
+              image={question?.image} 
+              loaded={squareImagesLoaded[i]} 
+              onLoad={() => setSquareImagesLoaded(prev => prev.map((val, idx) => idx === i ? true : val))} 
+            />
+          ))}
           
           {/* ANSWER Text */}
           <div className="absolute font-whirlyBirdie font-bold text-black text-center" style={{ width: "191px", height: "29px", left: "29px", top: "808px", fontSize: "24px", lineHeight: "29px" }}>ANSWER :</div>
@@ -195,11 +203,9 @@ function PlayPage() {
             <div className="absolute font-whirlyBirdie font-bold text-white text-center" style={{ width: "332px", height: "29px", left: "25px", top: "55px", fontSize: "24px", lineHeight: "29px" }}>Your progress</div>
             
             {/* Day Boxes */}
-            <DayBox day={1} left="24.99px" top="114px" dayTop="139px" statusTop="161px" isCompleted={progress?.progress[0]?.isCompleted} />
-            <DayBox day={2} left="171.07px" top="114px" dayTop="139px" statusTop="161px" isCompleted={progress?.progress[1]?.isCompleted} />
-            <DayBox day={3} left="317.15px" top="114px" dayTop="139px" statusTop="161px" isCompleted={progress?.progress[2]?.isCompleted} />
-            <DayBox day={4} left="24.99px" top="228px" dayTop="253px" statusTop="275px" isCompleted={progress?.progress[3]?.isCompleted} />
-            <DayBox day={5} left="171.07px" top="228px" dayTop="253px" statusTop="275px" isCompleted={progress?.progress[4]?.isCompleted} />
+            {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }, idx) => (
+              <DayBox key={day} day={day} left={left} top={top} dayTop={dayTop} statusTop={statusTop} isCompleted={progress?.progress[idx]?.isCompleted} />
+            ))}
             
             {/* Progress Bar */}
             <div className="absolute bg-white" style={{ width: "15px", height: "523px", left: "473.99px", top: "114px" }} />
