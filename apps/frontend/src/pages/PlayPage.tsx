@@ -99,7 +99,7 @@ function PlayPage() {
           </div>
           
           {/* Day X Of Y Text */}
-          <div className="absolute font-whirlyBirdie font-bold text-white text-center" style={{ width: "210px", height: "29px", left: "130.01px", top: "157px", fontSize: "24px", lineHeight: "29px" }}>
+          <div className="absolute font-whirlyBirdie font-bold text-white text-center" style={{ width: "210px", height: "29px", left: "130.01px", top: "157px", fontSize: "24px", lineHeight: "29px", whiteSpace: "nowrap" }}>
             Day {displayDay} Of {progress?.progress.length || 10}
           </div>
           
