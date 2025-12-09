@@ -120,9 +120,10 @@ function PlayPage() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="h-screen bg-transparent relative overflow-hidden" ref={containerRef}>
+    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="min-h-screen bg-transparent relative overflow-y-auto" ref={containerRef}>
+      {/* Desktop Layout */}
       <div 
-        className="font-orbitron absolute top-0 left-0" 
+        className="font-orbitron absolute top-0 left-0 hidden lg:block" 
         style={{ 
           transform: `scale(${scaleX}, ${scaleY})`, 
           transformOrigin: 'top left',
@@ -130,7 +131,6 @@ function PlayPage() {
           height: `${100 / scaleY}%`
         }}
       >
-        <div className="hidden lg:block">
           {/* Top Rectangle */}
           <div className="absolute bg-black" style={{ width: "1452px", height: "104px", left: "29.01px", top: "121px" }}>
             <button onClick={() => navigate(-1)} className="absolute flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity" style={{ left: "4.03%", top: "34.62%", width: "30px", height: "30px", background: "transparent", border: "none" }}>
@@ -210,45 +210,139 @@ function PlayPage() {
             {/* Progress Bar */}
             <div className="absolute bg-white" style={{ width: "15px", height: "523px", left: "473.99px", top: "114px" }} />
           </div>
+      </div>
+
+      {/* Mobile/Tablet Layout */}
+      <div className="lg:hidden px-4 py-6 space-y-6 pb-20">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between bg-black text-white p-4 rounded-lg">
+          <button onClick={() => navigate(-1)} className="flex items-center justify-center w-8 h-8">
+            <img src={leftArrow} alt="Back" className="w-full h-full object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+          </button>
+          <div className="font-whirlyBirdie font-bold text-lg whitespace-nowrap">
+            Day {displayDay} Of {progress?.progress.length || 10}
+          </div>
+          <button onClick={() => setIsOpen(true)} className="bg-transparent border border-white px-3 py-1.5 rounded text-sm hover:bg-gray-800 transition-colors">
+            Tutorial
+          </button>
         </div>
 
-        {/* Tutorial Popup */}
-        <AnimatePresence>
-          {isOpen && (
-            <motion.div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <motion.div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 font-sans" initial={{ scale: 0.8, opacity: 0, y: -50 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.8, opacity: 0, y: 50 }} transition={{ duration: 0.3, ease: "easeOut" }}>
-                <h2 className="text-2xl font-semibold text-center text-gray-900 mb-4 pb-3 border-b border-gray-200 tracking-tight">Tutorial</h2>
-                <div className="flex gap-4 justify-center mt-4">
-                  <img src={tutor1} alt="Tutorial 1" className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg" />
-                  <img src={tutor2} alt="Tutorial 2" className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg" />
-                </div>
-                <div className="mt-6 text-center">
-                  <p className="text-gray-700 leading-relaxed">France gifted the Statue of Liberty to the USA. <br />It was made of copper and over time it turned green due to chemical reactions.</p>
-                  <p className="mt-4 font-medium text-gray-900 text-lg">Answer: <span className="font-semibold">Statue of Liberty</span></p>
-                </div>
-                <div className="mt-5 flex justify-center">
-                  <button onClick={() => setIsOpen(false)} className="px-6 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium text-sm tracking-wide">Close</button>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Question Section */}
+        <div className="bg-black text-white p-4 rounded-lg">
+          <div className="font-whirlyBirdie font-bold text-lg mb-3">
+            {question?.question || "I hold two people inside me forever, but i'm not a home. What am i ?"}
+          </div>
+          <div className="w-full h-px bg-white my-3" />
+          
+          {/* Image Grid */}
+          <div className="grid grid-cols-2 gap-2 mt-4">
+            {[0, 1, 2, 3].map(i => (
+              <div key={i} className="relative aspect-square border border-white rounded overflow-hidden bg-black">
+                {question?.image && (
+                  <img 
+                    src={question?.image} 
+                    alt={`Question image ${i + 1}`}
+                    className={`w-full h-full object-cover transition-opacity duration-300 ${squareImagesLoaded[i] ? "opacity-100" : "opacity-0"}`}
+                    onLoad={() => setSquareImagesLoaded(prev => prev.map((val, idx) => idx === i ? true : val))}
+                    onError={() => setSquareImagesLoaded(prev => prev.map((val, idx) => idx === i ? true : val))}
+                  />
+                )}
+                {!squareImagesLoaded[i] && question?.image && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {/* Final Congratulations Popup */}
-        <AnimatePresence>
-          {showFinalCongrats && (
-            <motion.div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              <motion.div className="rounded-2xl p-6 max-w-md w-full mx-4 text-center bg-white/10 border border-white/20 backdrop-blur-xl shadow-xl" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.3 }}>
-                <h2 className="text-2xl font-semibold text-white mb-4 tracking-wide">🎉 Congratulations! 🎉</h2>
-                <p className="text-gray-200 leading-relaxed">You've completed all available challenges!<br />Absolute legend energy.</p>
-                <div className="mt-6">
-                  <button onClick={() => setShowFinalCongrats(false)} className="px-6 py-2.5 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors border border-white/30">Awesome!</button>
-                </div>
-              </motion.div>
-            </motion.div>
+        {/* Answer Section */}
+        <div className="space-y-3">
+          <div className="font-whirlyBirdie font-bold text-black text-lg">ANSWER :</div>
+          <div className="relative">
+            <Input 
+              id="answer-input-mobile" 
+              placeholder="Enter Your Answer" 
+              value={answer} 
+              onChange={(e: any) => setAnswer(e.target.value)} 
+              disabled={cooldownSeconds > 0 || submitting} 
+              onKeyDown={(e: any) => e.key === 'Enter' && handleSubmit()} 
+              className="w-full h-12 text-base" 
+            />
+          </div>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={submitting || cooldownSeconds > 0} 
+            className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base"
+          >
+            {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+          </Button>
+          {message && (
+            <div 
+              className={`font-poppins text-sm font-medium p-3 rounded ${
+                message.includes('Correct') || message.includes('Success') || message.includes('🎉') 
+                  ? "bg-green-100 text-green-700" 
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {message}
+            </div>
           )}
-        </AnimatePresence>
+        </div>
+
+        {/* Progress Section */}
+        <div className="bg-black text-white p-4 rounded-lg">
+          <div className="font-whirlyBirdie font-bold text-lg mb-4 text-center">Your progress</div>
+          <div className="grid grid-cols-3 gap-3">
+            {DAY_BOXES.map(({ day }, idx) => (
+              <div key={day} className="bg-white rounded p-3 text-center">
+                <div className="font-whirlyBirdie font-bold text-black text-sm mb-1 whitespace-nowrap">day {day}</div>
+                <div className="font-poppins font-medium text-black text-xs">
+                  {progress?.progress[idx]?.isCompleted ? "Completed" : "In Progress"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Tutorial Popup */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 font-sans" initial={{ scale: 0.8, opacity: 0, y: -50 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.8, opacity: 0, y: 50 }} transition={{ duration: 0.3, ease: "easeOut" }}>
+              <h2 className="text-2xl font-semibold text-center text-gray-900 mb-4 pb-3 border-b border-gray-200 tracking-tight">Tutorial</h2>
+              <div className="flex gap-4 justify-center mt-4">
+                <img src={tutor1} alt="Tutorial 1" className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg" />
+                <img src={tutor2} alt="Tutorial 2" className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg" />
+              </div>
+              <div className="mt-6 text-center">
+                <p className="text-gray-700 leading-relaxed">France gifted the Statue of Liberty to the USA. <br />It was made of copper and over time it turned green due to chemical reactions.</p>
+                <p className="mt-4 font-medium text-gray-900 text-lg">Answer: <span className="font-semibold">Statue of Liberty</span></p>
+              </div>
+              <div className="mt-5 flex justify-center">
+                <button onClick={() => setIsOpen(false)} className="px-6 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium text-sm tracking-wide">Close</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Final Congratulations Popup */}
+      <AnimatePresence>
+        {showFinalCongrats && (
+          <motion.div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="rounded-2xl p-6 max-w-md w-full mx-4 text-center bg-white/10 border border-white/20 backdrop-blur-xl shadow-xl" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.3 }}>
+              <h2 className="text-2xl font-semibold text-white mb-4 tracking-wide">🎉 Congratulations! 🎉</h2>
+              <p className="text-gray-200 leading-relaxed">You've completed all available challenges!<br />Absolute legend energy.</p>
+              <div className="mt-6">
+                <button onClick={() => setShowFinalCongrats(false)} className="px-6 py-2.5 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors border border-white/30">Awesome!</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
