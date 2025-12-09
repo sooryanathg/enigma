@@ -1,48 +1,106 @@
-import { useEffect, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { getCurrentDay } from '../services/firestoreService';
 import { usePlay } from '../hooks/usePlay';
-import ProgressGrid from '../components/play/ProgressGrid';
 import { Input } from '@/components/ui/input';
-import DayProgress from '@/components/play/DayProgress';
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from "framer-motion";
-
 import tutor1 from '@/assets/tutor1.jpeg';
 import tutor2 from '@/assets/tutor2.jpeg';
-import QuestionImage from '@/components/ui/questionImage';
+import leftArrow from '@/assets/left-arrow.svg';
+import { calculateGridLayout, ImageSquare } from '@/components/play/ImageGrid';
+
+const DayBox = ({ day, left, top, dayTop, statusTop, isCompleted }: { day: number; left: string; top: string; dayTop: string; statusTop: string; isCompleted?: boolean }) => (
+  <>
+    <div className="absolute bg-white" style={{ width: "126.08px", height: "94px", left, top }} />
+    <div className="absolute font-whirlyBirdie font-bold text-black text-center" style={{ width: "89px", height: "24px", left: `${parseFloat(left) + 18}px`, top: dayTop, fontSize: "20px", lineHeight: "24px", whiteSpace: "nowrap" }}>day {day}</div>
+    <div className="absolute font-poppins font-medium text-black text-center" style={{ width: "105px", height: "24px", left: `${parseFloat(left) + 10}px`, top: statusTop, fontSize: "16px", lineHeight: "24px" }}>{isCompleted ? "Completed" : "In Progress"}</div>
+  </>
+);
+
+const DAY_BOXES = [
+  { day: 1, left: "24.99px", top: "114px", dayTop: "139px", statusTop: "161px" },
+  { day: 2, left: "171.07px", top: "114px", dayTop: "139px", statusTop: "161px" },
+  { day: 3, left: "317.15px", top: "114px", dayTop: "139px", statusTop: "161px" },
+  { day: 4, left: "24.99px", top: "228px", dayTop: "253px", statusTop: "275px" },
+  { day: 5, left: "171.07px", top: "228px", dayTop: "253px", statusTop: "275px" }
+];
 
 function PlayPage() {
+  const navigate = useNavigate();
   const [answer, setAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const { currentUser } = useAuth();
   const [message, setMessage] = useState<string | null>(null);
-  const {
-    displayDay,
-    question,
-    progress,
-    cooldownSeconds,
-    initialize,
-    fetchQuestion,
-    submitAnswer,
-  } = usePlay(currentUser);
-
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const [showFinalCongrats, setShowFinalCongrats] = useState(false);
+  const [squareImagesLoaded, setSquareImagesLoaded] = useState<boolean[]>([]);
+  const [scaleX, setScaleX] = useState(1);
+  const [scaleY, setScaleY] = useState(1);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  const { displayDay, question, progress, cooldownSeconds, initialize, fetchQuestion, submitAnswer } = usePlay(currentUser);
 
   useEffect(() => {
-    setImageLoaded(false);
-  }, [question?.image]);
+    const updateScale = () => {
+      if (window.innerWidth >= 1024) {
+        const baseWidth = 1510;
+        const baseHeight = 900;
+        setScaleX(Math.max(window.innerWidth / baseWidth, 0.7));
+        setScaleY(Math.max((window.innerHeight - 64) / baseHeight, 0.7));
+      } else {
+        setScaleX(1);
+        setScaleY(1);
+      }
+    };
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, []);
+
+  // Get actual images array from question
+  const getQuestionImages = (): string[] => {
+    if (!question?.image) return [];
+    if (Array.isArray(question.image)) {
+      return question.image;
+    }
+    // If string, return as single element array (backward compatibility)
+    return [question.image];
+  };
+
+  const questionImages = getQuestionImages();
+  
+  // Calculate grid layout for desktop
+  const desktopImageLayout = calculateGridLayout(
+    questionImages.length,
+    918.03, // container width
+    414.5,  // available height (528 - 113.5 for question area)
+    362.5,  // start top (after divider line)
+    29      // start left (container left)
+  );
+
+  useEffect(() => {
+    // Reset loaded state when images change
+    setSquareImagesLoaded(new Array(questionImages.length).fill(false));
+  }, [questionImages.length]);
 
   useEffect(() => {
     if (currentUser) initialize();
   }, [currentUser, initialize]);
 
-  const handleSelectDay = useCallback(async (day: number) => {
-    const currentDay = getCurrentDay();
-    if (day > await currentDay) return;
-    await fetchQuestion(day);
-  }, [fetchQuestion]);
+  useEffect(() => {
+    if (question?.isCompleted && displayDay === progress?.progress.length) {
+      setShowFinalCongrats(true);
+    }
+  }, [question, displayDay, progress]);
+
+  // Auto-clear success messages after 5 seconds
+  useEffect(() => {
+    if (message && (message.includes('Correct') || message.includes('Success') || message.includes('🎉'))) {
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
 
   const handleSubmit = async () => {
     if (!answer.trim()) {
@@ -57,216 +115,276 @@ function PlayPage() {
         setMessage(res.message || (res.data && res.data.result) || 'Submission failed');
       } else {
         setMessage(res.data?.result || 'Submitted');
-        setAnswer('');
-
-        await fetchQuestion(displayDay);
+        if (res.data?.correct) {
+          setAnswer('');
+          await fetchQuestion(displayDay);
+        }
       }
+    } catch (error) {
+      setMessage('Error submitting answer');
     } finally {
       setSubmitting(false);
     }
   };
-  const [isOpen, setIsOpen] = useState(false);
-  const [showFinalCongrats, setShowFinalCongrats] = useState(false);
-  useEffect(() => {
-    if (question?.isCompleted && displayDay === progress?.progress.length) {
-      setShowFinalCongrats(true);
-    }
-  }, [question, displayDay, progress]);
-
-
-
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="min-h-screen bg-transparent pt-14">
-      <div className="container mx-auto px-4 md:px-6 pt-20 font-orbitron">
+    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="min-h-screen bg-transparent relative overflow-y-auto" ref={containerRef}>
+      {/* Desktop Layout */}
+      <div 
+        className="font-orbitron absolute top-0 left-0 hidden lg:block" 
+        style={{ 
+          transform: `scale(${scaleX}, ${scaleY})`, 
+          transformOrigin: 'top left',
+          width: `${100 / scaleX}%`,
+          height: `${100 / scaleY}%`
+        }}
+      >
+          {/* Top Rectangle */}
+          <div className="absolute bg-black" style={{ width: "1452px", height: "104px", left: "29.01px", top: "121px" }}>
+            <button onClick={() => navigate(-1)} className="absolute flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity" style={{ left: "4.03%", top: "34.62%", width: "30px", height: "30px", background: "transparent", border: "none" }}>
+              <img src={leftArrow} alt="Left arrow" className="w-full h-full object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+            </button>
+          </div>
+          
+          {/* Day X Of Y Text */}
+          <div className="absolute font-whirlyBirdie font-bold text-white text-center" style={{ width: "210px", height: "29px", left: "130.01px", top: "157px", fontSize: "24px", lineHeight: "29px", whiteSpace: "nowrap" }}>
+            Day {displayDay} Of {progress?.progress.length || 10}
+          </div>
+          
+          {/* Tutorial Button */}
+          <button onClick={() => setIsOpen(true)} className="absolute bg-black text-white border border-white px-4 py-2 rounded hover:bg-gray-800 transition-colors" style={{ width: "138px", height: "45px", left: "1321px", top: "150px" }}>Tutorial</button>
+          
+          {/* Left Rectangle */}
+          <div className="absolute bg-black border border-black" style={{ width: "918.03px", height: "528px", left: "29px", top: "249px" }}>
+            <div className="absolute font-whirlyBirdie font-bold text-white" style={{ width: "733px", height: "60px", left: "calc(50% - 733px/2 - 50px)", top: "0px", paddingTop: "20px", fontSize: "20px", lineHeight: "30px" }}>
+              {question?.question || "I hold two people inside me forever, but i'm not a home. What am i ?"}
+            </div>
+            <div className="absolute" style={{ width: "918.03px", height: "0px", left: "0px", top: "113.5px", border: "1px solid #FFFFFF" }} />
+          </div>
+          
+          {/* Image Squares - Dynamic Grid */}
+          {questionImages.map((image, i) => (
+            desktopImageLayout[i] && (
+              <ImageSquare 
+                key={i} 
+                index={i} 
+                position={desktopImageLayout[i]}
+                image={image} 
+                loaded={squareImagesLoaded[i] || false} 
+                onLoad={() => setSquareImagesLoaded(prev => {
+                  const newState = [...prev];
+                  newState[i] = true;
+                  return newState;
+                })} 
+              />
+            )
+          ))}
+          
+          {/* ANSWER Text */}
+          <div className="absolute font-whirlyBirdie font-bold text-black text-center" style={{ width: "191px", height: "29px", left: "29px", top: "808px", fontSize: "24px", lineHeight: "29px" }}>ANSWER :</div>
+          
+          {/* Answer Input */}
+          <div className="absolute" style={{ width: "701px", height: "73px", left: "29.01px", top: "851px" }}>
+            <Input id="answer-input" placeholder="" value={answer} onChange={(e: any) => setAnswer(e.target.value)} disabled={cooldownSeconds > 0 || submitting} onKeyDown={(e: any) => e.key === 'Enter' && handleSubmit()} className="w-full h-full" />
+          </div>
+          
+          {/* Placeholder Text */}
+          {!answer && <div className="absolute pointer-events-none font-poppins font-medium" style={{ width: "218px", height: "36px", left: "60px", top: "872px", fontSize: "24px", lineHeight: "36px", color: "#6B6B6B" }}>Enter Your Answer</div>}
+          
+          {/* Submit Button */}
+          <div className="absolute" style={{ width: "216px", height: "73px", left: "731px", top: "851px" }}>
+            <Button onClick={handleSubmit} disabled={submitting || cooldownSeconds > 0} className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center" style={{ fontSize: "24px", lineHeight: "29px" }}>
+              {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+            </Button>
+          </div>
+          
+          {/* Message Display */}
+          {message && (
+            <div 
+              className="absolute font-poppins text-base font-medium" 
+              style={{ 
+                left: "29px", 
+                top: "940px", 
+                color: message.includes('Correct') || message.includes('Success') || message.includes('🎉') ? "#10b981" : "#ef4444",
+                maxWidth: "900px"
+              }}
+            >
+              {message}
+            </div>
+          )}
+          
+          {/* Right Rectangle */}
+          <div className="absolute bg-black" style={{ width: "514px", height: "675px", left: "968.02px", top: "249px" }}>
+            <div className="absolute font-whirlyBirdie font-bold text-white text-center" style={{ width: "332px", height: "29px", left: "25px", top: "55px", fontSize: "24px", lineHeight: "29px" }}>Your progress</div>
+            
+            {/* Day Boxes */}
+            {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }, idx) => (
+              <DayBox key={day} day={day} left={left} top={top} dayTop={dayTop} statusTop={statusTop} isCompleted={progress?.progress[idx]?.isCompleted} />
+            ))}
+            
+            {/* Progress Bar */}
+            <div className="absolute bg-white" style={{ width: "15px", height: "523px", left: "473.99px", top: "114px" }} />
+          </div>
+      </div>
 
-        <div className="space-y-6">
-          <DayProgress day={displayDay} totalDays={progress?.progress.length} setIsOpen={setIsOpen} />
-          <div className='flex flex-col lg:flex-row lg:items-start lg:justify-center gap-8 w-full flex-grow min-h-0'>
+      {/* Mobile/Tablet Layout */}
+      <div className="lg:hidden px-4 py-6 space-y-6 pb-20">
+        {/* Top Bar */}
+        <div className="flex items-center justify-between bg-black text-white p-4 rounded-lg">
+          <button onClick={() => navigate(-1)} className="flex items-center justify-center w-8 h-8">
+            <img src={leftArrow} alt="Back" className="w-full h-full object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+          </button>
+          <div className="font-whirlyBirdie font-bold text-lg whitespace-nowrap">
+            Day {displayDay} Of {progress?.progress.length || 10}
+          </div>
+          <button onClick={() => setIsOpen(true)} className="bg-transparent border border-white px-3 py-1.5 rounded text-sm hover:bg-gray-800 transition-colors">
+            Tutorial
+          </button>
+        </div>
 
-            <div className='flex flex-col lg:flex-row gap-6 lg:w-[70%] items-center justify-between flex-shrink-0 mx-auto'>
-              {/*Image area*/}
-              <div className="relative w-[250px] h-[250px] md:w-[380px] md:h-[380px]
-                              bg-black rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-
-                {/* Spinner while image loads */}
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {/* Spinner / Placeholder */}
-                  {!imageLoaded && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center bg-black rounded-lg">
-                      {question?.image ? (
-                        <>
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                          <p className="text-gray-300 mt-2">Loading image...</p>
-                        </>
-                      ) : (
-                        <p className="text-gray-400">No image available for this question</p>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Actual Image */}
-                  <QuestionImage
-                    src={question?.image}
-                    imageLoaded={imageLoaded}
-                    setImageLoaded={setImageLoaded}
+        {/* Question Section */}
+        <div className="bg-black text-white p-4 rounded-lg">
+          <div className="font-whirlyBirdie font-bold text-lg mb-3">
+            {question?.question || "I hold two people inside me forever, but i'm not a home. What am i ?"}
+          </div>
+          <div className="w-full h-px bg-white my-3" />
+          
+          {/* Image Grid - Dynamic */}
+          <div 
+            className="mt-4"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: questionImages.length === 1 
+                ? '1fr' 
+                : questionImages.length === 2 
+                  ? 'repeat(2, 1fr)' 
+                  : questionImages.length === 3
+                    ? 'repeat(2, 1fr)'
+                    : questionImages.length <= 4
+                      ? 'repeat(2, 1fr)'
+                      : 'repeat(3, 1fr)',
+              gap: '8px'
+            }}
+          >
+            {questionImages.map((image, i) => (
+              <div 
+                key={i} 
+                className="relative aspect-square border border-white rounded overflow-hidden bg-black"
+                style={questionImages.length === 1 ? { maxWidth: '300px', margin: '0 auto' } : {}}
+              >
+                {image && (
+                  <img 
+                    src={image} 
+                    alt={`Question image ${i + 1}`}
+                    className={`w-full h-full object-cover transition-opacity duration-300 ${squareImagesLoaded[i] ? "opacity-100" : "opacity-0"}`}
+                    onLoad={() => setSquareImagesLoaded(prev => {
+                      const newState = [...prev];
+                      newState[i] = true;
+                      return newState;
+                    })}
+                    onError={() => setSquareImagesLoaded(prev => {
+                      const newState = [...prev];
+                      newState[i] = true;
+                      return newState;
+                    })}
                   />
-                </div>
-              </div>
-
-              {/*Answer Area*/}
-              <div className='flex flex-col lg:w-[50%] max-w-[500px] justify-center items-center text-center lg:text-left'>
-                {question?.isCompleted ? (
-                  <div >
-                    <div>{question?.question}</div>
-                    <div className='text-center py-6'>
-                      <div className="text-4xl">🎉</div>
-                      <div className="mt-2">You've completed this question.</div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className='flex flex-col gap-12 p-1 md:p-0'>
-                    <div>{question?.question}</div>
-                    <div className='flex flex-col gap-2 '>
-
-                      <div className='md:text-3xl text-xl'>Answer :</div>
-                      <Input
-                        id="answer-input"
-                        placeholder="Enter answer"
-                        value={answer}
-                        onChange={(e: any) => setAnswer(e.target.value)}
-                        disabled={cooldownSeconds > 0 || submitting}
-                        onKeyDown={(e: any) => e.key === 'Enter' && handleSubmit()}
-                      />
-                      <div className="mt-3 flex gap-2">
-                        <Button onClick={handleSubmit} disabled={submitting || cooldownSeconds > 0} className="flex-1">
-                          {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'Submit'}
-                        </Button>
-                      </div>
-                      {message && <div className="mt-3 text-sm text-muted-foreground">{message}</div>}
-
-                    </div>
+                )}
+                {!squareImagesLoaded[i] && image && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                   </div>
                 )}
               </div>
-            </div>
-
-            <div className="lg:w-[30%] w-full flex flex-col min-h-0">
-              <ProgressGrid
-                days={progress?.progress as any}
-                displayDay={displayDay}
-                onSelectDay={(d) => handleSelectDay(d)}
-              />
-            </div>
-
-
+            ))}
           </div>
-
-          {/* Popup */}
-          <AnimatePresence>
-            {isOpen && (
-              <motion.div
-                className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <motion.div
-                  className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 font-sans"
-                  initial={{ scale: 0.8, opacity: 0, y: -50 }}
-                  animate={{ scale: 1, opacity: 1, y: 0 }}
-                  exit={{ scale: 0.8, opacity: 0, y: 50 }}
-                  transition={{ duration: 0.3, ease: "easeOut" }}
-                >
-                  {/* Tutorial heading with underline */}
-                  <h2 className="text-2xl font-semibold text-center text-gray-900 mb-4 pb-3 border-b border-gray-200 tracking-tight">Tutorial</h2>
-
-                  {/* Two images in one row */}
-                  <div className="flex gap-4 justify-center mt-4">
-                    <img
-                      src={tutor1}
-                      alt="Dummy"
-                      className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg"
-                    />
-                    <img
-                      src={tutor2}
-                      alt="Dummy1"
-                      className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg"
-                    />
-                  </div>
-
-                  {/* Content */}
-                  <div className="mt-6 text-center">
-                    <p className="text-gray-700 leading-relaxed">
-                      France gifted the Statue of Liberty to the USA. <br />
-                      It was made of copper and over time it turned green due to chemical reactions.
-                    </p>
-                    <p className="mt-4 font-medium text-gray-900 text-lg">
-                      Answer: <span className="font-semibold">Statue of Liberty</span>
-                    </p>
-                  </div>
-
-                  {/* Close button */}
-                  <div className="mt-5 flex justify-center">
-                    <button
-                      onClick={() => setIsOpen(false)}
-                      className="px-6 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium text-sm tracking-wide"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
-        <AnimatePresence>
-  {showFinalCongrats && (
-    <motion.div
-      className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        className="rounded-2xl p-6 max-w-md w-full mx-4 text-center 
-                   bg-white/10 border border-white/20 backdrop-blur-xl shadow-xl"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.8, opacity: 0 }}
-        transition={{ duration: 0.3 }}
-      >
-        <h2 className="text-2xl font-semibold text-white mb-4 tracking-wide">
-          🎉 Congratulations! 🎉
-        </h2>
-
-        <p className="text-gray-200 leading-relaxed">
-          You’ve completed all available challenges!<br />
-          Absolute legend energy.
-        </p>
-
-        <div className="mt-6">
-          <button
-            onClick={() => setShowFinalCongrats(false)}
-            className="px-6 py-2.5 rounded-lg bg-white/20 text-white 
-                       hover:bg-white/30 transition-colors border border-white/30"
+        {/* Answer Section */}
+        <div className="space-y-3">
+          <div className="font-whirlyBirdie font-bold text-black text-lg">ANSWER :</div>
+          <div className="relative">
+            <Input 
+              id="answer-input-mobile" 
+              placeholder="Enter Your Answer" 
+              value={answer} 
+              onChange={(e: any) => setAnswer(e.target.value)} 
+              disabled={cooldownSeconds > 0 || submitting} 
+              onKeyDown={(e: any) => e.key === 'Enter' && handleSubmit()} 
+              className="w-full h-12 text-base" 
+            />
+          </div>
+          <Button 
+            onClick={handleSubmit} 
+            disabled={submitting || cooldownSeconds > 0} 
+            className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base"
           >
-            Awesome!
-          </button>
+            {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+          </Button>
+          {message && (
+            <div 
+              className={`font-poppins text-sm font-medium p-3 rounded ${
+                message.includes('Correct') || message.includes('Success') || message.includes('🎉') 
+                  ? "bg-green-100 text-green-700" 
+                  : "bg-red-100 text-red-700"
+              }`}
+            >
+              {message}
+            </div>
+          )}
         </div>
-      </motion.div>
-    </motion.div>
-  )}
-</AnimatePresence>
 
-
-
+        {/* Progress Section */}
+        <div className="bg-black text-white p-4 rounded-lg">
+          <div className="font-whirlyBirdie font-bold text-lg mb-4 text-center">Your progress</div>
+          <div className="grid grid-cols-3 gap-3">
+            {DAY_BOXES.map(({ day }, idx) => (
+              <div key={day} className="bg-white rounded p-3 text-center">
+                <div className="font-whirlyBirdie font-bold text-black text-sm mb-1 whitespace-nowrap">day {day}</div>
+                <div className="font-poppins font-medium text-black text-xs">
+                  {progress?.progress[idx]?.isCompleted ? "Completed" : "In Progress"}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
+
+      {/* Tutorial Popup */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 font-sans" initial={{ scale: 0.8, opacity: 0, y: -50 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.8, opacity: 0, y: 50 }} transition={{ duration: 0.3, ease: "easeOut" }}>
+              <h2 className="text-2xl font-semibold text-center text-gray-900 mb-4 pb-3 border-b border-gray-200 tracking-tight">Tutorial</h2>
+              <div className="flex gap-4 justify-center mt-4">
+                <img src={tutor1} alt="Tutorial 1" className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg" />
+                <img src={tutor2} alt="Tutorial 2" className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg" />
+              </div>
+              <div className="mt-6 text-center">
+                <p className="text-gray-700 leading-relaxed">France gifted the Statue of Liberty to the USA. <br />It was made of copper and over time it turned green due to chemical reactions.</p>
+                <p className="mt-4 font-medium text-gray-900 text-lg">Answer: <span className="font-semibold">Statue of Liberty</span></p>
+              </div>
+              <div className="mt-5 flex justify-center">
+                <button onClick={() => setIsOpen(false)} className="px-6 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium text-sm tracking-wide">Close</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Final Congratulations Popup */}
+      <AnimatePresence>
+        {showFinalCongrats && (
+          <motion.div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div className="rounded-2xl p-6 max-w-md w-full mx-4 text-center bg-white/10 border border-white/20 backdrop-blur-xl shadow-xl" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ duration: 0.3 }}>
+              <h2 className="text-2xl font-semibold text-white mb-4 tracking-wide">🎉 Congratulations! 🎉</h2>
+              <p className="text-gray-200 leading-relaxed">You've completed all available challenges!<br />Absolute legend energy.</p>
+              <div className="mt-6">
+                <button onClick={() => setShowFinalCongrats(false)} className="px-6 py-2.5 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-colors border border-white/30">Awesome!</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

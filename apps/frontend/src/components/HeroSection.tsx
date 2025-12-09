@@ -36,7 +36,7 @@ const tilesContainerVariants = {
 
 const tileVariants = {
   hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: "easeOut" } }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.9, ease: "easeOut" as const } }
 };
 
 const HowItWorksSection = () => {
@@ -262,7 +262,10 @@ const HeroSection = () => {
                 mass: 0.4
               }}
             />
-            <div className="pointer-events-none absolute inset-0 z-10">
+            <div
+              className="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
+              style={{ clipPath: "inset(40px 0 0 0)" }} // hide tiles behind the 64px navbar
+            >
               {tiles.map((tile) => (
                 <ParallaxTile
                   key={tile.id}
