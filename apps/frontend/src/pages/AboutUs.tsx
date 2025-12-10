@@ -218,7 +218,7 @@ const AboutUs = () => {
         </div>
       </div>
       <div className="xl:hidden bg-[var(--page-bg,#f6efe6)] min-h-screen pt-10">
-        <div className="w-full max-w-[100%] xs:max-w-[95%] sm:max-w-[90%] md:max-w-[85%] lg:max-w-[900px] mx-auto px-0 xs:px-2 sm:px-0">
+        <div className="w-full">
           <MobileSection 
             content={CONTENT.enigma} 
             CircularTextComponent={CircularTextEnigma} 
