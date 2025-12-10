@@ -317,8 +317,8 @@ function PlayPage() {
           {message && (
             <div
               className={`font-poppins text-sm font-medium p-3 rounded ${message.includes('Correct') || message.includes('Success') || message.includes('🎉')
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
                 }`}
             >
               {message}
@@ -345,19 +345,53 @@ function PlayPage() {
       {/* Tutorial Popup */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full mx-4 font-sans" initial={{ scale: 0.8, opacity: 0, y: -50 }} animate={{ scale: 1, opacity: 1, y: 0 }} exit={{ scale: 0.8, opacity: 0, y: 50 }} transition={{ duration: 0.3, ease: "easeOut" }}>
-              <h2 className="text-2xl font-semibold text-center text-gray-900 mb-4 pb-3 border-b border-gray-200 tracking-tight">Tutorial</h2>
-              <div className="flex gap-4 justify-center mt-4">
-                <img src={tutor1} alt="Tutorial 1" className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg" />
-                <img src={tutor2} alt="Tutorial 2" className="w-[128px] h-[128px] md:w-[156px] md:h-[156px] object-cover rounded-lg" />
+          <motion.div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div
+              className="bg-black border border-white w-full max-w-[340px] md:max-w-[600px] shadow-2xl"
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              {/* Header Grid */}
+              <div className="grid grid-cols-[1fr_2fr_1fr] h-[60px] md:h-[80px] border-b border-white">
+                <div className="border-r border-white"></div>
+                <div className="flex items-center justify-center font-orbitron font-bold text-white text-xl md:text-3xl tracking-wider">
+                  TUTORIAL
+                </div>
+                <div className="border-l border-white"></div>
               </div>
-              <div className="mt-6 text-center">
-                <p className="text-gray-700 leading-relaxed">France gifted the Statue of Liberty to the USA. <br />It was made of copper and over time it turned green due to chemical reactions.</p>
-                <p className="mt-4 font-medium text-gray-900 text-lg">Answer: <span className="font-semibold">Statue of Liberty</span></p>
-              </div>
-              <div className="mt-5 flex justify-center">
-                <button onClick={() => setIsOpen(false)} className="px-6 py-2.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200 font-medium text-sm tracking-wide">Close</button>
+
+              {/* Content */}
+              <div className="p-4 md:p-8 flex flex-col items-center space-y-4 md:space-y-8">
+                {/* Images */}
+                <div className="flex gap-3 md:gap-6 w-full justify-center">
+                  <div className="border border-white w-[130px] h-[130px] md:w-[200px] md:h-[200px] p-1.5 md:p-2">
+                    <img src={tutor1} alt="Tutorial 1" className="w-full h-full object-cover" />
+                  </div>
+                  <div className="border border-white w-[130px] h-[130px] md:w-[200px] md:h-[200px] p-1.5 md:p-2">
+                    <img src={tutor2} alt="Tutorial 2" className="w-full h-full object-cover" />
+                  </div>
+                </div>
+
+                {/* Text Content */}
+                <div className="text-center font-orbitron text-white text-[10px] md:text-base leading-relaxed uppercase max-w-md tracking-wide">
+                  France gifted the Statue of Liberty to the USA. <br />
+                  It was made of copper and over time it turned green due to chemical reactions.
+                </div>
+
+                {/* Answer */}
+                <div className="font-orbitron font-bold text-white text-sm md:text-xl tracking-wider">
+                  ANSWER : STATUE OF LIBERTY
+                </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setIsOpen(false)}
+                  className="font-orbitron text-white border border-white px-8 py-2 md:px-12 md:py-3 text-sm md:text-lg hover:bg-white hover:text-black transition-colors duration-300 uppercase tracking-widest"
+                >
+                  close
+                </button>
               </div>
             </motion.div>
           </motion.div>
