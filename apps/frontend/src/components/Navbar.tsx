@@ -140,7 +140,8 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 z-50 border-b border-black transition-transform duration-300",
-        hasCustomScroll ? "bg-[var(--page-bg,#f6efe6)]" : "bg-transparent",
+        // force consistent navbar background
+        "bg-[#FFF2E4]",
         visible ? "translate-y-0" : "-translate-y-full",
         className
       )}
@@ -224,7 +225,7 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
 
         <div
           className={cn(
-            "fixed inset-y-0 left-0 w-full bg-white shadow-xl transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto pt-6",
+            "fixed inset-y-0 left-0 w-full bg-[#FFF2E4] shadow-xl transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto pt-6",
             open ? "translate-x-0" : "-translate-x-full"
           )}
           role="dialog"
