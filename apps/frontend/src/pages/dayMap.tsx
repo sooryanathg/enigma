@@ -25,6 +25,11 @@ const DayMap = () => {
     );
   };
 
+  const isDayAccessible = (day: number) =>
+    progress?.progress &&
+    progress.progress.length >= day &&
+    (day === 1 || progress.progress[day - 2]?.isCompleted === true);
+
   const rows = generateMap(progress?.progress.length || 0);
 
   return (
@@ -57,12 +62,15 @@ const DayMap = () => {
                     <DayTile
                       day={cell.day!}
                       isComplete={isDayComplete(cell.day!)}
+                      isDayAccessible={isDayAccessible(cell.day!)}
                     />
                   ) : cell.type === "arrow" ? (
                     <ArrowTile
                       cellIndex={cellIndex}
                       isDayComplete={isDayComplete}
                       row={row}
+                      allRows={rows}
+                      rowIndex={rowIndex}
                     />
                   ) : (
                     <div className="w-full h-full bg-transparent"></div>

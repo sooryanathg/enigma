@@ -90,6 +90,17 @@ function AppRouter() {
           ),
         },
 
+        {
+          path: "/play/:day",
+          element: (
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <PlayPage />
+              </Suspense>
+            </ProtectedRoute>
+          ),
+        },
+
         // LEADERBOARD (Protected)
         {
           path: "/leaderboard",
