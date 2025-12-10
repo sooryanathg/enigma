@@ -5,11 +5,15 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import "./page.css";
 import { ArrowTile } from "@/components/progressMap/arrowTile";
+import { useEffect } from "react";
 
 const PlayMap = () => {
   const { currentUser } = useAuth();
   const { progress, fetchProgress } = usePlay(currentUser);
-  fetchProgress(true);
+
+  useEffect(() => {
+    fetchProgress(true);
+  }, []);
 
   const isDayComplete = (day: number): boolean => {
     return (
