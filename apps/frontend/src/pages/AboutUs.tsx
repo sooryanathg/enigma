@@ -78,7 +78,7 @@ const DesktopSection = ({ content, top, CircularTextComponent, logoSize }: Deskt
     <TextBlock className="absolute w-[50%] max-w-[729px] top-[42%] left-[1.5%]">{content.paragraphs[0]}</TextBlock>
     <TextBlock className="absolute w-[39%] max-w-[567px] top-[64%] left-[1.5%]">{content.paragraphs[1]}</TextBlock>
     {content.cta && <TextBlock className="absolute w-[18%] max-w-[258px] top-[84%] left-[1.5%] text-xl 2xl:text-[30px] font-semibold leading-tight 2xl:leading-[34px]">{content.cta}</TextBlock>}
-    <p className="absolute w-[34%] max-w-[489px] top-[75%] left-[55%] font-whirly text-4xl xl:text-6xl 2xl:text-[80px] font-bold leading-tight xl:leading-[80px] tracking-[-0.02em] text-center text-white antialiased">{content.title}</p>
+    <p className="absolute w-[34%] max-w-[489px] top-[75%] left-[55%] font-whirlyBirdie text-4xl xl:text-6xl 2xl:text-[80px] font-bold leading-tight xl:leading-[80px] tracking-[-0.02em] text-center text-white antialiased">{content.title}</p>
     <div className="absolute w-[45%] max-w-[650px] h-[60%] max-h-[486px] top-0 left-[55%] mix-blend-screen overflow-hidden">
       <VideoPlayer src={content.videoSrc} staticImageSrc={content.staticImageSrc} staticImageAlt={content.staticImageAlt} className="w-full h-full" />
     </div>
@@ -98,7 +98,7 @@ const MobileSection = ({ content, CircularTextComponent, showVerticalTitle = fal
         <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-5 w-full sm:w-auto">
           <div className="flex-1 text-[11px] xs:text-xs sm:text-sm md:text-base leading-relaxed"><p>{content.intro}</p></div>
           <div className="flex flex-row sm:flex-col items-center justify-center gap-0.5 sm:gap-1 md:gap-0 mx-auto sm:mx-0">
-            {content.title.split("").map((char) => <span key={char} className="font-whirly text-base sm:text-lg md:text-xl lg:text-2xl leading-tight tracking-[0.15em] sm:tracking-[0.2em]">{char}</span>)}
+            {content.title.split("").map((char) => <span key={char} className="font-whirlyBirdie text-base sm:text-lg md:text-xl lg:text-2xl leading-tight tracking-[0.15em] sm:tracking-[0.2em]">{char}</span>)}
           </div>
         </div>
       ) : (
@@ -123,7 +123,7 @@ const MobileSection = ({ content, CircularTextComponent, showVerticalTitle = fal
             <VideoPlayer src={content.videoSrc} staticImageSrc={content.staticImageSrc} staticImageAlt={content.staticImageAlt} className="w-full h-full" />
           </div>
         </div>
-        <p className="font-whirly text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center tracking-[0.15em] sm:tracking-[0.2em]">{content.title}</p>
+        <p className="font-whirlyBirdie text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center tracking-[0.15em] sm:tracking-[0.2em]">{content.title}</p>
       </div>
     )}
   </section>
