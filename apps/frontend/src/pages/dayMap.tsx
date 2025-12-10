@@ -1,13 +1,14 @@
-import { DayTile } from "@/components/progressMap/dayTile";
-import { generateMap } from "@/components/progressMap/mapGenerator";
+import { DayTile } from "@/components/dayMap/dayTile";
+import { generateMap } from "@/components/dayMap/mapGenerator";
 import { usePlay } from "@/hooks/usePlay";
 import { useAuth } from "@/contexts/AuthContext";
 
 import "./page.css";
-import { ArrowTile } from "@/components/progressMap/arrowTile";
+import { ArrowTile } from "@/components/dayMap/arrowTile";
 import { useEffect } from "react";
+import { PageExplainer } from "@/components/ui/pageExplainer";
 
-const PlayMap = () => {
+const DayMap = () => {
   const { currentUser } = useAuth();
   const { progress, fetchProgress } = usePlay(currentUser);
 
@@ -27,8 +28,10 @@ const PlayMap = () => {
   const rows = generateMap(progress?.progress.length || 0);
 
   return (
-    <div className="min-h-screen flex items-center justify-center pt-20 p-8 overflow-visible">
-      <div className="w-full max-w-6xl overflow-visible">
+    <div className="min-h-screen flex flex-col container mx-auto px-4 md:px-6 gap-6 lg:gap-12 py-14">
+      <PageExplainer pageTitle="Levels" />
+
+      <div className="flex items-center justify-center w-full max-w-6xl overflow-visible p-8">
         {/* Map Container with 3D perspective */}
         <div
           className="relative overflow-visible"
@@ -74,4 +77,4 @@ const PlayMap = () => {
   );
 };
 
-export default PlayMap;
+export default DayMap;
