@@ -85,45 +85,97 @@ const DesktopSection = ({ content, top, CircularTextComponent, logoSize }: Deskt
   </section>
 );
 
-interface MobileSectionProps { content: ContentSection; CircularTextComponent: React.ComponentType; showVerticalTitle?: boolean; logoSize?: { width: string; height: string }; isFirst?: boolean; }
+interface MobileSectionProps { content: ContentSection; CircularTextComponent: React.ComponentType; showVerticalTitle?: boolean; isFirst?: boolean; }
 
-const MobileSection = ({ content, CircularTextComponent, showVerticalTitle = false, logoSize = { width: "70px", height: "auto" }, isFirst = false }: MobileSectionProps) => (
-  <section className={`relative bg-black text-white px-3 sm:px-5 md:px-6 lg:px-8 py-5 sm:py-7 md:py-9 lg:py-10 overflow-hidden ${isFirst ? 'rounded-t-lg' : 'rounded-b-lg'}`}>
-    <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-      <div className={`relative shrink-0 mx-auto sm:mx-0 ${showVerticalTitle ? "w-[80px] h-[80px] xs:w-[90px] xs:h-[90px] sm:w-[100px] sm:h-[100px] md:w-[110px] md:h-[110px] lg:w-[130px] lg:h-[130px]" : "w-[100px] h-[100px] sm:w-[120px] sm:h-[120px] md:w-[140px] md:h-[140px] lg:w-[160px] lg:h-[160px]"}`}>
+const MobileSection = ({ content, CircularTextComponent, showVerticalTitle = false, isFirst = false }: MobileSectionProps) => (
+  <section className={`relative bg-black text-white px-4 xs:px-5 sm:px-6 md:px-8 lg:px-10 py-6 xs:py-7 sm:py-8 md:py-10 lg:py-12 overflow-hidden ${isFirst ? 'rounded-t-lg' : 'rounded-b-lg'}`}>
+    {/* Header: Logo + Intro + Vertical Title */}
+    <div className="flex flex-col xs:flex-row items-center xs:items-start gap-4 xs:gap-5 sm:gap-6 md:gap-8">
+      {/* Logo Container - responsive sizing */}
+      <div className={`relative shrink-0 ${showVerticalTitle 
+        ? "w-[90px] h-[90px] xs:w-[100px] xs:h-[100px] sm:w-[120px] sm:h-[120px] md:w-[140px] md:h-[140px] lg:w-[160px] lg:h-[160px]" 
+        : "w-[100px] h-[100px] xs:w-[110px] xs:h-[110px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px] lg:w-[180px] lg:h-[180px]"}`}>
         <CircularTextComponent />
-        <img src={content.logo} alt={content.logoAlt} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-contain" style={{ width: logoSize.width, height: logoSize.height }} />
+        <img 
+          src={content.logo} 
+          alt={content.logoAlt} 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 object-contain w-[55%] h-auto" 
+        />
       </div>
+      
       {showVerticalTitle ? (
-        <div className="flex-1 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 md:gap-5 w-full sm:w-auto">
-          <div className="flex-1 text-[11px] xs:text-xs sm:text-sm md:text-base leading-relaxed"><p>{content.intro}</p></div>
-          <div className="flex flex-row sm:flex-col items-center justify-center gap-0.5 sm:gap-1 md:gap-0 mx-auto sm:mx-0">
-            {content.title.split("").map((char) => <span key={char} className="font-whirlyBirdie text-base sm:text-lg md:text-xl lg:text-2xl leading-tight tracking-[0.15em] sm:tracking-[0.2em]">{char}</span>)}
+        <div className="flex-1 flex flex-col xs:flex-row items-center xs:items-start gap-4 xs:gap-5 sm:gap-6 w-full">
+          {/* Intro text */}
+          <div className="flex-1 text-[13px] xs:text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed text-center xs:text-left">
+            <p>{content.intro}</p>
+          </div>
+          {/* Vertical title - horizontal on mobile, vertical on larger */}
+          <div className="flex flex-row xs:flex-col items-center justify-center gap-1 xs:gap-0.5 sm:gap-1">
+            {content.title.split("").map((char, idx) => (
+              <span 
+                key={`${char}-${idx}`} 
+                className="font-whirlyBirdie text-lg xs:text-xl sm:text-2xl md:text-3xl lg:text-4xl leading-none tracking-wide"
+              >
+                {char}
+              </span>
+            ))}
           </div>
         </div>
       ) : (
-        <div className="hidden sm:block flex-1 text-xs sm:text-sm md:text-base leading-relaxed"><p className="mb-2 sm:mb-3">{content.intro}</p></div>
+        <div className="hidden xs:block flex-1 text-[13px] xs:text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed">
+          <p>{content.intro}</p>
+        </div>
       )}
     </div>
-    <div className={`text-[11px] xs:text-xs sm:text-sm md:text-base leading-relaxed space-y-2.5 sm:space-y-3 md:space-y-4 ${showVerticalTitle ? "mt-4 sm:mt-5 md:mt-6" : "mt-4 sm:mt-5"}`}>
-      {!showVerticalTitle && <p className="sm:hidden text-[11px] xs:text-xs leading-relaxed">{content.intro}</p>}
-      {content.paragraphs.map((paragraph, index) => <p key={`para-${index}`} className="text-[11px] xs:text-xs sm:text-sm md:text-base">{paragraph}</p>)}
-      {content.cta && <p className="text-xs sm:text-sm md:text-base lg:text-lg font-semibold mt-2 sm:mt-2.5 md:mt-3">{content.cta}</p>}
+    
+    {/* Content paragraphs */}
+    <div className={`leading-relaxed space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6 ${showVerticalTitle ? "mt-5 xs:mt-6 sm:mt-8 md:mt-10" : "mt-5 xs:mt-6 sm:mt-8"}`}>
+      {/* Show intro on smallest screens only for non-vertical title variant */}
+      {!showVerticalTitle && (
+        <p className="xs:hidden text-[13px] leading-relaxed text-center">{content.intro}</p>
+      )}
+      {content.paragraphs.map((paragraph, index) => (
+        <p 
+          key={`para-${index}`} 
+          className="text-[13px] xs:text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed"
+        >
+          {paragraph}
+        </p>
+      ))}
+      {content.cta && (
+        <p className="text-sm xs:text-base sm:text-lg md:text-xl lg:text-2xl font-semibold mt-3 xs:mt-4 sm:mt-5">
+          {content.cta}
+        </p>
+      )}
     </div>
+    
+    {/* Video/Media Section */}
     {showVerticalTitle ? (
-      <div className="mt-4 sm:mt-5 md:mt-6 w-full aspect-[4/3] overflow-hidden sm:rounded-lg bg-black relative">
-        <div className="absolute inset-0 w-full h-full sm:mix-blend-screen">
-          <VideoPlayer src={content.videoSrc} staticImageSrc={content.staticImageSrc} staticImageAlt={content.staticImageAlt} className="w-full h-full" />
+      <div className="mt-5 xs:mt-6 sm:mt-8 md:mt-10 w-full aspect-video xs:aspect-[4/3] sm:aspect-video overflow-hidden rounded-lg bg-black relative">
+        <div className="absolute inset-0 w-full h-full mix-blend-screen">
+          <VideoPlayer 
+            src={content.videoSrc} 
+            staticImageSrc={content.staticImageSrc} 
+            staticImageAlt={content.staticImageAlt} 
+            className="w-full h-full object-cover" 
+          />
         </div>
       </div>
     ) : (
-      <div className="mt-4 sm:mt-5 md:mt-6 space-y-3 sm:space-y-4 md:space-y-5 lg:space-y-6">
-        <div className="w-full aspect-[4/3] overflow-hidden sm:rounded-lg bg-black relative">
-          <div className="absolute inset-0 w-full h-full sm:mix-blend-screen">
-            <VideoPlayer src={content.videoSrc} staticImageSrc={content.staticImageSrc} staticImageAlt={content.staticImageAlt} className="w-full h-full" />
+      <div className="mt-5 xs:mt-6 sm:mt-8 md:mt-10 space-y-4 xs:space-y-5 sm:space-y-6 md:space-y-8">
+        <div className="w-full aspect-video xs:aspect-[4/3] sm:aspect-video overflow-hidden rounded-lg bg-black relative">
+          <div className="absolute inset-0 w-full h-full mix-blend-screen">
+            <VideoPlayer 
+              src={content.videoSrc} 
+              staticImageSrc={content.staticImageSrc} 
+              staticImageAlt={content.staticImageAlt} 
+              className="w-full h-full object-cover" 
+            />
           </div>
         </div>
-        <p className="font-whirlyBirdie text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-center tracking-[0.15em] sm:tracking-[0.2em]">{content.title}</p>
+        <p className="font-whirlyBirdie text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-center tracking-[0.15em] sm:tracking-[0.2em]">
+          {content.title}
+        </p>
       </div>
     )}
   </section>
@@ -165,10 +217,21 @@ const AboutUs = () => {
           <DesktopSection content={CONTENT.invento} top={DESKTOP_LAYOUT.inventoTop} CircularTextComponent={CircularTextInvento} logoSize={{ width: "90px", height: "auto", top: "50%", left: "50%" }} />
         </div>
       </div>
-      <div className="xl:hidden bg-[var(--page-bg,#f6efe6)]">
-        <div className="w-full max-w-full sm:max-w-[640px] md:max-w-[768px] lg:max-w-[1024px] mx-auto">
-          <MobileSection content={CONTENT.enigma} CircularTextComponent={CircularTextEnigma} showVerticalTitle={true} logoSize={{ width: "60px", height: "auto" }} isFirst={true} />
-          <MobileSection content={CONTENT.invento} CircularTextComponent={CircularTextInvento} showVerticalTitle={false} logoSize={{ width: "70px", height: "auto" }} isFirst={false} />
+      <div className="xl:hidden bg-[var(--page-bg,#f6efe6)] min-h-screen pt-10">
+        <div className="w-full max-w-[100%] xs:max-w-[95%] sm:max-w-[90%] md:max-w-[85%] lg:max-w-[900px] mx-auto px-0 xs:px-2 sm:px-0">
+          <MobileSection 
+            content={CONTENT.enigma} 
+            CircularTextComponent={CircularTextEnigma} 
+            showVerticalTitle={true} 
+            isFirst={true} 
+          />
+          <div className="h-px bg-white/20 mx-4 xs:mx-0" />
+          <MobileSection 
+            content={CONTENT.invento} 
+            CircularTextComponent={CircularTextInvento} 
+            showVerticalTitle={false} 
+            isFirst={false} 
+          />
         </div>
       </div>
     </div>
