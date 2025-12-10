@@ -23,12 +23,20 @@ const textContainerVariants = {
 
 const headingVariants = {
   hidden: { opacity: 0, y: -24 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } }
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: "easeOut" }
+  }
 };
 
 const subheadingVariants = {
   hidden: { opacity: 0, y: -16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut", delay: 0.05 } }
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: "easeOut", delay: 0.05 }
+  }
 };
 
 const tilesContainerVariants = {
@@ -78,7 +86,12 @@ const HowItWorksSection = () => {
   return (
     <section id="how-it-works-section" className="pt-24 pb-32 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto" ref={ref}>
-        <motion.div className="mb-12" variants={textContainerVariants} initial="hidden" animate={controls}>
+        <motion.div
+          className="mb-12"
+          variants={textContainerVariants}
+          initial="hidden"
+          animate={controls}
+        >
           <motion.h2
             style={{ fontFamily: "WhirlyBirdie" }}
             className="text-4xl md:text-5xl font-bold text-black text-center mb-6"
@@ -138,7 +151,10 @@ const HowItWorksSection = () => {
                 </p>
               </div>
 
-              <div aria-hidden className="pointer-events-none absolute inset-0 border-[3px] border-white" />
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 border-[3px] border-white"
+              />
             </motion.div>
           ))}
         </motion.div>
