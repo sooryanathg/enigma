@@ -2,10 +2,6 @@
   direction: rtl;
 }
 
-.grid {
-  filter: drop-shadow(-16px 19px 13px rgba(0, 0, 0, 0.75));
-}
-
 .grid .no-shadow,
 .grid .no-shadow * {
   filter: none;

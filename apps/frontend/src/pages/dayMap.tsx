@@ -28,7 +28,7 @@ const DayMap = () => {
   const rows = generateMap(progress?.progress.length || 0);
 
   return (
-    <div className="min-h-screen flex flex-col container mx-auto px-4 md:px-6 gap-6 lg:gap-12 py-14">
+    <div className="min-h-screen flex flex-col container mx-auto px-4 md:px-6 gap-12 lg:gap-24 py-14">
       <PageExplainer pageTitle="Levels" />
 
       <div className="flex items-center justify-center w-full max-w-6xl overflow-visible p-8">
