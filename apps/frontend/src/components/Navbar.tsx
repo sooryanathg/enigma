@@ -151,7 +151,7 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
             <img
               src={Logo}
               alt="Enigma logo"
-        className="h- sm:h-8 md:h-9 w-auto object-contain select-none -ml-12"
+        className="h-7 sm:h-8 md:h-9 w-auto object-contain select-none -ml-12"
             />
           </Link>
 
