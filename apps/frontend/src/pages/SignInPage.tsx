@@ -55,9 +55,9 @@ export default function SignInPage() {
       setError(null);
       setIsLoading(true);
       await signInWithGoogle();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error signing in with Google:", error);
-      setError(error.message || "Failed to sign in. Please try again.");
+      setError((error as Error).message || "Failed to sign in. Please try again.");
     } finally {
       setIsLoading(false);
     }

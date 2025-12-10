@@ -8,6 +8,14 @@ import {
 import { motion } from "framer-motion";
 import { PageExplainer } from "@/components/ui/pageExplainer";
 
+interface LeaderboardEntry {
+  id: string;
+  rank: number;
+  name: string;
+  attempts: number;
+  completedAt: any;
+}
+
 export default function LeaderboardPage() {
   const { currentUser } = useAuth();
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -49,6 +57,7 @@ export default function LeaderboardPage() {
     fetchLeaderboard(day);
   };
 
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "N/A";
     const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);

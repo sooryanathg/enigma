@@ -12,9 +12,9 @@ import { calculateGridLayout, ImageSquare } from '@/components/play/ImageGrid';
 
 const DayBox = ({ day, left, top, dayTop, statusTop, isCompleted }: { day: number; left: string; top: string; dayTop: string; statusTop: string; isCompleted?: boolean }) => (
   <>
-    <div className="absolute bg-white" style={{ width: "126.08px", height: "94px", left, top }} />
-    <div className="absolute font-whirlyBirdie font-bold text-black text-center" style={{ width: "89px", height: "24px", left: `${parseFloat(left) + 18}px`, top: dayTop, fontSize: "20px", lineHeight: "24px", whiteSpace: "nowrap" }}>day {day}</div>
-    <div className="absolute font-poppins font-medium text-black text-center" style={{ width: "105px", height: "24px", left: `${parseFloat(left) + 10}px`, top: statusTop, fontSize: "16px", lineHeight: "24px" }}>{isCompleted ? "Completed" : "In Progress"}</div>
+    <div className="absolute bg-white w-[126.08px] h-[94px]" style={{ left, top }} />
+    <div className="absolute font-whirlyBirdie font-bold text-black text-center w-[89px] h-[24px] text-[20px] leading-[24px] whitespace-nowrap" style={{ left: `${parseFloat(left) + 18}px`, top: dayTop }}>day {day}</div>
+    <div className="absolute font-poppins font-medium text-black text-center w-[105px] h-[24px] text-[16px] leading-[24px]" style={{ left: `${parseFloat(left) + 10}px`, top: statusTop }}>{isCompleted ? "Completed" : "In Progress"}</div>
   </>
 );
 
@@ -38,7 +38,7 @@ function PlayPage() {
   const [scaleX, setScaleX] = useState(1);
   const [scaleY, setScaleY] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const { displayDay, question, progress, cooldownSeconds, initialize, fetchQuestion, submitAnswer } = usePlay(currentUser);
 
   useEffect(() => {
@@ -69,7 +69,7 @@ function PlayPage() {
   };
 
   const questionImages = getQuestionImages();
-  
+
   // Calculate grid layout for desktop
   const desktopImageLayout = calculateGridLayout(
     questionImages.length,
@@ -120,7 +120,7 @@ function PlayPage() {
           await fetchQuestion(displayDay);
         }
       }
-    } catch (error) {
+    } catch {
       setMessage('Error submitting answer');
     } finally {
       setSubmitting(false);
@@ -130,101 +130,95 @@ function PlayPage() {
   return (
     <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="min-h-screen bg-transparent relative overflow-y-auto" ref={containerRef}>
       {/* Desktop Layout */}
-      <div 
-        className="font-orbitron absolute top-0 left-0 hidden lg:block" 
-        style={{ 
-          transform: `scale(${scaleX}, ${scaleY})`, 
-          transformOrigin: 'top left',
+      <div
+        className="font-orbitron absolute top-0 left-0 hidden lg:block origin-top-left"
+        style={{
+          transform: `scale(${scaleX}, ${scaleY})`,
           width: `${100 / scaleX}%`,
           height: `${100 / scaleY}%`
         }}
       >
-          {/* Top Rectangle */}
-          <div className="absolute bg-black" style={{ width: "1452px", height: "104px", left: "29.01px", top: "121px" }}>
-            <button onClick={() => navigate(-1)} className="absolute flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity" style={{ left: "4.03%", top: "34.62%", width: "30px", height: "30px", background: "transparent", border: "none" }}>
-              <img src={leftArrow} alt="Left arrow" className="w-full h-full object-contain" style={{ filter: "brightness(0) invert(1)" }} />
-            </button>
+        {/* Top Rectangle */}
+        <div className="absolute bg-black w-[1452px] h-[104px] left-[29.01px] top-[121px]">
+          <button onClick={() => navigate(-1)} className="absolute flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity left-[4.03%] top-[34.62%] w-[30px] h-[30px] bg-transparent border-none">
+            <img src={leftArrow} alt="Left arrow" className="w-full h-full object-contain brightness-0 invert" />
+          </button>
+        </div>
+
+        {/* Day X Of Y Text */}
+        <div className="absolute font-whirlyBirdie font-bold text-white text-center w-[210px] h-[29px] left-[130.01px] top-[157px] text-[24px] leading-[29px] whitespace-nowrap">
+          Day {displayDay} Of {progress?.progress.length || 10}
+        </div>
+
+        {/* Tutorial Button */}
+        <button onClick={() => setIsOpen(true)} className="absolute bg-black text-white border border-white px-4 py-2 rounded hover:bg-gray-800 transition-colors w-[138px] h-[45px] left-[1321px] top-[150px]">Tutorial</button>
+
+        {/* Left Rectangle */}
+        <div className="absolute bg-black border border-black w-[918.03px] h-[528px] left-[29px] top-[249px]">
+          <div className="absolute font-whirlyBirdie font-bold text-white w-[733px] h-[60px] left-[calc(50%-733px/2-50px)] top-0 pt-[20px] text-[20px] leading-[30px]">
+            {question?.question || "I hold two people inside me forever, but i'm not a home. What am i ?"}
           </div>
-          
-          {/* Day X Of Y Text */}
-          <div className="absolute font-whirlyBirdie font-bold text-white text-center" style={{ width: "210px", height: "29px", left: "130.01px", top: "157px", fontSize: "24px", lineHeight: "29px", whiteSpace: "nowrap" }}>
-            Day {displayDay} Of {progress?.progress.length || 10}
+          <div className="absolute w-[918.03px] h-0 left-0 top-[113.5px] border border-white" />
+        </div>
+
+        {/* Image Squares - Dynamic Grid */}
+        {questionImages.map((image, i) => (
+          desktopImageLayout[i] && (
+            <ImageSquare
+              key={i}
+              index={i}
+              position={desktopImageLayout[i]}
+              image={image}
+              loaded={squareImagesLoaded[i] || false}
+              onLoad={() => setSquareImagesLoaded(prev => {
+                const newState = [...prev];
+                newState[i] = true;
+                return newState;
+              })}
+            />
+          )
+        ))}
+
+        {/* ANSWER Text */}
+        <div className="absolute font-whirlyBirdie font-bold text-black text-center w-[191px] h-[29px] left-[29px] top-[808px] text-[24px] leading-[29px]">ANSWER :</div>
+
+        {/* Answer Input */}
+        <div className="absolute w-[701px] h-[73px] left-[29.01px] top-[851px]">
+          <Input id="answer-input" placeholder="" value={answer} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswer(e.target.value)} disabled={cooldownSeconds > 0 || submitting} onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSubmit()} className="w-full h-full" />
+        </div>
+
+        {/* Placeholder Text */}
+        {/* Placeholder Text */}
+        {!answer && <div className="absolute pointer-events-none font-poppins font-medium w-[218px] h-[36px] left-[60px] top-[872px] text-[24px] leading-[36px] text-[#6B6B6B]">Enter Your Answer</div>}
+
+        {/* Submit Button */}
+        <div className="absolute w-[216px] h-[73px] left-[731px] top-[851px]">
+          <Button onClick={handleSubmit} disabled={submitting || cooldownSeconds > 0} className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center text-[24px] leading-[29px]">
+            {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+          </Button>
+        </div>
+
+        {/* Message Display */}
+        {message && (
+          <div
+            className={`absolute font-poppins text-base font-medium left-[29px] top-[940px] max-w-[900px] ${message.includes('Correct') || message.includes('Success') || message.includes('🎉') ? "text-[#10b981]" : "text-[#ef4444]"}`}
+          >
+            {message}
           </div>
-          
-          {/* Tutorial Button */}
-          <button onClick={() => setIsOpen(true)} className="absolute bg-black text-white border border-white px-4 py-2 rounded hover:bg-gray-800 transition-colors" style={{ width: "138px", height: "45px", left: "1321px", top: "150px" }}>Tutorial</button>
-          
-          {/* Left Rectangle */}
-          <div className="absolute bg-black border border-black" style={{ width: "918.03px", height: "528px", left: "29px", top: "249px" }}>
-            <div className="absolute font-whirlyBirdie font-bold text-white" style={{ width: "733px", height: "60px", left: "calc(50% - 733px/2 - 50px)", top: "0px", paddingTop: "20px", fontSize: "20px", lineHeight: "30px" }}>
-              {question?.question || "I hold two people inside me forever, but i'm not a home. What am i ?"}
-            </div>
-            <div className="absolute" style={{ width: "918.03px", height: "0px", left: "0px", top: "113.5px", border: "1px solid #FFFFFF" }} />
-          </div>
-          
-          {/* Image Squares - Dynamic Grid */}
-          {questionImages.map((image, i) => (
-            desktopImageLayout[i] && (
-              <ImageSquare 
-                key={i} 
-                index={i} 
-                position={desktopImageLayout[i]}
-                image={image} 
-                loaded={squareImagesLoaded[i] || false} 
-                onLoad={() => setSquareImagesLoaded(prev => {
-                  const newState = [...prev];
-                  newState[i] = true;
-                  return newState;
-                })} 
-              />
-            )
+        )}
+
+        {/* Right Rectangle */}
+        <div className="absolute bg-black w-[514px] h-[675px] left-[968.02px] top-[249px]">
+          <div className="absolute font-whirlyBirdie font-bold text-white text-center w-[332px] h-[29px] left-[25px] top-[55px] text-[24px] leading-[29px]">Your progress</div>
+
+          {/* Day Boxes */}
+          {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }, idx) => (
+            <DayBox key={day} day={day} left={left} top={top} dayTop={dayTop} statusTop={statusTop} isCompleted={progress?.progress[idx]?.isCompleted} />
           ))}
-          
-          {/* ANSWER Text */}
-          <div className="absolute font-whirlyBirdie font-bold text-black text-center" style={{ width: "191px", height: "29px", left: "29px", top: "808px", fontSize: "24px", lineHeight: "29px" }}>ANSWER :</div>
-          
-          {/* Answer Input */}
-          <div className="absolute" style={{ width: "701px", height: "73px", left: "29.01px", top: "851px" }}>
-            <Input id="answer-input" placeholder="" value={answer} onChange={(e: any) => setAnswer(e.target.value)} disabled={cooldownSeconds > 0 || submitting} onKeyDown={(e: any) => e.key === 'Enter' && handleSubmit()} className="w-full h-full" />
-          </div>
-          
-          {/* Placeholder Text */}
-          {!answer && <div className="absolute pointer-events-none font-poppins font-medium" style={{ width: "218px", height: "36px", left: "60px", top: "872px", fontSize: "24px", lineHeight: "36px", color: "#6B6B6B" }}>Enter Your Answer</div>}
-          
-          {/* Submit Button */}
-          <div className="absolute" style={{ width: "216px", height: "73px", left: "731px", top: "851px" }}>
-            <Button onClick={handleSubmit} disabled={submitting || cooldownSeconds > 0} className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center" style={{ fontSize: "24px", lineHeight: "29px" }}>
-              {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
-            </Button>
-          </div>
-          
-          {/* Message Display */}
-          {message && (
-            <div 
-              className="absolute font-poppins text-base font-medium" 
-              style={{ 
-                left: "29px", 
-                top: "940px", 
-                color: message.includes('Correct') || message.includes('Success') || message.includes('🎉') ? "#10b981" : "#ef4444",
-                maxWidth: "900px"
-              }}
-            >
-              {message}
-            </div>
-          )}
-          
-          {/* Right Rectangle */}
-          <div className="absolute bg-black" style={{ width: "514px", height: "675px", left: "968.02px", top: "249px" }}>
-            <div className="absolute font-whirlyBirdie font-bold text-white text-center" style={{ width: "332px", height: "29px", left: "25px", top: "55px", fontSize: "24px", lineHeight: "29px" }}>Your progress</div>
-            
-            {/* Day Boxes */}
-            {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }, idx) => (
-              <DayBox key={day} day={day} left={left} top={top} dayTop={dayTop} statusTop={statusTop} isCompleted={progress?.progress[idx]?.isCompleted} />
-            ))}
-            
-            {/* Progress Bar */}
-            <div className="absolute bg-white" style={{ width: "15px", height: "523px", left: "473.99px", top: "114px" }} />
-          </div>
+
+          {/* Progress Bar */}
+          <div className="absolute bg-white w-[15px] h-[523px] left-[473.99px] top-[114px]" />
+        </div>
       </div>
 
       {/* Mobile/Tablet Layout */}
@@ -232,7 +226,7 @@ function PlayPage() {
         {/* Top Bar */}
         <div className="flex items-center justify-between bg-black text-white p-4 rounded-lg">
           <button onClick={() => navigate(-1)} className="flex items-center justify-center w-8 h-8">
-            <img src={leftArrow} alt="Back" className="w-full h-full object-contain" style={{ filter: "brightness(0) invert(1)" }} />
+            <img src={leftArrow} alt="Back" className="w-full h-full object-contain brightness-0 invert" />
           </button>
           <div className="font-whirlyBirdie font-bold text-lg whitespace-nowrap">
             Day {displayDay} Of {progress?.progress.length || 10}
@@ -248,16 +242,16 @@ function PlayPage() {
             {question?.question || "I hold two people inside me forever, but i'm not a home. What am i ?"}
           </div>
           <div className="w-full h-px bg-white my-3" />
-          
+
           {/* Image Grid - Dynamic */}
-          <div 
+          <div
             className="mt-4"
             style={{
               display: 'grid',
-              gridTemplateColumns: questionImages.length === 1 
-                ? '1fr' 
-                : questionImages.length === 2 
-                  ? 'repeat(2, 1fr)' 
+              gridTemplateColumns: questionImages.length === 1
+                ? '1fr'
+                : questionImages.length === 2
+                  ? 'repeat(2, 1fr)'
                   : questionImages.length === 3
                     ? 'repeat(2, 1fr)'
                     : questionImages.length <= 4
@@ -267,14 +261,14 @@ function PlayPage() {
             }}
           >
             {questionImages.map((image, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="relative aspect-square border border-white rounded overflow-hidden bg-black"
                 style={questionImages.length === 1 ? { maxWidth: '300px', margin: '0 auto' } : {}}
               >
                 {image && (
-                  <img 
-                    src={image} 
+                  <img
+                    src={image}
                     alt={`Question image ${i + 1}`}
                     className={`w-full h-full object-cover transition-opacity duration-300 ${squareImagesLoaded[i] ? "opacity-100" : "opacity-0"}`}
                     onLoad={() => setSquareImagesLoaded(prev => {
@@ -303,30 +297,29 @@ function PlayPage() {
         <div className="space-y-3">
           <div className="font-whirlyBirdie font-bold text-black text-lg">ANSWER :</div>
           <div className="relative">
-            <Input 
-              id="answer-input-mobile" 
-              placeholder="Enter Your Answer" 
-              value={answer} 
-              onChange={(e: any) => setAnswer(e.target.value)} 
-              disabled={cooldownSeconds > 0 || submitting} 
-              onKeyDown={(e: any) => e.key === 'Enter' && handleSubmit()} 
-              className="w-full h-12 text-base" 
+            <Input
+              id="answer-input-mobile"
+              placeholder="Enter Your Answer"
+              value={answer}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswer(e.target.value)}
+              disabled={cooldownSeconds > 0 || submitting}
+              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSubmit()}
+              className="w-full h-12 text-base"
             />
           </div>
-          <Button 
-            onClick={handleSubmit} 
-            disabled={submitting || cooldownSeconds > 0} 
+          <Button
+            onClick={handleSubmit}
+            disabled={submitting || cooldownSeconds > 0}
             className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base"
           >
             {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
           </Button>
           {message && (
-            <div 
-              className={`font-poppins text-sm font-medium p-3 rounded ${
-                message.includes('Correct') || message.includes('Success') || message.includes('🎉') 
-                  ? "bg-green-100 text-green-700" 
+            <div
+              className={`font-poppins text-sm font-medium p-3 rounded ${message.includes('Correct') || message.includes('Success') || message.includes('🎉')
+                  ? "bg-green-100 text-green-700"
                   : "bg-red-100 text-red-700"
-              }`}
+                }`}
             >
               {message}
             </div>
