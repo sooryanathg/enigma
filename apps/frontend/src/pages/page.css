@@ -1,0 +1,8 @@
+.direction-reverse {
+  direction: rtl;
+}
+
+.grid .no-shadow,
+.grid .no-shadow * {
+  filter: none;
+}

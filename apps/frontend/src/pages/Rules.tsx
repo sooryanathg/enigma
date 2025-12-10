@@ -17,7 +17,7 @@ const RULES: Rule[] = [
 
 interface DiagonalLineProps { left: number; className?: string; }
 const DiagonalLine = ({ left, className = "" }: DiagonalLineProps) => (
-  <div className={`absolute border border-white ${className}`} style={{ width: "128.46px", left: `${left}px`, top: "51px", transform: "rotate(-54.83deg)" }} />
+  <div className={`absolute border border-white w-[128.46px] top-[51px] -rotate-[54.83deg] ${className}`} style={{ left: `${left}px` }} />
 );
 
 interface RuleFrameProps { rule: Rule; index: number; isMobile: boolean; }
@@ -37,12 +37,12 @@ const RuleFrame = ({ rule, index, isMobile }: RuleFrameProps) => {
   const topOffset = LAYOUT.desktop.firstFrameTop + index * (LAYOUT.desktop.frameHeight + LAYOUT.desktop.frameGap);
 
   return (
-    <div className="relative box-border bg-black border border-white" style={{ width: `${LAYOUT.desktop.frameWidth}px`, height: `${LAYOUT.desktop.frameHeight}px`, left: `calc(50% - ${LAYOUT.desktop.frameWidth}px / 2)`, top: `${topOffset}px`, position: "absolute" }}>
+    <div className="absolute box-border bg-black border border-white w-[1451px] h-[248px] left-[calc(50%-1451px/2)]" style={{ top: `${topOffset}px` }}>
       {DIAGONAL_LINES.map((line, i) => <DiagonalLine key={i} left={line.left} />)}
       <div className="absolute left-0 right-0 top-[104px] border-t border-white" />
-      <div className="absolute font-whirlyBirdie font-bold text-white flex items-center" style={{ width: "22px", height: "49px", left: "64px", top: "29px", fontSize: "48px", lineHeight: "49px", letterSpacing: "0.01em" }}>{rule.number}</div>
-      <div className="absolute font-whirlyBirdie font-bold text-white flex items-center" style={{ width: "266px", height: "49px", left: "282px", top: "29px", fontSize: "24px", lineHeight: "49px", letterSpacing: "0.01em" }}>{rule.title}</div>
-      <div className="absolute font-poppins font-medium text-white flex items-center" style={{ width: "1189px", height: "78px", left: "64px", top: "134px", fontSize: "28px", lineHeight: "39px", letterSpacing: "0.01em" }}>{rule.description}</div>
+      <div className="absolute font-whirlyBirdie font-bold text-white flex items-center w-[22px] h-[49px] left-[64px] top-[29px] text-[48px] leading-[49px] tracking-[0.01em]">{rule.number}</div>
+      <div className="absolute font-whirlyBirdie font-bold text-white flex items-center w-[266px] h-[49px] left-[282px] top-[29px] text-[24px] leading-[49px] tracking-[0.01em]">{rule.title}</div>
+      <div className="absolute font-poppins font-medium text-white flex items-center w-[1189px] h-[78px] left-[64px] top-[134px] text-[28px] leading-[39px] tracking-[0.01em]">{rule.description}</div>
     </div>
   );
 };
@@ -56,10 +56,10 @@ const Rules = () => {
   return (
     <div className="relative w-full h-full overflow-y-auto overflow-x-hidden bg-[var(--page-bg,#f6efe6)]" data-rules-scroll>
       <div className="hidden lg:block">
-        <div className="absolute bg-black" style={{ width: `${LAYOUT.desktop.headerWidth}px`, height: `${LAYOUT.desktop.headerHeight}px`, left: `${LAYOUT.desktop.headerLeft}px`, top: `${LAYOUT.desktop.headerTop}px` }} />
-        <div className="absolute text-white font-whirlyBirdie font-bold" style={{ width: "130px", height: "29px", left: "60.01px", top: "157px", fontSize: "24px", lineHeight: "29px" }}>RULES</div>
-        <div className="absolute font-whirlyBirdie font-bold text-center" style={{ width: "370px", height: "43px", left: "calc(50% - 370px/2)", top: "293px", fontSize: "36px", lineHeight: "43px", letterSpacing: "-0.02em", color: "#000000" }}>GAME RULES</div>
-        <div className="absolute font-poppins font-medium text-center flex items-center" style={{ width: "651px", height: "62px", left: "calc(50% - 651px/2 + 0.5px)", top: "334px", fontSize: "24px", lineHeight: "62px", letterSpacing: "0.01em", color: "#000000" }}>Master the challenge with these essential guidelines</div>
+        <div className="absolute bg-black w-[1452px] h-[104px] left-[29.01px] top-[121px]" />
+        <div className="absolute text-white font-whirlyBirdie font-bold w-[130px] h-[29px] left-[60.01px] top-[157px] text-[24px] leading-[29px]">RULES</div>
+        <div className="absolute font-whirlyBirdie font-bold text-center w-[370px] h-[43px] left-[calc(50%-370px/2)] top-[293px] text-[36px] leading-[43px] tracking-[-0.02em] text-black">GAME RULES</div>
+        <div className="absolute font-poppins font-medium text-center flex items-center w-[651px] h-[62px] left-[calc(50%-651px/2+0.5px)] top-[334px] text-[24px] leading-[62px] tracking-[0.01em] text-black">Master the challenge with these essential guidelines</div>
         {RULES.map((rule, index) => <RuleFrame key={index} rule={rule} index={index} isMobile={false} />)}
       </div>
 
