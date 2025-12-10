@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, useAnimation, useInView } from "framer-motion";
 
 const steps = [
@@ -13,60 +13,36 @@ const textContainerVariants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: {
-      duration: 0.7,
-      ease: "easeOut",
-      staggerChildren: 0.15
-    }
+    transition: { duration: 0.7, ease: "easeOut", staggerChildren: 0.15 }
   }
 };
 
 const headingVariants = {
   hidden: { opacity: 0, y: -24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: "easeOut" }
-  }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" } }
 };
 
 const subheadingVariants = {
   hidden: { opacity: 0, y: -16 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: "easeOut", delay: 0.05 }
-  }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut", delay: 0.05 } }
 };
 
 const tilesContainerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: {
-      when: "beforeChildren",
-      staggerChildren: 0.18,
-      delayChildren: 0.15
-    }
+    transition: { when: "beforeChildren", staggerChildren: 0.18, delayChildren: 0.15 }
   }
 };
 
 const tileVariants = {
-  hidden: {
-    opacity: 0,
-    y: 32,
-    scale: 0.96,
-    filter: "blur(6px)"
-  },
+  hidden: { opacity: 0, y: 32, scale: 0.96, filter: "blur(6px)" },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
     filter: "blur(0px)",
-    transition: {
-      duration: 0.65,
-      ease: "easeOut"
-    }
+    transition: { duration: 0.65, ease: "easeOut" }
   }
 };
 
@@ -75,13 +51,28 @@ const HowItWorksSection = () => {
   const ref = useRef<HTMLDivElement | null>(null);
   const inView = useInView(ref, { amount: 0.35 });
 
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
+  const [activeStepId, setActiveStepId] = useState<number | null>(null);
+
   useEffect(() => {
-    if (inView) {
-      controls.start("visible");
-    } else {
-      controls.start("hidden");
-    }
+    controls.start(inView ? "visible" : "hidden");
   }, [inView, controls]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const mq = window.matchMedia("(hover: none)");
+    const update = () => setIsTouchDevice(mq.matches);
+
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  const handleTileClick = (id: number) => {
+    if (!isTouchDevice) return; // desktop: click should not lock state
+    setActiveStepId((prev) => (prev === id ? null : id));
+  };
 
   return (
     <section id="how-it-works-section" className="pt-24 pb-32 px-4 sm:px-6 lg:px-8">
@@ -119,44 +110,50 @@ const HowItWorksSection = () => {
           initial="hidden"
           animate={controls}
         >
-          {steps.map((step) => (
-            <motion.div
-              key={step.id}
-              variants={tileVariants}
-              className="group relative bg-black border-[3px] border-white text-white overflow-hidden cursor-pointer flex items-center justify-center min-h-[16rem]"
-              tabIndex={0}
-            >
-              <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-6 w-full h-full">
-                <div
-                  style={{ fontFamily: "WhirlyBirdie", fontSize: "32px" }}
-                  className="font-bold mb-2"
-                >
-                  {step.number}
+          {steps.map((step) => {
+            const isActive = isTouchDevice && activeStepId === step.id;
+
+            return (
+              <motion.div
+                key={step.id}
+                variants={tileVariants}
+                className="group relative bg-black border-[3px] border-white text-white overflow-hidden cursor-pointer flex items-center justify-center min-h-[16rem]"
+                onClick={() => handleTileClick(step.id)}
+              >
+                <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-6 w-full h-full">
+                  <div
+                    style={{ fontFamily: "WhirlyBirdie", fontSize: 32 }}
+                    className="font-bold mb-2"
+                  >
+                    {step.number}
+                  </div>
+
+                  <div
+                    style={{ fontFamily: "WhirlyBirdie", fontSize: 18 }}
+                    className="font-bold mb-3"
+                  >
+                    {step.title}
+                  </div>
+
+                  <p
+                    className={[
+                      "text-sm md:text-base text-white/90 max-w-[160px] mx-auto transition-all duration-700",
+                      isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
+                      // desktop hover only (no focus)
+                      "md:group-hover:opacity-100 md:group-hover:translate-y-0"
+                    ].join(" ")}
+                  >
+                    {step.description}
+                  </p>
                 </div>
 
                 <div
-                  style={{ fontFamily: "WhirlyBirdie", fontSize: "18px" }}
-                  className="font-bold mb-3"
-                >
-                  {step.title}
-                </div>
-
-                <p
-                  className={
-                    "text-sm md:text-base text-white/90 max-w-[160px] mx-auto transition-all duration-700 opacity-0 translate-y-4 " +
-                    "group-hover:opacity-100 group-hover:translate-y-0 group-focus:opacity-100 group-focus:translate-y-0"
-                  }
-                >
-                  {step.description}
-                </p>
-              </div>
-
-              <div
-                aria-hidden="true"
-                className="pointer-events-none absolute inset-0 border-[3px] border-white"
-              />
-            </motion.div>
-          ))}
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 border-[3px] border-white"
+                />
+              </motion.div>
+            );
+          })}
         </motion.div>
       </div>
     </section>

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, useMotionValue, useTransform } from "framer-motion";
 import { Link } from "react-router-dom";
-import { cn } from "../lib/utils";
 import { useAuth } from "../contexts/AuthContext";
 import Footer from "./ui/footer";
 import HowItWorksSection from "./hero/Howitworks";
@@ -70,7 +69,7 @@ const HeroSection = () => {
   const smoothX = useMotionValue(0);
   const smoothY = useMotionValue(0);
 
-  // Track viewport size
+  // Viewport tracking
   useEffect(() => {
     const update = () =>
       setViewport({ w: window.innerWidth, h: window.innerHeight });
@@ -82,7 +81,7 @@ const HeroSection = () => {
 
   const { w, h } = viewport;
 
-  // Mouse move → target parallax values (-1 to 1)
+  // Mouse → parallax target
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!w || !h) return;
@@ -98,7 +97,7 @@ const HeroSection = () => {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [w, h, targetX, targetY]);
 
-  // Smooth follow (lerp) for softer motion
+  // Smooth follow (lerp)
   useEffect(() => {
     let frame: number;
 
@@ -136,10 +135,12 @@ const HeroSection = () => {
 
   return (
     <div className="flex flex-col">
+      {/* Hero wrapper */}
       <section className="relative flex min-h-screen flex-col justify-center overflow-hidden">
+        {/* Parallax + pointer only when viewport ready */}
         {w > 0 && h > 0 && (
           <>
-            {/* Pointer indicator following cursor */}
+            {/* Pointer (desktop only) */}
             <motion.div
               className="pointer-events-none fixed z-30 hidden md:flex items-center justify-center rounded-full border border-black bg-peach/90 shadow-md"
               style={{
@@ -163,71 +164,105 @@ const HeroSection = () => {
               className="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
               style={{ clipPath: "inset(40px 0 0 0)" }}
             >
-              <HeroTile1 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile2 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile3 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile4 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile5 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile6 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile7 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile8 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile9 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile10 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile11 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile12 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile13 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile14 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile15 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
-              <HeroTile16 {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }} />
+              <HeroTile1
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile2
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile3
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile4
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile5
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile6
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile7
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile8
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile9
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile10
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile11
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile12
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile13
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile14
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile15
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
+              <HeroTile16
+                {...{ smoothX, smoothY, viewportWidth: w, viewportHeight: h, parallax }}
+              />
             </div>
           </>
         )}
 
         {/* Hero content */}
         <motion.div
-          className="relative z-20 flex px-4 sm:px-6 lg:px-8 pt-[9rem] items-start justify-center select-none"
+          className="relative z-20 flex items-start justify-center px-4 pt-28 sm:px-6 md:pt-32 lg:px-8 lg:pt-36 select-none"
           variants={heroContainerVariants}
           initial="hidden"
           whileInView="visible"
-          viewport={{ amount: 0.6, once: false }} // 👈 animate on load AND when scrolling back up
+          viewport={{ amount: 0.6, once: false }}
         >
-          <div className="max-w-5xl mx-auto text-center w-full">
+          <div className="mx-auto flex w-full max-w-5xl flex-col items-center text-center">
             <motion.h1
               variants={fadeIn}
-              style={{ fontFamily: "WhirlyBirdie", fontSize: "144px" }}
-              className={cn(
-                "font-bold text-black tracking-[0.08em] leading-[0.85] mb-8"
-              )}
+              style={{
+                fontFamily: "WhirlyBirdie",
+                fontSize: "clamp(3.25rem, 10vw, 9rem)",
+              }}
+              className="mb-6 sm:mb-8 font-bold tracking-[0.08em] leading-[0.85] text-black"
             >
               ENIGMA
             </motion.h1>
 
             <motion.p
               variants={fadeIn}
-              className="text-2xl sm:text-3xl md:text-5xl text-black mb-10 max-w-2xl mx-auto font-[400] font-whirlybird"
+              className="mb-10 max-w-2xl font-[400] font-whirlybird text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black"
             >
               Online Treasure Hunt
             </motion.p>
 
             <motion.div
-              className="mt-28 flex flex-col items-center gap-6"
+              className="mt-16 sm:mt-20 md:mt-24 flex flex-col items-center gap-6"
               variants={containerVariants}
             >
               <motion.div variants={fadeUp}>
                 <Link
                   to={currentUser ? "/play" : "/signin"}
-                  className="px-12 py-4 square-full text-lg font-medium border border-black text-black hover:bg-black hover:text-white transition-all duration-200"
+                  className="px-8 py-3 sm:px-10 sm:py-3.5 md:px-12 md:py-4 text-base sm:text-lg font-medium border border-black text-black hover:bg-black hover:text-white transition-all duration-200 square-full"
                 >
                   Get Started
                 </Link>
               </motion.div>
 
               <motion.button
+                type="button"
                 onClick={scrollToHow}
                 variants={fadeUp}
                 aria-label="Scroll"
-                className="flex items-center justify-center w-12 h-12 rounded-full"
-                animate={{ y: [0, 8, 0] }}
+                className="mt-2 flex items-center justify-center"
+                animate={{ y: [0, 6, 0] }}
                 transition={{
                   repeat: Infinity,
                   duration: 1.1,
@@ -253,6 +288,7 @@ const HeroSection = () => {
         </motion.div>
       </section>
 
+      {/* Below-the-fold sections */}
       <HowItWorksSection />
       <Footer />
     </div>
