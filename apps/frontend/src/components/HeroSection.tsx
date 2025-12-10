@@ -148,7 +148,10 @@ const HeroSection = () => {
               }}
             />
 
-            <div className="pointer-events-none absolute inset-0 z-10">
+            <div
+              className="pointer-events-none absolute inset-0 z-[5] overflow-hidden"
+              style={{ clipPath: "inset(40px 0 0 0)" }}
+            >
               <HeroTile1 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
               <HeroTile2 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
               <HeroTile3 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
@@ -158,13 +161,55 @@ const HeroSection = () => {
               <HeroTile7 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
               <HeroTile8 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
               <HeroTile9 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
-              <HeroTile10 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
-              <HeroTile11 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
-              <HeroTile12 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
-              <HeroTile13 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
-              <HeroTile14 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
-              <HeroTile15 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
-              <HeroTile16 smoothX={smoothX} smoothY={smoothY} viewportWidth={w} viewportHeight={h} parallax={parallax} />
+              <HeroTile10
+                smoothX={smoothX}
+                smoothY={smoothY}
+                viewportWidth={w}
+                viewportHeight={h}
+                parallax={parallax}
+              />
+              <HeroTile11
+                smoothX={smoothX}
+                smoothY={smoothY}
+                viewportWidth={w}
+                viewportHeight={h}
+                parallax={parallax}
+              />
+              <HeroTile12
+                smoothX={smoothX}
+                smoothY={smoothY}
+                viewportWidth={w}
+                viewportHeight={h}
+                parallax={parallax}
+              />
+              <HeroTile13
+                smoothX={smoothX}
+                smoothY={smoothY}
+                viewportWidth={w}
+                viewportHeight={h}
+                parallax={parallax}
+              />
+              <HeroTile14
+                smoothX={smoothX}
+                smoothY={smoothY}
+                viewportWidth={w}
+                viewportHeight={h}
+                parallax={parallax}
+              />
+              <HeroTile15
+                smoothX={smoothX}
+                smoothY={smoothY}
+                viewportWidth={w}
+                viewportHeight={h}
+                parallax={parallax}
+              />
+              <HeroTile16
+                smoothX={smoothX}
+                smoothY={smoothY}
+                viewportWidth={w}
+                viewportHeight={h}
+                parallax={parallax}
+              />
             </div>
           </>
         )}
