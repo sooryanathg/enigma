@@ -50,7 +50,7 @@ const CONTENT: Record<"enigma" | "invento", ContentSection> = {
   },
 };
 
-const CircularTextEnigma = () => <CircularText config={{ ...CIRCULAR_TEXT_CONFIG.ENIGMA, radius: { mobile: 58, desktop: 52 }, letterSpacing: { mobile: 1.1, desktop: 0.85 }, textSize: { mobile: "text-[11px]", desktop: "md:text-[18.5px]" }, lineHeight: { mobile: "leading-[14px]", desktop: "md:leading-[22px]" }, className: "" }} />;
+const CircularTextEnigma = () => <CircularText config={{ ...CIRCULAR_TEXT_CONFIG.ENIGMA, radius: { mobile: 58, desktop: 52 }, letterSpacing: { mobile: 1.1, desktop: 1.0 }, textSize: { mobile: "text-[11px]", desktop: "md:text-[18.5px]" }, lineHeight: { mobile: "leading-[14px]", desktop: "md:leading-[22px]" }, className: "" }} />;
 const CircularTextInvento = () => <CircularText config={{ ...CIRCULAR_TEXT_CONFIG.INVENTO, radius: { mobile: 58, desktop: 52 }, textSize: { mobile: "text-[11px]", desktop: "md:text-[15px]" }, lineHeight: { mobile: "leading-[14px]", desktop: "md:leading-[18px]" }, className: "font-medium tracking-tight" }} />;
 
 const GridLines = () => (
