@@ -7,6 +7,7 @@ import { RotatingCanvasText } from "./components/home/LoadingScreen";
 // Lazy loaded pages
 const HomePage = lazy(() => import("./pages/HomePage"));
 const SignInPage = lazy(() => import("./pages/SignInPage"));
+const DayMap = lazy(() => import("./pages/dayMap"));
 const PlayPage = lazy(() => import("./pages/PlayPage"));
 const LeaderboardPage = lazy(() => import("./pages/LeaderboardPage"));
 const Rules = lazy(() => import("./pages/Rules"));
@@ -80,6 +81,17 @@ function AppRouter() {
         // PLAY (Protected)
         {
           path: "/play",
+          element: (
+            <ProtectedRoute>
+              <Suspense fallback={<PageLoader />}>
+                <DayMap />
+              </Suspense>
+            </ProtectedRoute>
+          ),
+        },
+
+        {
+          path: "/play/:day",
           element: (
             <ProtectedRoute>
               <Suspense fallback={<PageLoader />}>

@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { getAllQuestions, getCurrentDay, getEnhancedDailyLeaderboard } from "../services/firestoreService";
+import {
+  getAllQuestions,
+  getCurrentDay,
+  getEnhancedDailyLeaderboard,
+} from "../services/firestoreService";
 import { motion } from "framer-motion";
+import { PageExplainer } from "@/components/ui/pageExplainer";
 
 interface LeaderboardEntry {
   id: string;
@@ -18,7 +23,6 @@ export default function LeaderboardPage() {
   const [selectedDay, setSelectedDay] = useState(1);
   const [loading, setLoading] = useState(true);
   const [totalDays, setTotalDays] = useState<number>(0);
-
 
   useEffect(() => {
     const load = async () => {
@@ -39,8 +43,7 @@ export default function LeaderboardPage() {
     try {
       // Use enhanced leaderboard with attempts tracking
       const data = await getEnhancedDailyLeaderboard(day, 20);
-      setLeaderboard(data as LeaderboardEntry[]);
-
+      setLeaderboard(data);
     } catch (error) {
       console.error("Error fetching leaderboard:", error);
     } finally {
@@ -57,22 +60,20 @@ export default function LeaderboardPage() {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   const formatTime = (timestamp: any) => {
     if (!timestamp) return "N/A";
-    // Check if it's a Firestore Timestamp (has toDate method)
-    const date = (timestamp && typeof timestamp.toDate === 'function')
-      ? timestamp.toDate()
-      : new Date(timestamp);
-
-    return [date.toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    }), date.toLocaleString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    })];
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    return [
+      date.toLocaleString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
+      date.toLocaleString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+      }),
+    ];
   };
-
 
   return (
     <motion.div
@@ -82,9 +83,7 @@ export default function LeaderboardPage() {
       className="min-h-screen bg-transparent py-14"
     >
       <div className="flex flex-col container mx-auto px-4 md:px-6 pt-8 gap-6 lg:gap-12">
-        <div className="flex flex-1 p-4 lg:p-8 bg-black text-white">
-          <h1 className="font-whirlyBirdie text-base lg:text-2xl font-bold">Leaderboard</h1>
-        </div>
+        <PageExplainer pageTitle="Leaderboard" />
 
         {/* Header */}
         <div className="text-center lg:mt-4">
@@ -112,15 +111,18 @@ export default function LeaderboardPage() {
                     key={day}
                     onClick={() => handleDayChange(day)}
                     disabled={day > currentDay}
-                    className={`transition-all border w-16 lg:w-40 py-1 border-white ${isSelected
-                      ? "bg-white text-black hover:bg-gray-200"
-                      : day > currentDay
-                        ? "border-white text-white opacity-40 cursor-not-allowed"
-                        : "border-white text-white  hover:bg-white/10"
-                      }`}
+                    className={`transition-all border w-16 lg:w-40 py-1 border-white ${
+                      isSelected
+                        ? "bg-white text-black hover:bg-gray-200"
+                        : day > currentDay
+                          ? "border-white text-white opacity-40 cursor-not-allowed"
+                          : "border-white text-white  hover:bg-white/10"
+                    }`}
                   >
                     <div className="flex flex-col items-center">
-                      <span className="font-whirlyBirdie font-bold text-[9.75px] lg:text-xl">Day {day}</span>
+                      <span className="font-whirlyBirdie font-bold text-[9.75px] lg:text-xl">
+                        Day {day}
+                      </span>
                     </div>
                   </button>
                 );
@@ -155,12 +157,12 @@ export default function LeaderboardPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`grid grid-cols-[40px_0.8fr_0.4fr] lg:grid-cols-[100px_0.8fr_0.2fr] justify-center transition-colors ${currentUser && entry.id === currentUser.uid
-                      ? 'bg-white/15'
-                      : 'hover:bg-white/5'
-                      }`}
+                    className={`grid grid-cols-[40px_0.8fr_0.4fr] lg:grid-cols-[100px_0.8fr_0.2fr] justify-center transition-colors ${
+                      currentUser && entry.id === currentUser.uid
+                        ? "bg-white/15"
+                        : "hover:bg-white/5"
+                    }`}
                   >
-
                     <div className="flex justify-center items-center text-center border-r border-white text-[9.87px] lg:text-4xl font-bold">
                       {entry.rank}
                     </div>
@@ -168,8 +170,10 @@ export default function LeaderboardPage() {
                     {/* Name and attempts */}
                     <div className="border-r border-white p-4 lg:p-6 flex-1">
                       <h3 className="font-whirlyBirdie text-[10.59px] lg:text-lg font-semibold">
-                        {entry.name || 'Anonymous'}
-                        {currentUser && entry.id === currentUser.uid && ' (You)'}
+                        {entry.name || "Anonymous"}
+                        {currentUser &&
+                          entry.id === currentUser.uid &&
+                          " (You)"}
                       </h3>
                       <p className="text-[10.59px] lg:text-lg mt-1">
                         Attempts: {entry.attempts}
