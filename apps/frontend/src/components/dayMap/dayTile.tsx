@@ -16,16 +16,20 @@ export const DayTile = ({
     if (isDayAccessible && !isComplete) navigate(`/play/${day}`);
   };
 
+  const isLocked = !isComplete && !isDayAccessible;
+
   return (
     <div
-      className={`group overflow-visible day-cell w-full h-full px-2 bg-black text-white flex items-center justify-center text-base font-whirlyBirdie font-bold border border-white/20 ${
-        isComplete ? "day-complete" : isDayAccessible && "day-hoverable"
-      }`}
+      className={`group overflow-visible day-cell w-full h-full px-2 flex items-center justify-center text-base font-whirlyBirdie font-bold border ${isLocked
+          ? "bg-[#252525] text-white/30 border-white/10" // Gray/Dimmed for Locked
+          : "bg-black text-white border-white/20"        // Black/Bright for Accessible/Complete
+        } ${isComplete ? "day-complete" : isDayAccessible ? "day-hoverable" : ""
+        }`}
       onClick={handleClick}
     >
-      <div className="day-cell-side overflow-visible" />
+      <div className={`day-cell-side overflow-visible ${isLocked ? "!bg-[#1a1a1a]" : ""}`} />
       DAY {day}
-      <div className="day-cell-bottom overflow-visible" />
+      <div className={`day-cell-bottom overflow-visible ${isLocked ? "!bg-[#1a1a1a]" : ""}`} />
     </div>
   );
 };
