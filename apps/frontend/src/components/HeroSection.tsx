@@ -53,7 +53,7 @@ const heroContainerVariants = {
     y: 0,
     transition: {
       duration: 0.7,
-      ease: "easeOut",
+      ease: "easeOut" as const,
       staggerChildren: 0.18,
     },
   },
@@ -266,7 +266,7 @@ const HeroSection = () => {
                 transition={{
                   repeat: Infinity,
                   duration: 1.1,
-                  ease: "easeInOut",
+                  ease: "easeInOut" as const,
                 }}
               >
                 <svg
