@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -5,10 +6,44 @@ import { usePlay } from '../hooks/usePlay';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from "framer-motion";
-import tutor1 from '@/assets/tutor1.jpeg';
-import tutor2 from '@/assets/tutor2.jpeg';
 import leftArrow from '@/assets/left-arrow.svg';
 import { calculateGridLayout, ImageSquare } from '@/components/play/ImageGrid';
+
+import alchemist from '@/assets/alchemist.png';
+import rumi from '@/assets/rumi.png';
+import sand_storm from '@/assets/sand_storm.png';
+import pyramid from '@/assets/pyramid.png';
+import hawkings from '@/assets/hawkings.png';
+
+const TUTORIAL_SLIDES = [
+  {
+    image: alchemist,
+    title: "QUESTION",
+    text: "I speak without words, guide without maps, and only those who listen with their heart understand me. I am the actual treasure hunt... Discover where I hide!!"
+  },
+  {
+    image: rumi,
+    text: "1. Clue of poet Rumi : The novel is deeply influenced by Sufi philosophy and closely resembles the teachings of Jalaluddin Rumi, the 13th century Sufi poet. Both The Alchemist and Rumi emphasize \" The Universe helps you when you follow your true path\""
+  },
+  {
+    image: sand_storm,
+    text: "2. Clue of Sand Storm: There are several scenes of Sand storm in The Alchemist also the protagonist himself turns into sandstorm wind"
+  },
+  {
+    image: pyramid,
+    text: "3. Clue of Pyramid : The pyramids are the final destination of Santiago, the protagonist."
+  },
+  {
+    image: hawkings,
+    text: "4. Clue of Stephen Hawking : His famous book \"The Brief History of Time\" is also released in the year 1988, the same year Paulo Coelho published \"The Alchemist\""
+  },
+  {
+    image: null,
+    title: "CONCLUSION",
+    text: "Each clue converges on The Alchemist: the novel is steeped in Sufi-like wisdom (Rumi-style guidance about following your true path), contains vivid desert imagery and a literal sandstorm sequence, culminates at the Egyptian pyramids (Santiago's final destination), and was first published in 1988 — the same year Hawking's A Brief History of Time came out, giving a neat date-based cross-clue. Put those together and there's only one book that fits all four hints.",
+    answer: "ALCHEMIST"
+  }
+];
 
 const DayBox = ({ day, left, top, dayTop, statusTop, isCompleted }: { day: number; left: string; top: string; dayTop: string; statusTop: string; isCompleted?: boolean }) => (
   <>
@@ -39,6 +74,8 @@ function PlayPage() {
   const [scaleY, setScaleY] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [currentSlide, setCurrentSlide] = useState(0);
+
   const { displayDay, question, progress, cooldownSeconds, initialize, fetchQuestion, submitAnswer } = usePlay(currentUser);
 
   useEffect(() => {
@@ -57,6 +94,11 @@ function PlayPage() {
     window.addEventListener('resize', updateScale);
     return () => window.removeEventListener('resize', updateScale);
   }, []);
+
+  // Reset slide when opening
+  useEffect(() => {
+    if (isOpen) setCurrentSlide(0);
+  }, [isOpen]);
 
   // Get actual images array from question
   const getQuestionImages = (): string[] => {
@@ -127,6 +169,18 @@ function PlayPage() {
     }
   };
 
+  const nextSlide = () => {
+    if (currentSlide < TUTORIAL_SLIDES.length - 1) {
+      setCurrentSlide(prev => prev + 1);
+    }
+  };
+
+  const prevSlide = () => {
+    if (currentSlide > 0) {
+      setCurrentSlide(prev => prev - 1);
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }} className="min-h-screen bg-transparent relative overflow-y-auto" ref={containerRef}>
       {/* Desktop Layout */}
@@ -187,7 +241,6 @@ function PlayPage() {
           <Input id="answer-input" placeholder="" value={answer} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAnswer(e.target.value)} disabled={cooldownSeconds > 0 || submitting} onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => e.key === 'Enter' && handleSubmit()} className="w-full h-full" />
         </div>
 
-        {/* Placeholder Text */}
         {/* Placeholder Text */}
         {!answer && <div className="absolute pointer-events-none font-poppins font-medium w-[218px] h-[36px] left-[60px] top-[872px] text-[24px] leading-[36px] text-[#6B6B6B]">Enter Your Answer</div>}
 
@@ -347,56 +400,133 @@ function PlayPage() {
         {isOpen && (
           <motion.div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <motion.div
-              className="bg-black border border-white w-full max-w-[340px] md:max-w-[500px] shadow-2xl"
+              className="bg-black border border-white w-full max-w-[340px] md:max-w-[500px] h-[500px] md:h-[600px] shadow-2xl flex flex-col"
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
               {/* Header Grid */}
-              <div className="grid grid-cols-[1fr_2fr_1fr] h-[60px] md:h-[70px] border-b border-white">
+              <div className="grid grid-cols-[1fr_2fr_1fr] h-[60px] md:h-[70px] border-b border-white shrink-0">
                 <div className="border-r border-white"></div>
                 <div className="flex items-center justify-center font-whirlyBirdie font-bold text-white text-xl md:text-2xl tracking-wider">
                   TUTORIAL
                 </div>
-                <div className="border-l border-white"></div>
+                <div className="border-l border-white">
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="w-full h-full flex items-center justify-center font-whirlyBirdie font-bold text-[#ef4444] text-xl md:text-2xl hover:bg-[#ef4444] hover:text-white transition-colors"
+                  >
+                    X
+                  </button>
+                </div>
               </div>
 
-              {/* Content */}
-              <div className="p-4 md:p-6 flex flex-col items-center space-y-4 md:space-y-6">
-                {/* Images */}
-                <div className="flex gap-3 md:gap-5 w-full justify-center">
-                  <div className="border border-white w-[130px] h-[130px] md:w-[160px] md:h-[160px] p-1.5 md:p-2">
-                    <img src={tutor1} alt="Tutorial 1" className="w-full h-full object-cover" />
+              {/* Slide Content */}
+              <div className="p-4 md:p-6 flex flex-col items-center grow overflow-hidden">
+                {/* Title (e.g. QUESTION, CONCLUSION) */}
+                {(TUTORIAL_SLIDES[currentSlide] as any).title && (
+                  <div className="text-xs md:text-sm text-gray-400 mb-4 tracking-widest font-whirlyBirdie font-bold">
+                    {(TUTORIAL_SLIDES[currentSlide] as any).title}
                   </div>
-                  <div className="border border-white w-[130px] h-[130px] md:w-[160px] md:h-[160px] p-1.5 md:p-2">
-                    <img src={tutor2} alt="Tutorial 2" className="w-full h-full object-cover" />
-                  </div>
-                </div>
+                )}
+
+                {/* Image Area - Hide for conclusion */}
+                {!(TUTORIAL_SLIDES[currentSlide] as any).title || (TUTORIAL_SLIDES[currentSlide] as any).title !== 'CONCLUSION' ? (
+                  /* Logic to show image if it exists, or placeholder if not conclusion (though currently all non-conclusion have images) */
+                  /* Wait, my previous logic was: hide if title exists? No, hide if title is present AND it's the conclusion? 
+                     The user wants 'QUESTION' title AND image.
+                     The previous logic '!(...title)' hid image for Conclusion. 
+                     Now 'Question' also has title.
+                     I need to specifically hide image ONLY for Conclusion slide, or based on image presence.
+                     Slide 6 has image: null. Slide 1 has image: alchemist.
+                     The easiest check is: if (image) show image.
+                  */
+                  (TUTORIAL_SLIDES[currentSlide] as any).image ? (
+                    <div className="w-full flex justify-center mb-4 md:mb-6 h-[160px] md:h-[200px] shrink-0 relative">
+                      <div className="border border-white p-1.5 md:p-2 h-full aspect-square">
+                        <img
+                          src={(TUTORIAL_SLIDES[currentSlide] as any).image}
+                          alt={`Slide ${currentSlide + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  ) : (TUTORIAL_SLIDES[currentSlide] as any).title !== 'CONCLUSION' && (
+                    <div className="w-full flex justify-center mb-4 md:mb-6 h-[160px] md:h-[200px] shrink-0 relative">
+                      <div className="flex items-center justify-center h-full text-white font-orbitron text-4xl">
+                        🧩
+                      </div>
+                    </div>
+                  )
+                ) : null}
 
                 {/* Text Content */}
-                <div className="text-center font-whirlyBirdie font-bold text-white text-[11px] md:text-sm leading-relaxed uppercase max-w-sm tracking-wide">
-                  France gifted the Statue of Liberty to the USA. <br />
-                  It was made of copper and over time it turned green due to chemical reactions.
-                </div>
+                <div className="text-center font-whirlyBirdie font-bold text-white text-[11px] md:text-sm leading-relaxed uppercase max-w-sm tracking-wide grow overflow-y-auto w-full scrollbar-hide pt-2 flex flex-col items-center">
 
-                {/* Answer */}
-                <div className="flex flex-col items-center gap-1 md:gap-1.5">
-                  <div className="font-whirlyBirdie font-bold text-white text-sm md:text-lg tracking-wider">
-                    ANSWER :
+                  <div className="mb-4">
+                    {TUTORIAL_SLIDES[currentSlide].text.includes(":") ? (
+                      (() => {
+                        const parts = TUTORIAL_SLIDES[currentSlide].text.split(":");
+                        const prefix = parts[0];
+                        const rest = parts.slice(1).join(":");
+                        return (
+                          <span>
+                            <span className="text-gray-400 font-bold">{prefix} :</span>
+                            {rest}
+                          </span>
+                        );
+                      })()
+                    ) : (
+                      TUTORIAL_SLIDES[currentSlide].text
+                    )}
                   </div>
-                  <div className="font-whirlyBirdie font-bold text-white text-sm md:text-lg tracking-wider">
-                    STATUE OF LIBERTY
-                  </div>
-                </div>
 
-                {/* Close Button */}
+                  {/* Optional Answer Display */}
+                  {(TUTORIAL_SLIDES[currentSlide] as any).answer && (
+                    <div className="mt-2">
+                      <div className="text-xs md:text-sm text-gray-400 mb-1">ANSWER :</div>
+                      <div className="text-xl md:text-2xl tracking-widest text-[#10b981]">
+                        {(TUTORIAL_SLIDES[currentSlide] as any).answer}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Navigation Footer */}
+              <div className="border-t border-white h-[60px] flex items-center justify-between px-6 shrink-0">
+                {/* Back Button */}
                 <button
-                  onClick={() => setIsOpen(false)}
-                  className="font-whirlyBirdie text-white border border-white px-8 py-2 md:px-10 md:py-2.5 text-sm md:text-base hover:bg-white hover:text-black transition-colors duration-300 uppercase tracking-widest"
+                  onClick={prevSlide}
+                  disabled={currentSlide === 0}
+                  className={`font-whirlyBirdie font-bold text-white text-sm md:text-base hover:text-gray-300 transition-colors uppercase tracking-wider ${currentSlide === 0 ? 'opacity-0 cursor-default' : 'opacity-100'}`}
                 >
-                  close
+                  &lt; BACK
                 </button>
+
+                {/* Dots Indicator */}
+                <div className="flex gap-2">
+                  {TUTORIAL_SLIDES.map((_, idx) => (
+                    <div
+                      key={idx}
+                      className={`w-2 h-2 rounded-full border border-white transition-all duration-300 ${idx === currentSlide ? 'bg-white' : 'bg-transparent'}`}
+                    />
+                  ))}
+                </div>
+
+                {/* Next/Close Button */}
+                {/* Next/Close Button */}
+                {currentSlide === TUTORIAL_SLIDES.length - 1 ? (
+                  <div className="w-[60px] md:w-[70px]" />
+                ) : (
+                  <button
+                    onClick={nextSlide}
+                    className="font-whirlyBirdie font-bold text-white text-sm md:text-base hover:text-gray-300 transition-colors uppercase tracking-wider"
+                  >
+                    NEXT &gt;
+                  </button>
+                )}
               </div>
             </motion.div>
           </motion.div>
