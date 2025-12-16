@@ -260,8 +260,10 @@ function PlayPage() {
 
         {/* Submit Button */}
         <div className="absolute w-[216px] h-[73px] left-[731px] top-[851px]">
-          <Button onClick={handleSubmit} disabled={submitting || cooldownSeconds > 0} className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center text-[24px] leading-[29px]">
-            {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+          <Button onClick={handleSubmit} disabled={submitting || cooldownSeconds > 0} className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center overflow-hidden px-2">
+            <span className={`whitespace-nowrap ${submitting ? 'text-[20px] leading-[24px]' : 'text-[24px] leading-[29px]'}`}>
+              {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+            </span>
           </Button>
         </div>
 
@@ -390,9 +392,11 @@ function PlayPage() {
           <Button
             onClick={handleSubmit}
             disabled={submitting || cooldownSeconds > 0}
-            className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base"
+            className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base overflow-hidden px-2"
           >
-            {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+            <span className="whitespace-nowrap">
+              {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+            </span>
           </Button>
           {message && (
             <div
