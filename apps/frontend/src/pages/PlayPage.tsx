@@ -87,6 +87,8 @@ function PlayPage() {
   const [scaleX, setScaleX] = useState(1);
   const [scaleY, setScaleY] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
+  const questionRef = useRef<HTMLDivElement>(null);
+  const [questionHeight, setQuestionHeight] = useState(113.5); // default height
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -126,12 +128,14 @@ function PlayPage() {
 
   const questionImages = getQuestionImages();
 
-  // Calculate grid layout for desktop
+  // Calculate grid layout for desktop with dynamic question height
+  const availableHeight = Math.max(528 - questionHeight, 100); // Total height minus question area, minimum 100px
+  const imageStartTop = 249 + questionHeight; // Container top + question height
   const desktopImageLayout = calculateGridLayout(
     questionImages.length,
     918.03, // container width
-    414.5,  // available height (528 - 113.5 for question area)
-    362.5,  // start top (after divider line)
+    availableHeight,  // available height (dynamic based on question height)
+    imageStartTop,  // start top (after divider line, dynamic)
     29      // start left (container left)
   );
 
@@ -139,6 +143,28 @@ function PlayPage() {
     // Reset loaded state when images change
     setSquareImagesLoaded(new Array(questionImages.length).fill(false));
   }, [questionImages.length]);
+
+  // Measure question height and update divider position
+  useEffect(() => {
+    const measureQuestion = () => {
+      if (questionRef.current) {
+        const height = questionRef.current.offsetHeight;
+        // Add padding (20px top) + some spacing (10px) for the divider
+        // Ensure minimum height of 113.5px (original value)
+        const calculatedHeight = Math.max(height + 20 + 10, 113.5);
+        setQuestionHeight(calculatedHeight);
+      }
+    };
+    
+    // Measure after DOM update
+    requestAnimationFrame(() => {
+      measureQuestion();
+    });
+    
+    // Also measure on window resize (for scaling)
+    window.addEventListener('resize', measureQuestion);
+    return () => window.removeEventListener('resize', measureQuestion);
+  }, [question?.question, scaleX, scaleY]);
 
   useEffect(() => {
     if (currentUser) initialize();
@@ -223,10 +249,13 @@ function PlayPage() {
 
         {/* Left Rectangle */}
         <div className="absolute bg-black border border-black w-[918.03px] h-[528px] left-[29px] top-[249px]">
-          <div className="absolute font-whirlyBirdie font-bold text-white w-[733px] h-[60px] left-[calc(50%-733px/2-50px)] top-0 pt-[20px] text-[20px] leading-[30px]">
+          <div 
+            ref={questionRef}
+            className="absolute font-whirlyBirdie font-bold text-white w-[733px] left-[calc(50%-733px/2-50px)] top-0 pt-[20px] text-[20px] leading-[30px] break-words"
+          >
             {question?.question || "I hold two people inside me forever, but i'm not a home. What am i ?"}
           </div>
-          <div className="absolute w-[918.03px] h-0 left-0 top-[113.5px] border border-white" />
+          <div className="absolute w-[918.03px] h-0 left-0 border border-white" style={{ top: `${questionHeight}px` }} />
         </div>
 
         {/* Image Squares - Dynamic Grid */}
