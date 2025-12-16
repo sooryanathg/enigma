@@ -45,13 +45,27 @@ const TUTORIAL_SLIDES = [
   }
 ];
 
-const DayBox = ({ day, left, top, dayTop, statusTop, isCompleted }: { day: number; left: string; top: string; dayTop: string; statusTop: string; isCompleted?: boolean }) => (
-  <>
-    <div className="absolute bg-white w-[126.08px] h-[94px]" style={{ left, top }} />
-    <div className="absolute font-whirlyBirdie font-bold text-black text-center w-[89px] h-[24px] text-[20px] leading-[24px] whitespace-nowrap" style={{ left: `${parseFloat(left) + 18}px`, top: dayTop }}>day {day}</div>
-    <div className="absolute font-poppins font-medium text-black text-center w-[105px] h-[24px] text-[16px] leading-[24px]" style={{ left: `${parseFloat(left) + 10}px`, top: statusTop }}>{isCompleted ? "Completed" : "In Progress"}</div>
-  </>
-);
+const DayBox = ({ day, left, top, dayTop, statusTop, isCompleted, isAccessible, isDateUnlocked }: { day: number; left: string; top: string; dayTop: string; statusTop: string; isCompleted?: boolean; isAccessible?: boolean; isDateUnlocked?: boolean }) => {
+  // Determine background color: completed > available > locked
+  let bgColor = 'bg-gray-400'; // default for locked
+  let textColor = 'text-white';
+  
+  if (isCompleted) {
+    bgColor = 'bg-[#f6efe6]'; // beige for completed
+    textColor = 'text-black';
+  } else if (isAccessible && isDateUnlocked !== false) {
+    bgColor = 'bg-white'; // white for available/unlocked
+    textColor = 'text-black';
+  }
+  
+  return (
+    <>
+      <div className={`absolute ${bgColor} w-[126.08px] h-[94px]`} style={{ left, top }} />
+      <div className={`absolute font-whirlyBirdie font-bold ${textColor} text-center w-[89px] h-[24px] text-[20px] leading-[24px] whitespace-nowrap`} style={{ left: `${parseFloat(left) + 18}px`, top: dayTop }}>day {day}</div>
+      <div className={`absolute font-poppins font-medium ${textColor} text-center w-[105px] h-[24px] text-[16px] leading-[24px]`} style={{ left: `${parseFloat(left) + 10}px`, top: statusTop }}>{isCompleted ? "Completed" : "In Progress"}</div>
+    </>
+  );
+};
 
 const DAY_BOXES = [
   { day: 1, left: "24.99px", top: "114px", dayTop: "139px", statusTop: "161px" },
@@ -265,9 +279,22 @@ function PlayPage() {
           <div className="absolute font-whirlyBirdie font-bold text-white text-center w-[332px] h-[29px] left-[25px] top-[55px] text-[24px] leading-[29px]">Your progress</div>
 
           {/* Day Boxes */}
-          {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }, idx) => (
-            <DayBox key={day} day={day} left={left} top={top} dayTop={dayTop} statusTop={statusTop} isCompleted={progress?.progress[idx]?.isCompleted} />
-          ))}
+          {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }, idx) => {
+            const dayProgress = progress?.progress[idx];
+            return (
+              <DayBox 
+                key={day} 
+                day={day} 
+                left={left} 
+                top={top} 
+                dayTop={dayTop} 
+                statusTop={statusTop} 
+                isCompleted={dayProgress?.isCompleted} 
+                isAccessible={dayProgress?.isAccessible}
+                isDateUnlocked={dayProgress?.isDateUnlocked}
+              />
+            );
+          })}
 
           {/* Progress Bar */}
           <div className="absolute bg-white w-[15px] h-[523px] left-[473.99px] top-[114px]" />
@@ -383,14 +410,32 @@ function PlayPage() {
         <div className="bg-black text-white p-4 rounded-lg">
           <div className="font-whirlyBirdie font-bold text-lg mb-4 text-center">Your progress</div>
           <div className="grid grid-cols-3 gap-3">
-            {DAY_BOXES.map(({ day }, idx) => (
-              <div key={day} className="bg-white rounded p-3 text-center">
-                <div className="font-whirlyBirdie font-bold text-black text-sm mb-1 whitespace-nowrap">day {day}</div>
-                <div className="font-poppins font-medium text-black text-xs">
-                  {progress?.progress[idx]?.isCompleted ? "Completed" : "In Progress"}
+            {DAY_BOXES.map(({ day }, idx) => {
+              const dayProgress = progress?.progress[idx];
+              const isCompleted = dayProgress?.isCompleted;
+              const isAvailable = dayProgress?.isAccessible && dayProgress?.isDateUnlocked !== false;
+              
+              // Determine background color: completed > available > locked
+              let bgColor = 'bg-gray-400'; // default for locked
+              let textColor = 'text-white';
+              
+              if (isCompleted) {
+                bgColor = 'bg-[#f6efe6]'; // beige for completed
+                textColor = 'text-black';
+              } else if (isAvailable) {
+                bgColor = 'bg-white'; // white for available/unlocked
+                textColor = 'text-black';
+              }
+              
+              return (
+                <div key={day} className={`${bgColor} rounded p-3 text-center`}>
+                  <div className={`font-whirlyBirdie font-bold ${textColor} text-sm mb-1 whitespace-nowrap`}>day {day}</div>
+                  <div className={`font-poppins font-medium ${textColor} text-xs`}>
+                    {isCompleted ? "Completed" : "In Progress"}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
