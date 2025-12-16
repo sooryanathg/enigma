@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { usePlay } from "../hooks/usePlay";
 import { Input } from "@/components/ui/input";
@@ -142,6 +142,9 @@ function PlayPage() {
     submitAnswer,
   } = usePlay(currentUser);
 
+  const { day } = useParams<{ day?: string }>();
+  const urlDay = day ? Number(day) : null;
+
   useEffect(() => {
     const updateScale = () => {
       if (window.innerWidth >= 1024) {
@@ -191,8 +194,16 @@ function PlayPage() {
   }, [questionImages.length]);
 
   useEffect(() => {
-    if (currentUser) initialize();
-  }, [currentUser, initialize]);
+    if (!currentUser) return;
+
+    // If day is present in URL → load that day
+    if (urlDay && !Number.isNaN(urlDay)) {
+      fetchQuestion(urlDay);
+    } else {
+      // Otherwise fallback to normal behavior
+      initialize();
+    }
+  }, [currentUser, urlDay, fetchQuestion, initialize]);
 
   useEffect(() => {
     if (question?.isCompleted && displayDay === progress?.progress.length) {
