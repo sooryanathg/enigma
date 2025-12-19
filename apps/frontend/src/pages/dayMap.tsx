@@ -5,13 +5,17 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import "./page.css";
 import { ArrowTile } from "@/components/dayMap/arrowTile";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { PageExplainer } from "@/components/ui/pageExplainer";
 import { TutorialTile } from "@/components/dayMap/tutorialTile";
+import TutorialModal from "@/components/play/tutorialModal";
 
 const DayMap = () => {
   const { currentUser } = useAuth();
   const { progress, fetchProgress } = usePlay(currentUser);
+
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     fetchProgress(true);
@@ -72,7 +76,10 @@ const DayMap = () => {
                     >
                       {cell.type === "day" &&
                         (cell.day === 0 ? (
-                          <TutorialTile isComplete={isDayComplete(0)} />
+                          <TutorialTile
+                            onClick={setIsOpen}
+                            isComplete={isDayComplete(0)}
+                          />
                         ) : (
                           <DayTile
                             day={cell.day}
@@ -99,6 +106,13 @@ const DayMap = () => {
           })}
         </div>
       </div>
+
+      <TutorialModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        currentSlide={currentSlide}
+        setCurrentSlide={setCurrentSlide}
+      />
     </div>
   );
 };

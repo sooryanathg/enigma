@@ -133,7 +133,7 @@ export default function TutorialModal({
               <button
                 onClick={prev}
                 disabled={currentSlide === 0}
-                className={`font-whirlyBirdie font-bold ${
+                className={`font-whirlyBirdie font-bold  text-white ${
                   currentSlide === 0 ? "opacity-0" : "opacity-100"
                 }`}
               >
@@ -152,7 +152,10 @@ export default function TutorialModal({
               </div>
 
               {currentSlide < TUTORIAL_SLIDES.length - 1 ? (
-                <button onClick={next} className="font-whirlyBirdie font-bold">
+                <button
+                  onClick={next}
+                  className="font-whirlyBirdie font-bold text-white"
+                >
                   NEXT &gt;
                 </button>
               ) : (
