@@ -11,7 +11,6 @@
   transform-style: preserve-3d;
   perspective: 1500px;
   transform: translateZ(0);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   z-index: 1;
 }
 
@@ -20,13 +19,12 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 0;
+  height: 100%;
+  width: 0;
   background-color: black;
   z-index: -1;
-  transform: rotateY(118deg) skewY(23deg) translateY(1px);
+  transform: rotateY(118deg) skewY(23deg) translateY(2px);
   transform-origin: left center;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .day-cell-bottom {
@@ -34,13 +32,23 @@
   position: absolute;
   bottom: 0;
   left: 0;
-  width: 0;
-  height: 100%;
+  width: 100%;
+  height: 0;
   background-color: black;
   z-index: -1;
-  transform: rotateX(111deg) skewX(20deg) translateY(4px) translateZ(2px);
+  transform: rotateX(110deg) skewX(20deg);
   transform-origin: bottom center;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.day-cell,
+.day-cell-side,
+.day-cell-bottom {
+  transition:
+    transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    width 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+
+  will-change: transform, width, height;
 }
 
 .day-cell.day-hoverable:hover {
@@ -50,12 +58,12 @@
 }
 
 .day-cell.day-hoverable:hover .day-cell-side {
-  height: 100%;
+  width: 80%;
   cursor: pointer;
 }
 
 .day-cell.day-hoverable:hover .day-cell-bottom {
-  width: 100%;
+  height: 90%;
   cursor: pointer;
 }
 
@@ -67,11 +75,11 @@
 }
 
 .day-cell.day-complete .day-cell-side {
-  height: 100%;
+  width: 80%;
   cursor: pointer;
 }
 
 .day-cell.day-complete .day-cell-bottom {
-  width: 100%;
+  height: 90%;
   cursor: pointer;
 }
