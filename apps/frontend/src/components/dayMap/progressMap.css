@@ -45,8 +45,8 @@
 
 .day-cell.day-hoverable:hover {
   transform: translateY(-30px) translateX(30px);
-  z-index: 15 !important;
   cursor: pointer;
+  z-index: 15 !important;
 }
 
 .day-cell.day-hoverable:hover .day-cell-side {
@@ -63,12 +63,15 @@
 .day-cell.day-complete {
   transform: translateY(-30px) translateX(30px);
   z-index: 5;
+  cursor: pointer;
 }
 
 .day-cell.day-complete .day-cell-side {
   height: 100%;
+  cursor: pointer;
 }
 
 .day-cell.day-complete .day-cell-bottom {
   width: 100%;
+  cursor: pointer;
 }
