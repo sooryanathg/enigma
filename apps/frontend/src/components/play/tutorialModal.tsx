@@ -19,6 +19,8 @@ import rumi from "@/assets/rumi.png";
 import sand_storm from "@/assets/sand_storm.png";
 import pyramid from "@/assets/pyramid.png";
 import hawkings from "@/assets/hawkings.png";
+import { usePlay } from "@/hooks/usePlay";
+import { useAuth } from "@/contexts/AuthContext";
 
 const TUTORIAL_SLIDES: TutorialSlide[] = [
   {
@@ -57,6 +59,14 @@ export default function TutorialModal({
   setCurrentSlide,
 }: TutorialModalProps) {
   const slide = TUTORIAL_SLIDES[currentSlide];
+  const { currentUser } = useAuth();
+
+  const { submitTutorial } = usePlay(currentUser);
+
+  const closeModal = async () => {
+    await submitTutorial();
+    onClose();
+  };
 
   const next = () =>
     currentSlide < TUTORIAL_SLIDES.length - 1 &&
@@ -87,7 +97,7 @@ export default function TutorialModal({
                 TUTORIAL
               </div>
               <button
-                onClick={onClose}
+                onClick={closeModal}
                 className="font-whirlyBirdie font-bold text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-colors"
               >
                 X

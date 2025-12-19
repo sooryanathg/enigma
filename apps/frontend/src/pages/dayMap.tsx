@@ -2,10 +2,9 @@ import { DayTile } from "@/components/dayMap/dayTile";
 import { generateMap } from "@/components/dayMap/mapGenerator";
 import { usePlay } from "@/hooks/usePlay";
 import { useAuth } from "@/contexts/AuthContext";
-
 import "./page.css";
 import { ArrowTile } from "@/components/dayMap/arrowTile";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { PageExplainer } from "@/components/ui/pageExplainer";
 import { TutorialTile } from "@/components/dayMap/tutorialTile";
 import TutorialModal from "@/components/play/tutorialModal";
@@ -17,24 +16,43 @@ const DayMap = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const hasInitiatedFetch = useRef(false);
+
   useEffect(() => {
-    fetchProgress(true);
-  }, []);
+    if (!isOpen && !progress?.isTutorialComplete) fetchProgress(true);
+  }, [isOpen]);
 
-  const completedDays = progress?.progress ?? [];
+  useEffect(() => {
+    if (currentUser && !hasInitiatedFetch.current && !progress) {
+      hasInitiatedFetch.current = true;
+      fetchProgress(true);
+    }
+  }, [currentUser, fetchProgress, progress]);
 
-  // Day N is complete if progress[N - 1] is completed
-  const isDayComplete = (day: number): boolean => {
-    if (day <= 0) return true;
-    return completedDays[day - 1]?.isCompleted == true;
-  };
+  const completedDays = useMemo(() => progress?.progress ?? [], [progress]);
 
-  const isDayAccessible = (day: number): boolean => {
-    if (day <= 1) return true;
-    return isDayComplete(day - 1);
-  };
+  const isDayComplete = useCallback(
+    (day: number): boolean => {
+      if (day === 0) {
+        return progress?.isTutorialComplete === true;
+      }
+      return completedDays[day - 1]?.isCompleted === true;
+    },
+    [completedDays],
+  );
 
-  const rows = generateMap(completedDays.length);
+  const isDayAccessible = useCallback(
+    (day: number): boolean => {
+      if (day === 0) return true;
+      return isDayComplete(day - 1);
+    },
+    [isDayComplete],
+  );
+
+  const rows = useMemo(
+    () => generateMap(completedDays.length),
+    [completedDays.length],
+  );
 
   return (
     <div className="min-h-screen flex flex-col container mx-auto px-4 md:px-6 gap-12 lg:gap-24 py-14">
@@ -55,21 +73,19 @@ const DayMap = () => {
 
             return (
               <div
-                key={rowIndex}
+                key={`row-${rowIndex}`}
                 className={`grid grid-cols-9 gap-0 items-center justify-center max-w-4xl overflow-visible ${
                   isReversed ? "direction-reverse" : ""
                 }`}
               >
                 {row.map((cell, cellIndex) => {
                   const visualColumn = isReversed ? 8 - cellIndex : cellIndex;
-
                   const zIndex = 1000 - visualColumn;
+
                   return (
                     <div
-                      key={cellIndex}
-                      style={{
-                        zIndex: zIndex,
-                      }}
+                      key={`cell-${rowIndex}-${cellIndex}`}
+                      style={{ zIndex }}
                       className={`flex w-full h-full min-h-[120px] relative overflow-visible ${
                         cell.type === "empty" ? "no-shadow" : ""
                       }`}
