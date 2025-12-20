@@ -10,8 +10,6 @@ interface TutorialSlide {
 interface TutorialModalProps {
   isOpen: boolean;
   onClose: () => void;
-  currentSlide: number;
-  setCurrentSlide: (index: number) => void;
 }
 
 import alchemist from "@/assets/alchemist.png";
@@ -21,6 +19,7 @@ import pyramid from "@/assets/pyramid.png";
 import hawkings from "@/assets/hawkings.png";
 import { usePlay } from "@/hooks/usePlay";
 import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
 
 const TUTORIAL_SLIDES: TutorialSlide[] = [
   {
@@ -52,12 +51,9 @@ const TUTORIAL_SLIDES: TutorialSlide[] = [
   },
 ];
 
-export default function TutorialModal({
-  isOpen,
-  onClose,
-  currentSlide,
-  setCurrentSlide,
-}: TutorialModalProps) {
+export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
   const slide = TUTORIAL_SLIDES[currentSlide];
   const { currentUser } = useAuth();
 
@@ -66,6 +62,7 @@ export default function TutorialModal({
   const closeModal = async () => {
     await submitTutorial();
     onClose();
+    setCurrentSlide(0);
   };
 
   const next = () =>

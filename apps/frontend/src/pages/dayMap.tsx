@@ -8,19 +8,22 @@ import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { PageExplainer } from "@/components/ui/pageExplainer";
 import { TutorialTile } from "@/components/dayMap/tutorialTile";
 import TutorialModal from "@/components/play/tutorialModal";
+import { useMapAnimation } from "@/hooks/useMapAnimation";
 
 const DayMap = () => {
   const { currentUser } = useAuth();
   const { progress, fetchProgress } = usePlay(currentUser);
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
 
   const hasInitiatedFetch = useRef(false);
+  const hasScrolledToActive = useRef(false);
+
+  const { mapRef } = useMapAnimation();
 
   useEffect(() => {
-    if (!isOpen && !progress?.isTutorialComplete) fetchProgress(true);
-  }, [isOpen]);
+    if (!isTutorialOpen && !progress?.isTutorialComplete) fetchProgress(true);
+  }, [isTutorialOpen]);
 
   useEffect(() => {
     if (currentUser && !hasInitiatedFetch.current && !progress) {
@@ -29,57 +32,6 @@ const DayMap = () => {
     }
   }, [currentUser, fetchProgress, progress]);
 
-  const mapRef = useRef<HTMLDivElement>(null);
-  const lastKnownScrollY = useRef(0);
-  const ticking = useRef(false);
-  const hasScrolledToActive = useRef(false);
-
-  const updateMapTransform = useCallback(() => {
-    if (!mapRef.current) return;
-
-    const y = lastKnownScrollY.current;
-    const width = window.innerWidth;
-
-    // RESPONSIVE CALCULATION:
-    // On small screens (mobile), we need a larger base offset and a faster correction rate.
-    const isMobile = width < 768;
-    const baseTranslateX = isMobile ? 85 : 75; // Starting position %
-    const driftFactor = isMobile ? 0.12 : 0.08; // How fast it moves left as you scroll
-
-    const horizontalCorrection = y * 0.8;
-    const xValue = baseTranslateX - horizontalCorrection * driftFactor;
-
-    mapRef.current.style.transform = `
-          rotateX(55deg)
-          rotateZ(-20deg)
-          translateX(${xValue}%)
-          translateY(-25%)
-        `;
-
-    ticking.current = false;
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      lastKnownScrollY.current = window.scrollY;
-      if (!ticking.current) {
-        window.requestAnimationFrame(updateMapTransform);
-        ticking.current = true;
-      }
-    };
-
-    // Also update on resize to ensure it stays centered if orientation changes
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", updateMapTransform);
-
-    // Initial call to set position
-    updateMapTransform();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", updateMapTransform);
-    };
-  }, [updateMapTransform]);
   const completedDays = useMemo(() => progress?.progress ?? [], [progress]);
 
   const isDayComplete = useCallback(
@@ -165,7 +117,7 @@ const DayMap = () => {
                       {cell.type === "day" &&
                         (cell.day === 0 ? (
                           <TutorialTile
-                            onClick={setIsOpen}
+                            onClick={setIsTutorialOpen}
                             isComplete={isDayComplete(0)}
                           />
                         ) : (
@@ -196,10 +148,8 @@ const DayMap = () => {
       </div>
 
       <TutorialModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        currentSlide={currentSlide}
-        setCurrentSlide={setCurrentSlide}
+        isOpen={isTutorialOpen}
+        onClose={() => setIsTutorialOpen(false)}
       />
     </div>
   );

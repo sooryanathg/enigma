@@ -116,7 +116,6 @@ function PlayPage() {
 
   // For tutorial
   const [isOpen, setIsOpen] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState(0);
 
   const {
     displayDay,
@@ -642,12 +641,7 @@ function PlayPage() {
           </motion.div>
         )}
       </AnimatePresence>
-      <TutorialModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        currentSlide={currentSlide}
-        setCurrentSlide={setCurrentSlide}
-      />
+      <TutorialModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </motion.div>
   );
 }
