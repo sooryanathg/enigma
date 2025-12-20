@@ -68,7 +68,7 @@ const TextBlock = ({ children, className = "" }: TextBlockProps) => <p className
 interface DesktopSectionProps { content: ContentSection; top: number; CircularTextComponent: React.ComponentType; logoSize: { width: string; height: string; top: string; left: string }; }
 
 const DesktopSection = ({ content, top, CircularTextComponent, logoSize }: DesktopSectionProps) => (
-  <section className="absolute bg-black relative w-full" style={{ height: `${DESKTOP_LAYOUT.sectionHeight}px`, top: `${top}px`, left: `0px`, minHeight: '100vh' }}>
+  <section className="absolute bg-black relative w-full " style={{ height: `${DESKTOP_LAYOUT.sectionHeight}px`, top: `${top}px`, left: `0px`, minHeight: '100vh' }}>
     <GridLines />
     <div className="absolute top-[9%] left-[5%] w-[15%] max-w-[214px] aspect-square min-w-[150px]">
       <CircularTextComponent />
