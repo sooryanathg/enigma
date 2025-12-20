@@ -29,6 +29,57 @@ const DayMap = () => {
     }
   }, [currentUser, fetchProgress, progress]);
 
+  const mapRef = useRef<HTMLDivElement>(null);
+  const lastKnownScrollY = useRef(0);
+  const ticking = useRef(false);
+  const hasScrolledToActive = useRef(false);
+
+  const updateMapTransform = useCallback(() => {
+    if (!mapRef.current) return;
+
+    const y = lastKnownScrollY.current;
+    const width = window.innerWidth;
+
+    // RESPONSIVE CALCULATION:
+    // On small screens (mobile), we need a larger base offset and a faster correction rate.
+    const isMobile = width < 768;
+    const baseTranslateX = isMobile ? 85 : 75; // Starting position %
+    const driftFactor = isMobile ? 0.12 : 0.08; // How fast it moves left as you scroll
+
+    const horizontalCorrection = y * 0.8;
+    const xValue = baseTranslateX - horizontalCorrection * driftFactor;
+
+    mapRef.current.style.transform = `
+          rotateX(55deg)
+          rotateZ(-20deg)
+          translateX(${xValue}%)
+          translateY(-25%)
+        `;
+
+    ticking.current = false;
+  }, []);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      lastKnownScrollY.current = window.scrollY;
+      if (!ticking.current) {
+        window.requestAnimationFrame(updateMapTransform);
+        ticking.current = true;
+      }
+    };
+
+    // Also update on resize to ensure it stays centered if orientation changes
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", updateMapTransform);
+
+    // Initial call to set position
+    updateMapTransform();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", updateMapTransform);
+    };
+  }, [updateMapTransform]);
   const completedDays = useMemo(() => progress?.progress ?? [], [progress]);
 
   const isDayComplete = useCallback(
@@ -49,22 +100,43 @@ const DayMap = () => {
     [isDayComplete],
   );
 
-  const rows = useMemo(
-    () => generateMap(completedDays.length),
-    [completedDays.length],
-  );
+  const rows = useMemo(() => generateMap(30), [completedDays.length]);
+
+  const activeDay = useMemo(() => {
+    if (!progress) return 0;
+    const lastCompleted = completedDays.filter((d) => d.isCompleted).length;
+    return lastCompleted; // This is the day they are currently on
+  }, [completedDays, progress]);
+
+  useEffect(() => {
+    if (progress && !hasScrolledToActive.current) {
+      const activeElement = document.getElementById(`day-tile-${activeDay}`);
+      if (activeElement) {
+        activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        hasScrolledToActive.current = true;
+      }
+    }
+  }, [progress, activeDay]);
+
+  const horizontalCorrection = scrollY * 0.8;
 
   return (
-    <div className="min-h-screen flex flex-col container mx-auto px-4 md:px-6 gap-12 lg:gap-24 py-14">
+    <div className="min-h-screen flex flex-col container overflow-x-hidden selection:bg-none mx-auto px-4 md:px-6 gap-12 lg:gap-24 py-14">
       <PageExplainer pageTitle="Levels" />
 
-      <div className="flex items-center justify-center w-full max-w-6xl overflow-visible p-8">
+      <div className="w-full flex justify-center overflow-hidden pb-[-20%]">
         <div
-          className="relative overflow-visible"
+          ref={mapRef}
+          className="relative map-area transition-transform duration-75 ease-out"
           style={{
             transformStyle: "preserve-3d",
-            transform:
-              "rotateX(55deg) rotateZ(-20deg) translateY(-25%) translateX(20%)",
+            transform: `
+                    rotateX(55deg)
+                    rotateZ(-20deg)
+                    translateX(${75 - horizontalCorrection * 0.08}%)
+                    translateY(-25%)
+                  `,
+            marginBottom: "-40vh",
           }}
         >
           {rows.map((row, rowIndex) => {
