@@ -7,61 +7,57 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import leftArrow from "@/assets/left-arrow.svg";
 import { calculateGridLayout, ImageSquare } from "@/components/play/ImageGrid";
+import TutorialModal from "@/components/play/tutorialModal";
 
-import alchemist from "@/assets/alchemist.png";
-import rumi from "@/assets/rumi.png";
-import sand_storm from "@/assets/sand_storm.png";
-import pyramid from "@/assets/pyramid.png";
-import hawkings from "@/assets/hawkings.png";
-
-const TUTORIAL_SLIDES = [
-  {
-    image: alchemist,
-    title: "QUESTION",
-    text: "I speak without words, guide without maps, and only those who listen with their heart understand me. I am the actual treasure hunt... Discover where I hide!!",
-  },
-  {
-    image: rumi,
-    text: '1. Clue of poet Rumi : The novel is deeply influenced by Sufi philosophy and closely resembles the teachings of Jalaluddin Rumi, the 13th century Sufi poet. Both The Alchemist and Rumi emphasize " The Universe helps you when you follow your true path"',
-  },
-  {
-    image: sand_storm,
-    text: "2. Clue of Sand Storm: There are several scenes of Sand storm in The Alchemist also the protagonist himself turns into sandstorm wind",
-  },
-  {
-    image: pyramid,
-    text: "3. Clue of Pyramid : The pyramids are the final destination of Santiago, the protagonist.",
-  },
-  {
-    image: hawkings,
-    text: '4. Clue of Stephen Hawking : His famous book "The Brief History of Time" is also released in the year 1988, the same year Paulo Coelho published "The Alchemist"',
-  },
-  {
-    image: null,
-    title: "CONCLUSION",
-    text: "Each clue converges on The Alchemist: the novel is steeped in Sufi-like wisdom (Rumi-style guidance about following your true path), contains vivid desert imagery and a literal sandstorm sequence, culminates at the Egyptian pyramids (Santiago's final destination), and was first published in 1988 — the same year Hawking's A Brief History of Time came out, giving a neat date-based cross-clue. Put those together and there's only one book that fits all four hints.",
-    answer: "ALCHEMIST",
-  },
-];
-
-const DayBox = ({ day, left, top, dayTop, statusTop, isCompleted, isAccessible, isDateUnlocked }: { day: number; left: string; top: string; dayTop: string; statusTop: string; isCompleted?: boolean; isAccessible?: boolean; isDateUnlocked?: boolean }) => {
+const DayBox = ({
+  day,
+  left,
+  top,
+  dayTop,
+  statusTop,
+  isCompleted,
+  isAccessible,
+  isDateUnlocked,
+}: {
+  day: number;
+  left: string;
+  top: string;
+  dayTop: string;
+  statusTop: string;
+  isCompleted?: boolean;
+  isAccessible?: boolean;
+  isDateUnlocked?: boolean;
+}) => {
   // Determine background color: completed > available > locked
-  let bgColor = 'bg-gray-400'; // default for locked
-  let textColor = 'text-white';
-  
+  let bgColor = "bg-gray-400"; // default for locked
+  let textColor = "text-white";
+
   if (isCompleted) {
-    bgColor = 'bg-[#f6efe6]'; // beige for completed
-    textColor = 'text-black';
+    bgColor = "bg-[#f6efe6]"; // beige for completed
+    textColor = "text-black";
   } else if (isAccessible && isDateUnlocked !== false) {
-    bgColor = 'bg-white'; // white for available/unlocked
-    textColor = 'text-black';
+    bgColor = "bg-white"; // white for available/unlocked
+    textColor = "text-black";
   }
-  
+
   return (
     <>
-      <div className={`absolute ${bgColor} w-[126.08px] h-[94px]`} style={{ left, top }} />
-      <div className={`absolute font-whirlyBirdie font-bold ${textColor} text-center w-[89px] h-[24px] text-[20px] leading-[24px] whitespace-nowrap`} style={{ left: `${parseFloat(left) + 18}px`, top: dayTop }}>day {day}</div>
-      <div className={`absolute font-poppins font-medium ${textColor} text-center w-[105px] h-[24px] text-[16px] leading-[24px]`} style={{ left: `${parseFloat(left) + 10}px`, top: statusTop }}>{isCompleted ? "Completed" : "In Progress"}</div>
+      <div
+        className={`absolute ${bgColor} w-[126.08px] h-[94px]`}
+        style={{ left, top }}
+      />
+      <div
+        className={`absolute font-whirlyBirdie font-bold ${textColor} text-center w-[89px] h-[24px] text-[20px] leading-[24px] whitespace-nowrap`}
+        style={{ left: `${parseFloat(left) + 18}px`, top: dayTop }}
+      >
+        day {day}
+      </div>
+      <div
+        className={`absolute font-poppins font-medium ${textColor} text-center w-[105px] h-[24px] text-[16px] leading-[24px]`}
+        style={{ left: `${parseFloat(left) + 10}px`, top: statusTop }}
+      >
+        {isCompleted ? "Completed" : "In Progress"}
+      </div>
     </>
   );
 };
@@ -110,7 +106,6 @@ function PlayPage() {
   const [submitting, setSubmitting] = useState(false);
   const { currentUser } = useAuth();
   const [message, setMessage] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
   const [showFinalCongrats, setShowFinalCongrats] = useState(false);
   const [squareImagesLoaded, setSquareImagesLoaded] = useState<boolean[]>([]);
   const [scaleX, setScaleX] = useState(1);
@@ -119,7 +114,8 @@ function PlayPage() {
   const questionRef = useRef<HTMLDivElement>(null);
   const [questionHeight, setQuestionHeight] = useState(113.5); // default height
 
-  const [currentSlide, setCurrentSlide] = useState(0);
+  // For tutorial
+  const [isOpen, setIsOpen] = useState(false);
 
   const {
     displayDay,
@@ -151,11 +147,6 @@ function PlayPage() {
     return () => window.removeEventListener("resize", updateScale);
   }, []);
 
-  // Reset slide when opening
-  useEffect(() => {
-    if (isOpen) setCurrentSlide(0);
-  }, [isOpen]);
-
   // Get actual images array from question
   const getQuestionImages = (): string[] => {
     if (!question?.image) return [];
@@ -174,9 +165,9 @@ function PlayPage() {
   const desktopImageLayout = calculateGridLayout(
     questionImages.length,
     918.03, // container width
-    availableHeight,  // available height (dynamic based on question height)
-    imageStartTop,  // start top (after divider line, dynamic)
-    29      // start left (container left)
+    availableHeight, // available height (dynamic based on question height)
+    imageStartTop, // start top (after divider line, dynamic)
+    29, // start left (container left)
   );
 
   useEffect(() => {
@@ -195,15 +186,15 @@ function PlayPage() {
         setQuestionHeight(calculatedHeight);
       }
     };
-    
+
     // Measure after DOM update
     requestAnimationFrame(() => {
       measureQuestion();
     });
-    
+
     // Also measure on window resize (for scaling)
-    window.addEventListener('resize', measureQuestion);
-    return () => window.removeEventListener('resize', measureQuestion);
+    window.addEventListener("resize", measureQuestion);
+    return () => window.removeEventListener("resize", measureQuestion);
   }, [question?.question, scaleX, scaleY]);
 
   useEffect(() => {
@@ -264,18 +255,6 @@ function PlayPage() {
     }
   };
 
-  const nextSlide = () => {
-    if (currentSlide < TUTORIAL_SLIDES.length - 1) {
-      setCurrentSlide((prev) => prev + 1);
-    }
-  };
-
-  const prevSlide = () => {
-    if (currentSlide > 0) {
-      setCurrentSlide((prev) => prev - 1);
-    }
-  };
-
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -322,13 +301,17 @@ function PlayPage() {
 
         {/* Left Rectangle */}
         <div className="absolute bg-black border border-black w-[918.03px] h-[528px] left-[29px] top-[249px]">
-          <div 
+          <div
             ref={questionRef}
             className="absolute font-whirlyBirdie font-bold text-white w-[733px] left-[calc(50%-733px/2-50px)] top-0 pt-[20px] text-[20px] leading-[30px] break-words"
           >
-            {question?.question || "I hold two people inside me forever, but i'm not a home. What am i ?"}
+            {question?.question ||
+              "I hold two people inside me forever, but i'm not a home. What am i ?"}
           </div>
-          <div className="absolute w-[918.03px] h-0 left-0 border border-white" style={{ top: `${questionHeight}px` }} />
+          <div
+            className="absolute w-[918.03px] h-0 left-0 border border-white"
+            style={{ top: `${questionHeight}px` }}
+          />
         </div>
 
         {/* Image Squares - Dynamic Grid */}
@@ -383,9 +366,19 @@ function PlayPage() {
 
         {/* Submit Button */}
         <div className="absolute w-[216px] h-[73px] left-[731px] top-[851px]">
-          <Button onClick={handleSubmit} disabled={submitting || cooldownSeconds > 0} className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center overflow-hidden px-2">
-            <span className={`whitespace-nowrap ${submitting ? 'text-[20px] leading-[24px]' : 'text-[24px] leading-[29px]'}`}>
-              {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+          <Button
+            onClick={handleSubmit}
+            disabled={submitting || cooldownSeconds > 0}
+            className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center overflow-hidden px-2"
+          >
+            <span
+              className={`whitespace-nowrap ${submitting ? "text-[20px] leading-[24px]" : "text-[24px] leading-[29px]"}`}
+            >
+              {submitting
+                ? "Submitting..."
+                : cooldownSeconds > 0
+                  ? `Wait ${cooldownSeconds}s`
+                  : "SUBMIT"}
             </span>
           </Button>
         </div>
@@ -409,14 +402,14 @@ function PlayPage() {
           {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }, idx) => {
             const dayProgress = progress?.progress[idx];
             return (
-              <DayBox 
-                key={day} 
-                day={day} 
-                left={left} 
-                top={top} 
-                dayTop={dayTop} 
-                statusTop={statusTop} 
-                isCompleted={dayProgress?.isCompleted} 
+              <DayBox
+                key={day}
+                day={day}
+                left={left}
+                top={top}
+                dayTop={dayTop}
+                statusTop={statusTop}
+                isCompleted={dayProgress?.isCompleted}
                 isAccessible={dayProgress?.isAccessible}
                 isDateUnlocked={dayProgress?.isDateUnlocked}
               />
@@ -546,7 +539,11 @@ function PlayPage() {
             className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base overflow-hidden px-2"
           >
             <span className="whitespace-nowrap">
-              {submitting ? 'Submitting...' : cooldownSeconds > 0 ? `Wait ${cooldownSeconds}s` : 'SUBMIT'}
+              {submitting
+                ? "Submitting..."
+                : cooldownSeconds > 0
+                  ? `Wait ${cooldownSeconds}s`
+                  : "SUBMIT"}
             </span>
           </Button>
           {message && (
@@ -573,24 +570,32 @@ function PlayPage() {
             {DAY_BOXES.map(({ day }, idx) => {
               const dayProgress = progress?.progress[idx];
               const isCompleted = dayProgress?.isCompleted;
-              const isAvailable = dayProgress?.isAccessible && dayProgress?.isDateUnlocked !== false;
-              
+              const isAvailable =
+                dayProgress?.isAccessible &&
+                dayProgress?.isDateUnlocked !== false;
+
               // Determine background color: completed > available > locked
-              let bgColor = 'bg-gray-400'; // default for locked
-              let textColor = 'text-white';
-              
+              let bgColor = "bg-gray-400"; // default for locked
+              let textColor = "text-white";
+
               if (isCompleted) {
-                bgColor = 'bg-[#f6efe6]'; // beige for completed
-                textColor = 'text-black';
+                bgColor = "bg-[#f6efe6]"; // beige for completed
+                textColor = "text-black";
               } else if (isAvailable) {
-                bgColor = 'bg-white'; // white for available/unlocked
-                textColor = 'text-black';
+                bgColor = "bg-white"; // white for available/unlocked
+                textColor = "text-black";
               }
-              
+
               return (
                 <div key={day} className={`${bgColor} rounded p-3 text-center`}>
-                  <div className={`font-whirlyBirdie font-bold ${textColor} text-sm mb-1 whitespace-nowrap`}>day {day}</div>
-                  <div className={`font-poppins font-medium ${textColor} text-xs`}>
+                  <div
+                    className={`font-whirlyBirdie font-bold ${textColor} text-sm mb-1 whitespace-nowrap`}
+                  >
+                    day {day}
+                  </div>
+                  <div
+                    className={`font-poppins font-medium ${textColor} text-xs`}
+                  >
                     {isCompleted ? "Completed" : "In Progress"}
                   </div>
                 </div>
@@ -599,156 +604,6 @@ function PlayPage() {
           </div>
         </div>
       </div>
-
-      {/* Tutorial Popup */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="bg-black border border-white w-full max-w-[340px] md:max-w-[500px] h-[500px] md:h-[600px] shadow-2xl flex flex-col"
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Header Grid */}
-              <div className="grid grid-cols-[1fr_2fr_1fr] h-[60px] md:h-[70px] border-b border-white shrink-0">
-                <div className="border-r border-white"></div>
-                <div className="flex items-center justify-center font-whirlyBirdie font-bold text-white text-xl md:text-2xl tracking-wider">
-                  TUTORIAL
-                </div>
-                <div className="border-l border-white">
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="w-full h-full flex items-center justify-center font-whirlyBirdie font-bold text-[#ef4444] text-xl md:text-2xl hover:bg-[#ef4444] hover:text-white transition-colors"
-                  >
-                    X
-                  </button>
-                </div>
-              </div>
-
-              {/* Slide Content */}
-              <div className="p-4 md:p-6 flex flex-col items-center grow overflow-hidden">
-                {/* Title (e.g. QUESTION, CONCLUSION) */}
-                {(TUTORIAL_SLIDES[currentSlide] as any).title && (
-                  <div className="text-xs md:text-sm text-gray-400 mb-4 tracking-widest font-whirlyBirdie font-bold">
-                    {(TUTORIAL_SLIDES[currentSlide] as any).title}
-                  </div>
-                )}
-
-                {/* Image Area - Hide for conclusion */}
-                {!(TUTORIAL_SLIDES[currentSlide] as any).title ||
-                (TUTORIAL_SLIDES[currentSlide] as any).title !==
-                  "CONCLUSION" ? (
-                  /* Logic to show image if it exists, or placeholder if not conclusion (though currently all non-conclusion have images) */
-                  /* Wait, my previous logic was: hide if title exists? No, hide if title is present AND it's the conclusion?
-                     The user wants 'QUESTION' title AND image.
-                     The previous logic '!(...title)' hid image for Conclusion.
-                     Now 'Question' also has title.
-                     I need to specifically hide image ONLY for Conclusion slide, or based on image presence.
-                     Slide 6 has image: null. Slide 1 has image: alchemist.
-                     The easiest check is: if (image) show image.
-                  */
-                  (TUTORIAL_SLIDES[currentSlide] as any).image ? (
-                    <div className="w-full flex justify-center mb-4 md:mb-6 h-[160px] md:h-[200px] shrink-0 relative">
-                      <div className="border border-white p-1.5 md:p-2 h-full aspect-square">
-                        <img
-                          src={(TUTORIAL_SLIDES[currentSlide] as any).image}
-                          alt={`Slide ${currentSlide + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    (TUTORIAL_SLIDES[currentSlide] as any).title !==
-                      "CONCLUSION" && (
-                      <div className="w-full flex justify-center mb-4 md:mb-6 h-[160px] md:h-[200px] shrink-0 relative">
-                        <div className="flex items-center justify-center h-full text-white font-orbitron text-4xl">
-                          🧩
-                        </div>
-                      </div>
-                    )
-                  )
-                ) : null}
-
-                {/* Text Content */}
-                <div className="text-center font-whirlyBirdie font-bold text-white text-[11px] md:text-sm leading-relaxed uppercase max-w-sm tracking-wide grow overflow-y-auto w-full scrollbar-hide pt-2 flex flex-col items-center">
-                  <div className="mb-4">
-                    {TUTORIAL_SLIDES[currentSlide].text.includes(":")
-                      ? (() => {
-                          const parts =
-                            TUTORIAL_SLIDES[currentSlide].text.split(":");
-                          const prefix = parts[0];
-                          const rest = parts.slice(1).join(":");
-                          return (
-                            <span>
-                              <span className="text-gray-400 font-bold">
-                                {prefix} :
-                              </span>
-                              {rest}
-                            </span>
-                          );
-                        })()
-                      : TUTORIAL_SLIDES[currentSlide].text}
-                  </div>
-
-                  {/* Optional Answer Display */}
-                  {(TUTORIAL_SLIDES[currentSlide] as any).answer && (
-                    <div className="mt-2">
-                      <div className="text-xs md:text-sm text-gray-400 mb-1">
-                        ANSWER :
-                      </div>
-                      <div className="text-xl md:text-2xl tracking-widest text-[#10b981]">
-                        {(TUTORIAL_SLIDES[currentSlide] as any).answer}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Navigation Footer */}
-              <div className="border-t border-white h-[60px] flex items-center justify-between px-6 shrink-0">
-                {/* Back Button */}
-                <button
-                  onClick={prevSlide}
-                  disabled={currentSlide === 0}
-                  className={`font-whirlyBirdie font-bold text-white text-sm md:text-base hover:text-gray-300 transition-colors uppercase tracking-wider ${currentSlide === 0 ? "opacity-0 cursor-default" : "opacity-100"}`}
-                >
-                  &lt; BACK
-                </button>
-
-                {/* Dots Indicator */}
-                <div className="flex gap-2">
-                  {TUTORIAL_SLIDES.map((_, idx) => (
-                    <div
-                      key={idx}
-                      className={`w-2 h-2 rounded-full border border-white transition-all duration-300 ${idx === currentSlide ? "bg-white" : "bg-transparent"}`}
-                    />
-                  ))}
-                </div>
-
-                {/* Next/Close Button */}
-                {/* Next/Close Button */}
-                {currentSlide === TUTORIAL_SLIDES.length - 1 ? (
-                  <div className="w-[60px] md:w-[70px]" />
-                ) : (
-                  <button
-                    onClick={nextSlide}
-                    className="font-whirlyBirdie font-bold text-white text-sm md:text-base hover:text-gray-300 transition-colors uppercase tracking-wider"
-                  >
-                    NEXT &gt;
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Final Congratulations Popup */}
       <AnimatePresence>
@@ -786,6 +641,7 @@ function PlayPage() {
           </motion.div>
         )}
       </AnimatePresence>
+      <TutorialModal isOpen={isOpen} onClose={() => setIsOpen(false)} />
     </motion.div>
   );
 }

@@ -24,7 +24,7 @@ router.get("/play", authMiddleware, async (req: Request, res: Response) => {
     const requestedDay = req.query.day
       ? parseInt(req.query.day as string)
       : null;
-    const currentDay = requestedDay || await getCurrentDay();
+    const currentDay = requestedDay || (await getCurrentDay());
 
     // Fetch question document
     const questionRef = db.collection("questions").doc(`day${currentDay}`);
@@ -168,12 +168,14 @@ router.get("/progress", authMiddleware, async (req: Request, res: Response) => {
       return {
         day,
         isCompleted,
+
         isAccessible,
         reason,
         isCurrentDay: day === currentDay,
         isDateUnlocked,
       };
     });
+    const isTutorialComplete = userData.completed?.tutorial?.done === true;
 
     // Calculate summary statistics
     const nextAvailableDay =
@@ -188,6 +190,7 @@ router.get("/progress", authMiddleware, async (req: Request, res: Response) => {
     res.json({
       currentDay,
       progress,
+      isTutorialComplete,
       totalCompleted: progress.filter((p) => p.isCompleted).length,
       totalDays: totalDays,
       nextAvailableDay,
@@ -356,6 +359,39 @@ router.post(
     } catch (error) {
       console.error("Error validating answer:", error);
       res.status(500).json({ result: "Error validating answer" });
+    }
+  },
+);
+
+router.post(
+  "/play/tutorial-complete",
+  authMiddleware,
+  async (req: Request, res: Response) => {
+    const { db } = req.app.locals;
+    const uid = (req as any).user.uid;
+
+    try {
+      const userRef = db.collection("users").doc(uid);
+
+      await userRef.set(
+        {
+          completed: {
+            tutorial: {
+              done: true,
+              timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            },
+          },
+        },
+        { merge: true },
+      );
+
+      return res.json({
+        result: "Tutorial completed 🎉",
+        correct: true,
+      });
+    } catch (err) {
+      console.error("Tutorial completion error", err);
+      return res.status(500).json({ result: "Failed to complete tutorial" });
     }
   },
 );
