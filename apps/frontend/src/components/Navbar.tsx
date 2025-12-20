@@ -20,8 +20,8 @@ interface NavbarProps {
 const navItems = [
   { name: "Home", path: "/" },
   { name: "Rules", path: "/rules" },
+  { name: "About Us", path: "/about-us" },
   { name: "Leaderboard", path: "/leaderboard" },
-  { name: "About", path: "/about-us" },
   { name: "Play", path: "/play" },
 ];
 
@@ -152,12 +152,12 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
             <img
               src={Logo}
               alt="Enigma logo"
-        className="h-7 sm:h-8 md:h-9 w-auto object-contain select-none -ml-12"
+              className="h-7 sm:h-8 md:h-9 w-auto object-contain select-none -ml-1"
             />
           </Link>
 
-          <div className="hidden lg:flex items-center space-x-10">
-            <nav className="flex items-center space-x-10">
+          <div className="hidden lg:flex items-center gap-x-10">
+            <nav className="flex items-center gap-x-10">
               {navItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -167,7 +167,7 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
                     className={cn(
                       "text-sm tracking-wide transition-colors relative group",
                       "font-semibold",
-                      isActive ? "text-black font-bold" : "text-black/60 hover:text-black"
+                      isActive ? "text-black font-bold" : "text-black font-normal hover:text-black"
                     )}
                   >
                     {item.name}
@@ -207,7 +207,7 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
                 to="/signin"
                 className="text-sm font-medium rounded-md border border-black text-black px-4 py-1.5 hover:bg-black hover:text-white transition"
               >
-                SIGN UP
+                Sign Up
               </Link>
             ) : null}
           </div>
