@@ -19,8 +19,6 @@ const DayMap = () => {
   const hasInitiatedFetch = useRef(false);
   const hasScrolledToActive = useRef(false);
 
-  const { mapRef } = useMapAnimation();
-
   useEffect(() => {
     if (!isTutorialOpen && !progress?.isTutorialComplete) fetchProgress(true);
   }, [isTutorialOpen]);
@@ -52,7 +50,12 @@ const DayMap = () => {
     [isDayComplete],
   );
 
-  const rows = useMemo(() => generateMap(30), [completedDays.length]);
+  const rows = useMemo(
+    () => generateMap(completedDays.length),
+    [completedDays.length],
+  );
+
+  const { mapRef } = useMapAnimation(rows.length);
 
   const activeDay = useMemo(() => {
     if (!progress) return 0;
@@ -70,24 +73,17 @@ const DayMap = () => {
     }
   }, [progress, activeDay]);
 
-  const horizontalCorrection = scrollY * 0.8;
-
   return (
     <div className="min-h-screen flex flex-col container overflow-x-hidden selection:bg-none mx-auto px-4 md:px-6 gap-12 lg:gap-24 py-14">
       <PageExplainer pageTitle="Levels" />
 
-      <div className="w-full flex justify-center overflow-hidden pb-[-20%]">
+      <div className="flex-1 w-full flex justify-center items-start overflow-visible min-h-[80vh]">
         <div
           ref={mapRef}
-          className="relative map-area transition-transform duration-75 ease-out"
+          className="relative map-area"
           style={{
+            willChange: "transform",
             transformStyle: "preserve-3d",
-            transform: `
-                    rotateX(55deg)
-                    rotateZ(-20deg)
-                    translateX(${75 - horizontalCorrection * 0.08}%)
-                    translateY(-25%)
-                  `,
             marginBottom: "-40vh",
           }}
         >
@@ -95,12 +91,18 @@ const DayMap = () => {
             const isReversed =
               (rowIndex + 1) % 4 === 2 || (rowIndex + 1) % 4 === 3;
 
+            // Dynamically calculate columns if your generator isn't always 9 wide
+            const columnCount = row.length;
+
             return (
               <div
                 key={`row-${rowIndex}`}
-                className={`grid grid-cols-9 gap-0 items-center justify-center max-w-4xl overflow-visible ${
+                className={`grid gap-0 items-center justify-center max-w-4xl overflow-visible ${
                   isReversed ? "direction-reverse" : ""
                 }`}
+                style={{
+                  gridTemplateColumns: `repeat(${columnCount}, minmax(0, 1fr))`,
+                }}
               >
                 {row.map((cell, cellIndex) => {
                   const visualColumn = isReversed ? 8 - cellIndex : cellIndex;

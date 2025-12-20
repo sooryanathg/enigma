@@ -5,8 +5,3 @@
 .map-area {
   will-change: transform;
 }
-
-.grid .no-shadow,
-.grid .no-shadow * {
-  filter: none;
-}

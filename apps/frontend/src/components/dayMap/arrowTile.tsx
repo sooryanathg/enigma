@@ -1,6 +1,8 @@
 import { MoveRight, MoveLeft, MoveDown } from "lucide-react";
 import type { FC } from "react";
 
+import "./progressMap.css";
+
 interface ArrowTileProps {
   isActive: boolean;
   direction: string;
@@ -21,7 +23,7 @@ export const ArrowTile: FC<ArrowTileProps> = ({ isActive, direction }) => {
   };
   return (
     <div
-      className={`w-full h-full flex items-center justify-center border -z-10 ${
+      className={`arrow-tile w-full h-full flex items-center justify-center border -z-10 ${
         isActive ? "bg-black text-white border-white/20" : "border-black"
       }`}
     >
