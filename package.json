@@ -18,5 +18,5 @@
     "lint": "turbo run lint",
     "dev": "turbo run dev --parallel"
   },
-  "packageManager": "pnpm@10.20.0"
+  "packageManager": "pnpm@10.26.1"
 }

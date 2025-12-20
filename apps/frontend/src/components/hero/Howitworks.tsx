@@ -95,10 +95,10 @@ const HowItWorksSection = () => {
             className="text-center max-w-3xl mx-auto"
             variants={subheadingVariants}
           >
-            <p className="text-2xl md:text-3xl font-bold text-black/90">
+            <p className="text-2xl md:text-2xl font-normal text-black">
               Join our 10-day treasure hunt!!
             </p>
-            <p className="text-md md:text-lg font-bold text-black/70 mt-4">
+            <p className="text-md md:text-2xl font-normal text-black mt-4">
               One question per day, compete for the fastest completion time, and climb the daily leaderboard
             </p>
           </motion.div>
