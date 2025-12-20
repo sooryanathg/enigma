@@ -12,38 +12,27 @@ export const useMapAnimation = (rowCount: number) => {
     const width = window.innerWidth;
     const isMobile = width < 768;
 
-    const paddingTop = -1 * rowCount * 3;
-
-    if (mapRef.current.parentElement) {
-      mapRef.current.parentElement.style.marginTop = `${paddingTop}px`;
-    }
-
-    /**
-     * CALCULATION LOGIC:
-     * When rows are low (e.g., 1-2), the 3D 'rotateX' pulls the top of the map
-     * closer to the center. We reduce the baseTranslateX for short maps.
-     */
-    const rowOffset = Math.max(0, (rowCount - 1) * 3.8); // Add 5% shift per row
-    const desktopBase = 50 + rowOffset; // Starts tighter for 1 row, wider for more
-
+    // 1. Horizontal Drift Logic
+    const rowOffset = Math.max(0, (rowCount - 1) * 3.8);
+    const desktopBase = 50 + rowOffset;
     const baseTranslateX = isMobile ? 50 : desktopBase;
     const driftFactor = isMobile ? 0.08 : 0.13;
-    const horizontalCorrection = y * 0.5;
+    const xValue = baseTranslateX - y * 0.5 * driftFactor;
 
-    const xValue = baseTranslateX - horizontalCorrection * driftFactor;
+    // 2. Vertical Space Compression Logic
+    const verticalCompression = Math.min(-10, -rowCount * 0.45);
 
-    // Use transformOrigin to ensure the map anchors correctly
-    mapRef.current.style.transformOrigin = "center center";
-
+    // 3. Apply everything in a single GPU-accelerated string
     mapRef.current.style.transform = `
       rotateX(55deg)
       rotateZ(-20deg)
       translateX(calc(-50% + ${xValue}%))
-      translateY(-25%)
+      translateY(${verticalCompression}%)
+      translateZ(0)
     `;
 
     ticking.current = false;
-  }, [rowCount]); // Re-run if rowCount changes
+  }, [rowCount]);
 
   useEffect(() => {
     const handleScroll = () => {

@@ -84,7 +84,6 @@ const DayMap = () => {
           style={{
             willChange: "transform",
             transformStyle: "preserve-3d",
-            marginBottom: "-40vh",
           }}
         >
           {rows.map((row, rowIndex) => {
