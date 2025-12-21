@@ -28,16 +28,23 @@ const DayBox = ({
   isAccessible?: boolean;
   isDateUnlocked?: boolean;
 }) => {
-  // Determine background color: completed > available > locked
+  // Determine state: completed > available > locked
+  // A day is available if it's accessible AND date is unlocked
+  // Use truthy check for isAccessible (true), and ensure isDateUnlocked is not explicitly false
+  const isAvailable = isAccessible === true && (isDateUnlocked !== false);
+  
   let bgColor = "bg-gray-400"; // default for locked
   let textColor = "text-white";
+  let statusText = "Locked";
 
   if (isCompleted) {
     bgColor = "bg-[#d4c4b0]"; // beige for completed
     textColor = "text-black";
-  } else if (isAccessible && isDateUnlocked !== false) {
+    statusText = "Completed";
+  } else if (isAvailable) {
     bgColor = "bg-white"; // white for available/unlocked
     textColor = "text-black";
+    statusText = "In Progress";
   }
 
   return (
@@ -56,7 +63,7 @@ const DayBox = ({
         className={`absolute font-poppins font-medium ${textColor} text-center w-[105px] h-[24px] text-[16px] leading-[24px]`}
         style={{ left: `${parseFloat(left) + 10}px`, top: statusTop }}
       >
-        {isCompleted ? "Completed" : "In Progress"}
+        {statusText}
       </div>
     </>
   );
@@ -124,6 +131,7 @@ function PlayPage() {
     cooldownSeconds,
     initialize,
     fetchQuestion,
+    fetchProgress,
     submitAnswer,
   } = usePlay(currentUser);
 
@@ -200,14 +208,20 @@ function PlayPage() {
   useEffect(() => {
     if (!currentUser) return;
 
-    // If day is present in URL → load that day
-    if (urlDay && !Number.isNaN(urlDay)) {
-      fetchQuestion(urlDay);
-    } else {
-      // Otherwise fallback to normal behavior
-      initialize();
-    }
-  }, [currentUser, urlDay, fetchQuestion, initialize]);
+    // Always ensure progress is loaded first
+    const loadData = async () => {
+      // If day is present in URL → load that day
+      if (urlDay && !Number.isNaN(urlDay)) {
+        // Ensure progress is loaded (might be cached, but that's ok)
+        await fetchProgress();
+        await fetchQuestion(urlDay);
+      } else {
+        // Otherwise fallback to normal behavior
+        initialize();
+      }
+    };
+    loadData();
+  }, [currentUser, urlDay, fetchQuestion, initialize, fetchProgress]);
 
   useEffect(() => {
     if (question?.isCompleted && displayDay === progress?.progress.length) {
@@ -399,8 +413,8 @@ function PlayPage() {
           </div>
 
           {/* Day Boxes */}
-          {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }, idx) => {
-            const dayProgress = progress?.progress[idx];
+          {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }) => {
+            const dayProgress = progress?.progress.find((p) => p.day === day);
             return (
               <DayBox
                 key={day}
@@ -567,11 +581,11 @@ function PlayPage() {
             Your progress
           </div>
           <div className="grid grid-cols-3 gap-3">
-            {DAY_BOXES.map(({ day }, idx) => {
-              const dayProgress = progress?.progress[idx];
+            {DAY_BOXES.map(({ day }) => {
+              const dayProgress = progress?.progress.find((p) => p.day === day);
               const isCompleted = dayProgress?.isCompleted;
               const isAvailable =
-                dayProgress?.isAccessible &&
+                dayProgress?.isAccessible === true &&
                 dayProgress?.isDateUnlocked !== false;
 
               // Determine background color: completed > available > locked
@@ -596,7 +610,7 @@ function PlayPage() {
                   <div
                     className={`font-poppins font-medium ${textColor} text-xs`}
                   >
-                    {isCompleted ? "Completed" : "In Progress"}
+                    {isCompleted ? "Completed" : isAvailable ? "In Progress" : "Locked"}
                   </div>
                 </div>
               );
