@@ -92,6 +92,7 @@ const DayMap = () => {
 
             // Dynamically calculate columns if your generator isn't always 9 wide
             const columnCount = row.length;
+            console.log(columnCount);
 
             return (
               <div

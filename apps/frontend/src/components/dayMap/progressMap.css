@@ -84,12 +84,12 @@
 }
 
 .day-cell.day-hoverable:hover .day-cell-side {
-  width: 80%;
+  width: 100%;
   cursor: pointer;
 }
 
 .day-cell.day-hoverable:hover .day-cell-bottom {
-  height: 90%;
+  height: 100%;
   cursor: pointer;
 }
 
@@ -101,11 +101,11 @@
 }
 
 .day-cell.day-complete .day-cell-side {
-  width: 80%;
+  width: 100%;
   cursor: pointer;
 }
 
 .day-cell.day-complete .day-cell-bottom {
-  height: 90%;
+  height: 100%;
   cursor: pointer;
 }
