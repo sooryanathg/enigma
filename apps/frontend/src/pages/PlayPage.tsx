@@ -33,7 +33,7 @@ const DayBox = ({
   let textColor = "text-white";
 
   if (isCompleted) {
-    bgColor = "bg-[#f6efe6]"; // beige for completed
+    bgColor = "bg-[#d4c4b0]"; // beige for completed
     textColor = "text-black";
   } else if (isAccessible && isDateUnlocked !== false) {
     bgColor = "bg-white"; // white for available/unlocked
@@ -579,7 +579,7 @@ function PlayPage() {
               let textColor = "text-white";
 
               if (isCompleted) {
-                bgColor = "bg-[#f6efe6]"; // beige for completed
+                bgColor = "bg-[#d4c4b0]"; // beige for completed
                 textColor = "text-black";
               } else if (isAvailable) {
                 bgColor = "bg-white"; // white for available/unlocked

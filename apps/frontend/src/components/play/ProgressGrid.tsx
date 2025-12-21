@@ -31,7 +31,7 @@ const ProgressGrid = memo(function ProgressGrid({ days, displayDay, onSelectDay 
             <div
               key={d.day}
               className={`p-3 rounded-lg border cursor-pointer transition-all text-center border-gray-400
-                ${d.isCompleted ? 'bg-[#f6efe6] text-black' :
+                ${d.isCompleted ? 'bg-[#d4c4b0] text-black' :
                   isAvailable ? 'bg-white text-black' :
                   'bg-gray-400 text-white'}
                 ${d.day === displayDay ? 'border-4' : ''}`}
