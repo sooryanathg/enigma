@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
@@ -28,6 +29,18 @@ const navItems = [
 export function Navbar({ isSignInPage = false, className }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(true);
+  
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [open]);
   const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, signOut } = useAuth();
@@ -146,7 +159,7 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
         className
       )}
     >
-      <div className="relative z-10 container mx-auto px-6">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           <Link to="/" aria-label="Enigma home" className="flex items-center justify-start">
             <img
@@ -212,7 +225,28 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
             ) : null}
           </div>
 
-          <div className="lg:hidden">
+          {/* Mobile menu button and user auth */}
+          <div className="lg:hidden flex items-center gap-3">
+            {currentUser && (
+              <Link to="/play" aria-label="User profile">
+                <Avatar className="h-8 w-8 border border-black/10">
+                  <AvatarImage src={currentUser.photoURL ?? undefined} />
+                  <AvatarFallback className="bg-black text-white text-xs">
+                    {currentUser.displayName?.[0]?.toUpperCase() ||
+                      currentUser.email?.[0]?.toUpperCase() ||
+                      "U"}
+                  </AvatarFallback>
+                </Avatar>
+              </Link>
+            )}
+            {!currentUser && !isSignInPage && (
+              <Link
+                to="/signin"
+                className="text-xs font-medium rounded-md border border-black text-black px-3 py-1.5 hover:bg-black hover:text-white transition"
+              >
+                Sign Up
+              </Link>
+            )}
             <button
               onClick={() => setOpen(!open)}
               aria-label={open ? "Close menu" : "Open menu"}
@@ -222,49 +256,90 @@ export function Navbar({ isSignInPage = false, className }: NavbarProps) {
             </button>
           </div>
         </div>
-
-        <div
-          className={cn(
-            "fixed inset-y-0 left-0 w-full bg-[#FFF2E4] shadow-xl transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto pt-6",
-            open ? "translate-x-0" : "-translate-x-full"
-          )}
-          role="dialog"
-          aria-modal={open}
-        >
-          <div className="flex items-center justify-between p-4 border-b border-black/10">
-            <div className="flex items-center space-x-2">
-              <img src={Logo} alt="Enigma logo" className="h-6 w-auto object-contain" />
-              <span className="font-semibold text-lg text-black">Enigma</span>
-            </div>
-            <button onClick={() => setOpen(false)} aria-label="Close menu" className="p-2">
-              <X className="h-6 w-6 text-black" />
-            </button>
-          </div>
-
-          <nav className="flex flex-col mt-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                onClick={() => setOpen(false)}
-                className="px-6 py-4 text-black font-medium flex justify-between items-center border-b border-black/10 hover:bg-black hover:text-white transition-colors"
-              >
-                {item.name}
-                <span className="text-black/40">›</span>
-              </Link>
-            ))}
-          </nav>
-        </div>
-
-        {open && (
-          <button
-            type="button"
-            aria-label="Close mobile menu"
-            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
-            onClick={() => setOpen(false)}
-          />
-        )}
       </div>
+
+      {/* Mobile menu - rendered via portal */}
+      {typeof document !== 'undefined' && createPortal(
+        <>
+          {/* Mobile menu overlay */}
+          {open && (
+            <div
+              className="fixed top-16 left-0 right-0 bottom-0 bg-black/20 backdrop-blur-sm z-[60] lg:hidden"
+              onClick={() => setOpen(false)}
+              aria-hidden="true"
+            />
+          )}
+
+          {/* Mobile menu slide-out */}
+          <div
+            className="fixed top-16 left-0 w-full bottom-0 bg-[#FFF2E4] shadow-xl transition-transform duration-300 ease-in-out z-[70] overflow-y-auto lg:hidden"
+            style={{ 
+              transform: open ? 'translateX(0)' : 'translateX(-100%)',
+              willChange: 'transform'
+            }}
+            role="dialog"
+            aria-modal={open}
+            aria-label="Mobile navigation menu"
+            aria-hidden={!open}
+          >
+            <div className="flex flex-col h-full">
+              {/* Mobile nav items */}
+              <nav className="flex flex-col">
+                {navItems.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  return (
+                    <Link
+                      key={item.name}
+                      to={item.path}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "px-6 py-4 text-black font-medium flex justify-between items-center border-b border-black/10 transition-colors",
+                        isActive ? "bg-black/5 font-bold" : "hover:bg-black hover:text-white"
+                      )}
+                    >
+                      {item.name}
+                      <span className="text-black/40">{isActive ? "•" : "›"}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Mobile user section */}
+              {currentUser && (
+                <div className="mt-auto border-t border-black/10 pt-4 px-6 pb-6">
+                  <div className="flex items-center gap-3 mb-4 pb-4 border-b border-black/10">
+                    <Avatar className="h-10 w-10 border border-black/10">
+                      <AvatarImage src={currentUser.photoURL ?? undefined} />
+                      <AvatarFallback className="bg-black text-white">
+                        {currentUser.displayName?.[0]?.toUpperCase() ||
+                          currentUser.email?.[0]?.toUpperCase() ||
+                          "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-black truncate">
+                        {currentUser.displayName || "User"}
+                      </p>
+                      <p className="text-xs text-black/60 truncate">{currentUser.email}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setOpen(false);
+                    }}
+                    className="w-full flex items-center justify-center gap-2 text-sm font-medium text-red-500 py-3 border border-red-500/20 rounded-md hover:bg-red-500 hover:text-white transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </>,
+        document.body
+      )}
     </header>
   );
 }
