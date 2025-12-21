@@ -29,11 +29,6 @@ export function generateMap(dayCount: number): MapRow[] {
   const daysPerRow = 3;
 
   while (currentDay <= dayCount) {
-    const downArrowData: ArrowCell = {
-      type: "arrow",
-      arrow: "down",
-      fromDay: currentDay,
-    };
     const directedArrowData: ArrowCell = {
       type: "arrow",
       arrow: goingRight ? "right" : "left",
@@ -58,7 +53,18 @@ export function generateMap(dayCount: number): MapRow[] {
 
     // Add connector to next row
     if (currentDay <= dayCount && !isSmallScreen) {
-      row.push(directedArrowData, downArrowData);
+      row.push(
+        {
+          type: "arrow",
+          arrow: goingRight ? "right" : "left",
+          fromDay: currentDay - 1,
+        },
+        {
+          type: "arrow",
+          arrow: "down",
+          fromDay: currentDay - 1,
+        },
+      );
     }
 
     // Pad row to columns count
@@ -70,7 +76,13 @@ export function generateMap(dayCount: number): MapRow[] {
 
     // Add vertical transition row
     if (currentDay <= dayCount) {
-      const transitionRow: MapRow = [downArrowData];
+      const transitionRow: MapRow = [
+        {
+          type: "arrow",
+          arrow: "down",
+          fromDay: currentDay - 1,
+        },
+      ];
       while (transitionRow.length < columnCount) {
         transitionRow.push({ type: "empty" });
       }

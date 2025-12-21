@@ -1,5 +1,28 @@
 import { useCallback, useEffect, useRef } from "react";
 
+const screenParams = {
+  mobile: {
+    baseXOffset: 280,
+    driftFactor: 0.3,
+    mapRotationDeg: 55,
+  },
+  tablet: {
+    baseXOffset: 200,
+    driftFactor: 0.3,
+    mapRotationDeg: 55,
+  },
+  semiDesktop: {
+    baseXOffset: 280,
+    driftFactor: 0.25,
+    mapRotationDeg: 55,
+  },
+  desktop: {
+    baseXOffset: 50,
+    driftFactor: 0.13,
+    mapRotationDeg: 55,
+  },
+};
+
 export const useMapAnimation = (rowCount: number) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const lastKnownScrollY = useRef(0);
@@ -10,13 +33,20 @@ export const useMapAnimation = (rowCount: number) => {
 
     const y = lastKnownScrollY.current;
     const width = window.innerWidth;
-    const isMobile = width < 768;
+
+    let params = screenParams.desktop;
+    if (width < 768) {
+      params = screenParams.mobile;
+    } else if (width < 1024) {
+      params = screenParams.tablet;
+    } else if (width < 1200) {
+      params = screenParams.semiDesktop;
+    }
 
     // 1. Horizontal Drift Logic
     const rowOffset = Math.max(0, (rowCount - 1) * 3.8);
-    const desktopBase = 50 + rowOffset;
-    const baseTranslateX = isMobile ? 50 : desktopBase;
-    const driftFactor = isMobile ? 0.08 : 0.13;
+    const baseTranslateX = params.baseXOffset + rowOffset;
+    const driftFactor = params.driftFactor;
     const xValue = baseTranslateX - y * 0.5 * driftFactor;
 
     // 2. Vertical Space Compression Logic

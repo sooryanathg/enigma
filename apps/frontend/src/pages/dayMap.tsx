@@ -50,10 +50,7 @@ const DayMap = () => {
     [isDayComplete],
   );
 
-  const rows = useMemo(
-    () => generateMap(completedDays.length),
-    [completedDays.length],
-  );
+  const rows = useMemo(() => generateMap(100), [completedDays.length]);
 
   const { mapRef } = useMapAnimation(rows.length);
 
@@ -90,9 +87,8 @@ const DayMap = () => {
             const isReversed =
               (rowIndex + 1) % 4 === 2 || (rowIndex + 1) % 4 === 3;
 
-            // Dynamically calculate columns if your generator isn't always 9 wide
+            // Dynamically calculate columns
             const columnCount = row.length;
-            console.log(columnCount);
 
             return (
               <div
@@ -112,7 +108,7 @@ const DayMap = () => {
                     <div
                       key={`cell-${rowIndex}-${cellIndex}`}
                       style={{ zIndex }}
-                      className={`flex w-full h-full min-h-[120px] relative overflow-visible ${
+                      className={`flex w-full h-full min-h-[90px] lg:min-h-[120px] relative overflow-visible ${
                         cell.type === "empty" ? "no-shadow" : ""
                       }`}
                     >
