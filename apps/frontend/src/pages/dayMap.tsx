@@ -50,7 +50,10 @@ const DayMap = () => {
     [isDayComplete],
   );
 
-  const rows = useMemo(() => generateMap(100), [completedDays.length]);
+  const rows = useMemo(
+    () => generateMap(completedDays.length),
+    [completedDays.length],
+  );
 
   const { mapRef } = useMapAnimation(rows.length);
 

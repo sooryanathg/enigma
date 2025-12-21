@@ -2,17 +2,17 @@ import { useCallback, useEffect, useRef } from "react";
 
 const screenParams = {
   mobile: {
-    baseXOffset: 280,
+    baseXOffset: 50,
     driftFactor: 0.3,
     mapRotationDeg: 55,
   },
   tablet: {
-    baseXOffset: 200,
+    baseXOffset: 50,
     driftFactor: 0.3,
     mapRotationDeg: 55,
   },
   semiDesktop: {
-    baseXOffset: 280,
+    baseXOffset: 50,
     driftFactor: 0.25,
     mapRotationDeg: 55,
   },
