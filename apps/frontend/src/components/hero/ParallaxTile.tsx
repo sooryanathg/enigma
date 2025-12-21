@@ -24,27 +24,38 @@ const ParallaxTile = ({
   ox,
   oy,
   sizeClass,
-  src
+  src,
 }: ParallaxTileProps) => {
   const x = useTransform(smoothX, (v) => {
     const baseX = ox * (viewportWidth / 2);
-    return baseX + -v * depth * viewportWidth * parallax;
+    return baseX - v * depth * viewportWidth * parallax;
   });
 
   const y = useTransform(smoothY, (v) => {
     const baseY = oy * (viewportHeight / 2);
-    return baseY + -v * depth * viewportHeight * parallax;
+    return baseY - v * depth * viewportHeight * parallax;
   });
 
   return (
     <motion.div
       className={cn(
-        "absolute left-1/2 top-1/2 rounded-2xl shadow-xl overflow-hidden pointer-events-none",
+        "absolute left-1/2 top-1/2 overflow-hidden pointer-events-none shadow-xl",
+        // ✅ Less rounded on mobile, same look on desktop
+        "rounded-xl sm:rounded-2xl md:rounded-3xl",
         sizeClass
       )}
-      style={{ x, y }}
+      style={{
+        x,
+        y,
+        touchAction: "none",
+      }}
     >
-      <img src={src} className="h-full w-full object-cover" draggable={false} />
+      <img
+        src={src}
+        alt=""
+        className="h-full w-full object-cover"
+        draggable={false}
+      />
     </motion.div>
   );
 };
