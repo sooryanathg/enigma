@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { usePlay } from "../hooks/usePlay";
@@ -66,6 +66,62 @@ const DayBox = ({
         {statusText}
       </div>
     </>
+  );
+};
+
+// Component to handle individual image loading with cached image detection
+const ImageSquareWithLoader = ({ 
+  image, 
+  index, 
+  isLoaded, 
+  onLoad,
+  isSingleImage
+}: { 
+  image: string; 
+  index: number; 
+  isLoaded: boolean; 
+  onLoad: (index: number) => void;
+  isSingleImage: boolean;
+}) => {
+  const imgRef = React.useRef<HTMLImageElement>(null);
+  
+  // Check if image is already loaded (cached) when component mounts or image changes
+  React.useEffect(() => {
+    // Use a small delay to ensure ref is attached
+    const checkImage = () => {
+      if (imgRef.current && imgRef.current.complete && imgRef.current.naturalHeight !== 0) {
+        // Image is already loaded (cached)
+        onLoad(index);
+      }
+    };
+    
+    // Check immediately and after a short delay to handle cached images
+    checkImage();
+    const timeout = setTimeout(checkImage, 10);
+    
+    return () => clearTimeout(timeout);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [image, index]); // Only depend on image URL and index, not onLoad callback
+
+  return (
+    <div
+      className="relative aspect-square border border-white rounded overflow-hidden bg-black"
+      style={isSingleImage ? { maxWidth: "300px", margin: "0 auto" } : {}}
+    >
+      <img
+        ref={imgRef}
+        src={image}
+        alt={`Question image ${index + 1}`}
+        className={`w-full h-full object-cover transition-opacity duration-300 ${isLoaded ? "opacity-100" : "opacity-0"}`}
+        onLoad={() => onLoad(index)}
+        onError={() => onLoad(index)}
+      />
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -180,9 +236,9 @@ function PlayPage() {
   );
 
   useEffect(() => {
-    // Reset loaded state when images change
+    // Reset loaded state when image URLs actually change
     setSquareImagesLoaded(new Array(questionImages.length).fill(false));
-  }, [questionImages.length]);
+  }, [questionImages.join(',')]); // Track actual image URLs, not just length
 
   // Measure question height and update divider position
   useEffect(() => {
@@ -514,42 +570,20 @@ function PlayPage() {
             }}
           >
             {questionImages.map((image, i) => (
-              <div
-                key={i}
-                className="relative aspect-square border border-white rounded overflow-hidden bg-black"
-                style={
-                  questionImages.length === 1
-                    ? { maxWidth: "300px", margin: "0 auto" }
-                    : {}
+              <ImageSquareWithLoader
+                key={`${image}-${i}`}
+                image={image}
+                index={i}
+                isLoaded={squareImagesLoaded[i] || false}
+                isSingleImage={questionImages.length === 1}
+                onLoad={(idx) =>
+                  setSquareImagesLoaded((prev) => {
+                    const newState = [...prev];
+                    newState[idx] = true;
+                    return newState;
+                  })
                 }
-              >
-                {image && (
-                  <img
-                    src={image}
-                    alt={`Question image ${i + 1}`}
-                    className={`w-full h-full object-cover transition-opacity duration-300 ${squareImagesLoaded[i] ? "opacity-100" : "opacity-0"}`}
-                    onLoad={() =>
-                      setSquareImagesLoaded((prev) => {
-                        const newState = [...prev];
-                        newState[i] = true;
-                        return newState;
-                      })
-                    }
-                    onError={() =>
-                      setSquareImagesLoaded((prev) => {
-                        const newState = [...prev];
-                        newState[i] = true;
-                        return newState;
-                      })
-                    }
-                  />
-                )}
-                {!squareImagesLoaded[i] && image && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                  </div>
-                )}
-              </div>
+              />
             ))}
           </div>
         </div>
