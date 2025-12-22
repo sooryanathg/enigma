@@ -174,14 +174,27 @@ export function usePlay(user: any) {
           signal: controller.signal,
         });
 
+        // Check if request was aborted before processing response
+        if (controller.signal.aborted) {
+          return null;
+        }
+
         if (!res.ok) {
           const errorText = await res.text();
           console.error("❌ fetchQuestion failed - Status:", res.status);
           console.error("❌ Response:", errorText);
-          setQuestion(null);
+          // Only update state if request wasn't aborted
+          if (!controller.signal.aborted) {
+            setQuestion(null);
+          }
           return null;
         }
         const data = (await res.json()) as QuestionResponse;
+        
+        // Double-check if request was aborted before setting state
+        if (controller.signal.aborted) {
+          return null;
+        }
 
         // Cache the question
         sessionStorage.setItem(cacheKey, JSON.stringify(data));
@@ -194,17 +207,24 @@ export function usePlay(user: any) {
         setCooldownSeconds(data.cooldownSeconds ?? 0);
         return data;
       } catch (err: any) {
-        if (err.name === "AbortError") {
-          // Request was aborted, ignore
+        // Check if request was aborted - this is expected behavior, ignore it
+        if (err.name === "AbortError" || controller.signal.aborted) {
+          // Request was intentionally aborted, ignore silently
           return null;
         }
         if (import.meta.env.DEV) {
           console.error("fetchQuestion error", err);
         }
-        setQuestion(null);
+        // Only clear question state if this is the current active request
+        if (!controller.signal.aborted) {
+          setQuestion(null);
+        }
         return null;
       } finally {
-        setQuestionLoading(false);
+        // Only update loading state if this request wasn't aborted
+        if (!controller.signal.aborted) {
+          setQuestionLoading(false);
+        }
         // Don't set ref to null - leave it for cleanup on unmount
         // This prevents race conditions with concurrent calls
       }

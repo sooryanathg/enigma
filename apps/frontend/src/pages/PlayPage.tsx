@@ -137,6 +137,7 @@ function PlayPage() {
 
   const { day } = useParams<{ day?: string }>();
   const urlDay = day ? Number(day) : null;
+  const loadingRef = useRef(false);
 
   useEffect(() => {
     const updateScale = () => {
@@ -207,21 +208,36 @@ function PlayPage() {
 
   useEffect(() => {
     if (!currentUser) return;
+    
+    // Prevent duplicate requests - if already loading, skip
+    if (loadingRef.current) return;
+    
+    // If question is already loaded for this day, skip fetching
+    // This check handles the case when navigating back to the same day
+    if (question?.day === urlDay && urlDay !== null) {
+      return;
+    }
 
     // Always ensure progress is loaded first
     const loadData = async () => {
-      // If day is present in URL → load that day
-      if (urlDay && !Number.isNaN(urlDay)) {
-        // Ensure progress is loaded (might be cached, but that's ok)
-        await fetchProgress();
-        await fetchQuestion(urlDay);
-      } else {
-        // Otherwise fallback to normal behavior
-        initialize();
+      loadingRef.current = true;
+      try {
+        // If day is present in URL → load that day
+        if (urlDay && !Number.isNaN(urlDay)) {
+          // Ensure progress is loaded (might be cached, but that's ok)
+          await fetchProgress();
+          await fetchQuestion(urlDay);
+        } else {
+          // Otherwise fallback to normal behavior
+          initialize();
+        }
+      } finally {
+        loadingRef.current = false;
       }
     };
     loadData();
-  }, [currentUser, urlDay, fetchQuestion, initialize, fetchProgress]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser, urlDay]); // Intentionally exclude function dependencies to prevent unnecessary re-runs
 
   useEffect(() => {
     if (question?.isCompleted && displayDay === progress?.progress.length) {
