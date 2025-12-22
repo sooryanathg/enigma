@@ -40,7 +40,7 @@ const ParallaxTile = ({
     <motion.div
       className={cn(
         "absolute left-1/2 top-1/2 overflow-hidden pointer-events-none shadow-xl",
-        // ✅ Less rounded on mobile, same look on desktop
+      
         "rounded-xl sm:rounded-2xl md:rounded-3xl",
         sizeClass
       )}

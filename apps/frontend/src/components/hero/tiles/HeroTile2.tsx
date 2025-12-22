@@ -8,8 +8,9 @@ const HeroTile2 = (props: Props) => (
   <ParallaxTile
     {...props}
     depth={0.7}
-    ox={-1.2}
-    oy={-1.4}
+    ox={-1.8}
+    oy={-1.2}
+   
     sizeClass="w-[34%] sm:w-[24%] md:w-[16%]"
     src={p2}
   />

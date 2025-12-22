@@ -11,9 +11,8 @@ const HeroTile15 = (props: Props) => (
   <ParallaxTile
     {...props}
     depth={0.9}
-    ox={-1}
-    oy={-1}
-    // ✅ Bigger on mobile, balanced on desktop
+    ox={-1.2}
+    oy={-0.2}
     sizeClass="w-[34%] sm:w-[24%] md:w-[16%]"
     src={p15}
   />
