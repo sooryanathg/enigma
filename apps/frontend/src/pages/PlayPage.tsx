@@ -259,7 +259,18 @@ function PlayPage() {
         setMessage(res.data?.result || "Submitted");
         if (res.data?.correct) {
           setAnswer("");
-          await fetchQuestion(displayDay);
+          // The usePlay hook's submitAnswer already handles fetching the next question
+          // Navigate to next question URL to update the route
+          const nextDay = displayDay + 1;
+          const maxDay = progress?.totalDays || 10;
+          
+          // Wait a brief moment for the hook to process, then navigate
+          // This ensures the next question is fetched before URL change
+          setTimeout(() => {
+            if (nextDay <= maxDay) {
+              navigate(`/play/${nextDay}`, { replace: false });
+            }
+          }, 100);
         }
       }
     } catch {

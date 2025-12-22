@@ -241,14 +241,6 @@ export function usePlay(user: any) {
       if (cooldownSeconds > 0)
         return { ok: false, message: `Please wait ${cooldownSeconds}s` };
 
-      const nextAttempts = attemptsInPeriod + 1;
-      setAttemptsInPeriod(nextAttempts);
-
-      if (nextAttempts >= COOLDOWN_THRESHOLD) {
-        setCooldownSeconds(COOLDOWN_TIME);
-        setAttemptsInPeriod(0);
-      }
-
       try {
         const token = await user.getIdToken();
         const res = await fetch(`${BACKEND}/play/submit`, {
@@ -259,20 +251,42 @@ export function usePlay(user: any) {
           },
           body: JSON.stringify({ day: displayDay, answer }),
         });
+        
+        if (!res.ok) {
+          // If request failed, return error without updating state
+          const errorData = await res.json().catch(() => ({}));
+          return { ok: false, data: errorData, message: errorData.result || "Submission failed" };
+        }
+        
         const data = await res.json();
 
-        // prefer server-provided values when present
-        if (data.cooldownSeconds) setCooldownSeconds(data.cooldownSeconds);
-        if (typeof data.attemptsInPeriod === "number")
+        // Update state only after successful request - prefer server-provided values
+        if (typeof data.cooldownSeconds === "number") {
+          setCooldownSeconds(data.cooldownSeconds);
+        }
+        if (typeof data.attemptsInPeriod === "number") {
           setAttemptsInPeriod(data.attemptsInPeriod);
-        if (typeof data.attemptsBeforeCooldown === "number")
+        } else {
+          // Fallback: increment local attempts only if server doesn't provide value
+          setAttemptsInPeriod((prev) => {
+            const nextAttempts = prev + 1;
+            // Only set client-side cooldown if server doesn't provide one and threshold is reached
+            if (nextAttempts >= COOLDOWN_THRESHOLD && typeof data.cooldownSeconds !== "number") {
+              setCooldownSeconds(COOLDOWN_TIME);
+              return 0;
+            }
+            return nextAttempts;
+          });
+        }
+        if (typeof data.attemptsBeforeCooldown === "number") {
           setAttemptsBeforeCooldown(data.attemptsBeforeCooldown);
+        }
 
         // Invalidate question cache on submission
         sessionStorage.removeItem(`question_${displayDay}`);
 
         // If answer is correct, refresh progress and navigate to next question
-        if (res.ok && data.correct) {
+        if (data.correct) {
           // Invalidate progress cache to get fresh unlocked state
           sessionStorage.removeItem("userProgress");
           sessionStorage.removeItem("userProgressTs");

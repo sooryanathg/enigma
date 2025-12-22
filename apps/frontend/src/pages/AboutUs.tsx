@@ -230,7 +230,7 @@ const AboutUs = () => {
             content={CONTENT.invento} 
             CircularTextComponent={CircularTextInvento} 
             showVerticalTitle={false} 
-            isFirst={false} 
+            isFirst={false}
           />
         </div>
       </div>
