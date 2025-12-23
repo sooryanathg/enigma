@@ -192,6 +192,29 @@ function PlayPage() {
   const urlDay = day ? Number(day) : null;
   const loadingRef = useRef(false);
 
+  // Control main page scrollbar depending on route:
+  // - /play           → main scrollbar visible
+  // - /play/:day      → main scrollbar hidden (only internal scroll)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+
+    if (urlDay && !Number.isNaN(urlDay)) {
+      htmlEl.style.overflow = "hidden";
+      bodyEl.style.overflow = "hidden";
+    } else {
+      htmlEl.style.overflow = "";
+      bodyEl.style.overflow = "";
+    }
+
+    return () => {
+      htmlEl.style.overflow = "";
+      bodyEl.style.overflow = "";
+    };
+  }, [urlDay]);
+
   useEffect(() => {
     const updateScale = () => {
       if (window.innerWidth >= 1024) {
