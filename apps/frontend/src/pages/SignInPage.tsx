@@ -1,5 +1,5 @@
 import { useEffect, useState, type FC } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import {  useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
@@ -38,7 +38,33 @@ const GoogleLogo: FC = () => {
   );
 };
 
+const Modal: FC<{
+  title: string;
+  onClose: () => void;
+  children: React.ReactNode;
+}> = ({ title, onClose, children }) => {
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl bg-black border border-white text-white">
+        {/* Header */}
+        <div className="flex justify-between items-center p-4 border-b border-white">
+          <h2 className="text-lg font-bold">{title}</h2>
+          <button onClick={onClose}>
+            <X size={24} />
+          </button>
+        </div>
+
+        {/* Content */}
+        <div className="p-4 max-h-[70vh] overflow-y-auto space-y-4 text-sm leading-relaxed">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function SignInPage() {
+  const [openModal, setOpenModal] = useState<"terms" | "privacy" | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { currentUser, signInWithGoogle } = useAuth();
@@ -120,9 +146,50 @@ export default function SignInPage() {
                 </>
               )}
             </button>
+            <div className="text-white text-[10px] text-center">
+              By clicking Log in, you agree to our <span><button onClick={() => setOpenModal("terms")} className="underline" >Terms of Service</button></span>. Learn how we process your data in our <span><button onClick={() => setOpenModal("privacy")} className="underline">Privacy Policy</button></span>.
+            </div>
           </div>
         </div>
       </div>
+      {openModal === "terms" && (
+        <Modal title="Terms of Service – Enigma" onClose={() => setOpenModal(null)}>
+          <p><strong>Last updated:</strong> December 2025</p>
+          <p><strong>1. About Enigma</strong><br />Enigma is an online puzzle hunt game developed and hosted by Team Invento, as part of Invento 26, the multi-fest of Government Engineering College, Palakkad.
+By accessing or participating in Enigma, you agree to comply with these Terms of Service.</p>
+          <p><strong>2. Eligibility</strong><br />Participation is open to users who sign in using a valid Google account.
+By participating, you confirm that the information provided is accurate and that you are participating voluntarily.</p>
+          <p><strong>3. User Account & Authentication</strong><br />Enigma uses Google Authentication for sign-in.
+We do not create separate usernames or passwords.</p>
+          <p><strong>4. Game Rules & Fair Play</strong><br />Players must not use unfair means, automated tools, bots, or external assistance that violates the spirit of the puzzle hunt.
+Any attempt to manipulate scores, exploit bugs, or disrupt the platform may result in disqualification without prior notice.</p>
+          <p><strong>5. Intellectual Property</strong><br />All puzzles, designs, content, branding, and game mechanics are the intellectual property of Team Invento.
+Copying, reproducing, or redistributing Enigma’s content without permission is strictly prohibited.</p>
+          <p><strong>6. Modifications & Availability</strong><br />Team Invento reserves the right to modify, suspend, or terminate Enigma or its features at any time without prior notice.
+We are not liable for temporary downtime or technical issues.</p>
+          <p><strong>7. Limitation of Liability</strong><br />Enigma is provided “as is.”</p>
+          <p>Team Invento shall not be held responsible for any data loss, device issues, or indirect damages arising from participation.</p>
+        </Modal>
+      )}
+
+      {/* ---------- Privacy Modal ---------- */}
+      {openModal === "privacy" && (
+        <Modal title="Privacy Policy – Enigma" onClose={() => setOpenModal(null)}>
+          <p><strong>Last updated:</strong> December 2025</p>
+          <p><strong>1. Information We Collect</strong><br />Enigma uses Google Authentication via Firebase. When you sign in, we collect only the following information from your Google account: Name, Email address, Profile picture (display photo), No additional personal data is collected.</p>
+          <p><strong>2. How We Use Your Information</strong><br />The collected information is used solely to: Identify participants uniquely Display your name and profile picture within the game interface Manage gameplay, progress tracking, and leaderboards We do not use your data for marketing, advertising, or third-party promotions.</p>
+          <p><strong>3. Data Storage & Security</strong><br />All authentication and data handling is managed securely using Firebase backend services.
+Reasonable security measures are in place to protect your information from unauthorized access.</p>
+          <p><strong>4. Data Sharing</strong><br />We do not sell, trade, or share your personal information with third parties.
+Your data is accessible only to the Enigma development and organizing team for operational purposes.</p>
+          <p><strong>5. Data Retention</strong><br />User data is retained only for the duration necessary to conduct the event and related activities.
+After the event, data may be removed or anonymized unless required for record-keeping.</p>
+          <p><strong>6. User Consent</strong><br />By signing in and using Enigma, you consent to the collection and use of your information as described in this Privacy Policy.</p>
+          <p><strong>7. Changes to This Policy</strong><br />Team Invento reserves the right to update this Privacy Policy if required. Any changes will be reflected on this page</p>
+          <p><strong>Contact</strong><br />For queries, concerns, or data-related requests, please contact Team Invento 26, Government Engineering College Palakkad through official Invento communication channels.</p>
+        </Modal>
+      )}
     </div>
+
   );
 }
