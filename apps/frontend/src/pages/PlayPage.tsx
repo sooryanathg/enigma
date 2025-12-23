@@ -129,7 +129,9 @@ const ImageSquareWithLoader = ({
 // with however many questions exist in Firestore.
 const generateDayBoxes = (count: number) => {
   const baseLeft = 24.99;
-  const baseTop = 114;
+  // Base top is 0 because the scrollable container itself is positioned
+  // at top-[114px] inside the right panel.
+  const baseTop = 0;
   const colSpacing = 146.08;
   const rowSpacing = 114;
 
@@ -352,7 +354,7 @@ function PlayPage() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="min-h-screen bg-transparent relative overflow-y-auto"
+      className="min-h-screen bg-transparent relative overflow-hidden"
       ref={containerRef}
     >
       {/* Desktop Layout */}
@@ -485,31 +487,34 @@ function PlayPage() {
         )}
 
         {/* Right Rectangle */}
-        <div className="absolute bg-black w-[514px] h-[675px] left-[968.02px] top-[249px]">
+        <div className="absolute bg-black w-[514px] h-[675px] left-[968.02px] top-[249px] overflow-hidden">
           <div className="absolute font-whirlyBirdie font-bold text-white text-center w-[332px] h-[29px] left-[25px] top-[55px] text-[24px] leading-[29px]">
             Your progress
           </div>
 
-          {/* Day Boxes */}
-          {dayBoxes.map(({ day, left, top, dayTop, statusTop }) => {
-            const dayProgress = progress?.progress.find((p) => p.day === day);
-            return (
-              <DayBox
-                key={day}
-                day={day}
-                left={left}
-                top={top}
-                dayTop={dayTop}
-                statusTop={statusTop}
-                isCompleted={dayProgress?.isCompleted}
-                isAccessible={dayProgress?.isAccessible}
-                isDateUnlocked={dayProgress?.isDateUnlocked}
-              />
-            );
-          })}
-
-          {/* Progress Bar */}
-          <div className="absolute bg-white w-[15px] h-[523px] left-[473.99px] top-[114px]" />
+          {/* Scrollable Day Boxes + Progress Bar */}
+          <div className="absolute left-0 top-[114px] w-full h-[523px] overflow-y-auto internal-progress-scroll">
+            <div className="relative w-full h-max">
+              {dayBoxes.map(({ day, left, top, dayTop, statusTop }) => {
+                const dayProgress = progress?.progress.find(
+                  (p) => p.day === day,
+                );
+                return (
+                  <DayBox
+                    key={day}
+                    day={day}
+                    left={left}
+                    top={top}
+                    dayTop={dayTop}
+                    statusTop={statusTop}
+                    isCompleted={dayProgress?.isCompleted}
+                    isAccessible={dayProgress?.isAccessible}
+                    isDateUnlocked={dayProgress?.isDateUnlocked}
+                  />
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
