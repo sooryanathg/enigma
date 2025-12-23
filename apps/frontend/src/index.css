@@ -13,11 +13,10 @@
   --primary:white;
 }
 
+/* Allow normal page scrolling again */
 html, body {
-  /* Prevent global page scroll; only internal scroll areas (like Play progress)
-     should scroll. */
-  height: 100%;
-  overflow: hidden;
+  height: auto;
+  overflow: auto;
 }
 }
 
