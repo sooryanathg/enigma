@@ -22,41 +22,53 @@ export function generateMap(dayCount: number): MapRow[] {
   let currentDay = 0;
   let goingRight = true;
 
-  while (currentDay <= dayCount) {
-    const row: MapRow = [];
-    const maxDaysInRow = Math.min(3, dayCount - currentDay + 1);
+  const width = window.innerWidth;
+  const isSmallScreen = width <= 1024;
 
-    // Build path segment
+  const columnCount = isSmallScreen ? 5 : 9;
+  const daysPerRow = 3;
+
+  while (currentDay <= dayCount) {
+    const directedArrowData: ArrowCell = {
+      type: "arrow",
+      arrow: goingRight ? "right" : "left",
+      fromDay: currentDay,
+    };
+
+    const row: MapRow = [];
+    const maxDaysInRow = Math.min(daysPerRow, dayCount - currentDay + 1);
+
     for (let i = 0; i < maxDaysInRow; i++) {
       row.push({ type: "day", day: currentDay });
       currentDay++;
 
       if (i < maxDaysInRow - 1) {
-        row.push({
-          type: "arrow",
-          arrow: goingRight ? "right" : "left",
-          fromDay: currentDay - 1,
-        });
-        row.push({
-          type: "arrow",
-          arrow: goingRight ? "right" : "left",
-          fromDay: currentDay - 1,
-        });
+        // Pushes 2 by default, 1 if in isSmallScreen
+        row.push(
+          directedArrowData,
+          ...(isSmallScreen ? [] : [directedArrowData]),
+        );
       }
     }
 
     // Add connector to next row
-    if (currentDay <= dayCount) {
-      row.push({
-        type: "arrow",
-        arrow: goingRight ? "right" : "left",
-        fromDay: currentDay - 1,
-      });
-      row.push({ type: "arrow", arrow: "down", fromDay: currentDay - 1 });
+    if (currentDay <= dayCount && !isSmallScreen) {
+      row.push(
+        {
+          type: "arrow",
+          arrow: goingRight ? "right" : "left",
+          fromDay: currentDay - 1,
+        },
+        {
+          type: "arrow",
+          arrow: "down",
+          fromDay: currentDay - 1,
+        },
+      );
     }
 
-    // Pad row to 9 columns
-    while (row.length < 9) {
+    // Pad row to columns count
+    while (row.length < columnCount) {
       row.push({ type: "empty" });
     }
 
@@ -65,9 +77,13 @@ export function generateMap(dayCount: number): MapRow[] {
     // Add vertical transition row
     if (currentDay <= dayCount) {
       const transitionRow: MapRow = [
-        { type: "arrow", arrow: "down", fromDay: currentDay - 1 },
+        {
+          type: "arrow",
+          arrow: "down",
+          fromDay: currentDay - 1,
+        },
       ];
-      while (transitionRow.length < 9) {
+      while (transitionRow.length < columnCount) {
         transitionRow.push({ type: "empty" });
       }
       rows.push(transitionRow);

@@ -90,7 +90,7 @@ const DayMap = () => {
             const isReversed =
               (rowIndex + 1) % 4 === 2 || (rowIndex + 1) % 4 === 3;
 
-            // Dynamically calculate columns if your generator isn't always 9 wide
+            // Dynamically calculate columns
             const columnCount = row.length;
 
             return (
@@ -111,7 +111,7 @@ const DayMap = () => {
                     <div
                       key={`cell-${rowIndex}-${cellIndex}`}
                       style={{ zIndex }}
-                      className={`flex w-full h-full min-h-[120px] relative overflow-visible ${
+                      className={`flex w-full h-full min-h-[90px] lg:min-h-[120px] relative overflow-visible ${
                         cell.type === "empty" ? "no-shadow" : ""
                       }`}
                     >

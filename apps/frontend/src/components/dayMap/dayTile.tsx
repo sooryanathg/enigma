@@ -21,7 +21,7 @@ export const DayTile = ({
   return (
     <div className="group tile w-full h-full ">
       <div
-        className={`overflow-visible day-cell w-full h-full px-2 flex items-center justify-center font-whirlyBirdie text-[12px] font-bold border ${
+        className={`overflow-visible day-cell w-full h-full px-2 flex items-center justify-center font-whirlyBirdie text-[8px] lg:text-[12px] font-bold border ${
           isLocked
             ? "bg-[#252525] text-white/30 border-white/10"
             : "bg-black text-white border-white/20"
