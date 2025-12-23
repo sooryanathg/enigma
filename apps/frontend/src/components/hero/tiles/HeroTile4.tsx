@@ -10,7 +10,7 @@ const HeroTile4 = (props: Props) => (
     depth={0.7}
     ox={1.8}
     oy={-1.6}
-    sizeClass="w-[16%]"
+    sizeClass="w-[34%] sm:w-[24%] md:w-[16%]"
     src={p4}
   />
 );
