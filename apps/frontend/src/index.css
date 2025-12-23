@@ -6,12 +6,33 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --enigma-ivory-cream: #FFF2E4;
-    --background: var(--enigma-ivory-cream);
-    --foreground: 0 0% 10%;
-    --primary:white;
-  }
+:root {
+  --enigma-ivory-cream: #FFF2E4;
+  --background: var(--enigma-ivory-cream);
+  --foreground: 0 0% 10%;
+  --primary:white;
+}
+
+/* Allow normal page scrolling by default */
+html, body {
+  height: auto;
+  overflow: auto;
+}
+
+/* Hide main page scrollbar visually (used on specific pages like Rules).
+   We target both html and body because different browsers attach the main
+   scrollbar to different roots. */
+html.no-main-scrollbar,
+body.no-main-scrollbar {
+  /* Firefox */
+  scrollbar-width: none;
+}
+
+html.no-main-scrollbar::-webkit-scrollbar,
+body.no-main-scrollbar::-webkit-scrollbar {
+  /* Chrome, Edge, Safari */
+  display: none;
+}
 }
 
 * {
@@ -47,4 +68,41 @@
 
 .animate-spin-slow {
   animation: spin-slow 16s linear infinite;
+}
+
+/* Scrollbar styling for internal progress panel on Play page */
+.internal-progress-scroll {
+  /* Thin scrollbar: black thumb over white track so the scrollbar itself
+     looks like a white vertical bar with a black handle. */
+  scrollbar-width: thin;
+  scrollbar-color: #000000 #ffffff; /* thumb = black, track = white */
+}
+
+.internal-progress-scroll::-webkit-scrollbar {
+  width: 12px;
+}
+
+.internal-progress-scroll::-webkit-scrollbar-track {
+  background: #ffffff; /* white track */
+}
+
+.internal-progress-scroll::-webkit-scrollbar-thumb {
+  background-color: #000000;
+  border-radius: 0;
+}
+
+/* Hide scrollbar arrows/buttons inside the internal progress scrollbar */
+.internal-progress-scroll::-webkit-scrollbar-button {
+  height: 0;
+  width: 0;
+  background: transparent;
+  display: none;
+}
+
+/* Extra guard for some WebKit implementations (top/bottom single buttons) */
+.internal-progress-scroll::-webkit-scrollbar-button:single-button {
+  height: 0;
+  width: 0;
+  background: transparent;
+  display: none;
 }

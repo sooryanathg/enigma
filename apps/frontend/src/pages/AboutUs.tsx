@@ -202,10 +202,18 @@ const AboutUs = () => {
   }, []);
   
   const desktopMinHeight = (DESKTOP_LAYOUT.inventoTop + DESKTOP_LAYOUT.sectionHeight + 100) * scaleFactor;
-  
+
+  // Hide the main page scrollbar visually while on the About Us page,
+  // but still allow scrolling with the mouse/trackpad.
   React.useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    const body = document.body;
+    const html = document.documentElement;
+    body.classList.add("no-main-scrollbar");
+    html.classList.add("no-main-scrollbar");
+    return () => {
+      body.classList.remove("no-main-scrollbar");
+      html.classList.remove("no-main-scrollbar");
+    };
   }, []);
   
   return (

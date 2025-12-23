@@ -48,13 +48,21 @@ const RuleFrame = ({ rule, index, isMobile }: RuleFrameProps) => {
 };
 // ========== MAIN COMPONENT ==========
 const Rules = () => {
+  // Hide the main page scrollbar visually while on the Rules page,
+  // but still allow scrolling with the mouse/trackpad.
   React.useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = ''; };
+    const body = document.body;
+    const html = document.documentElement;
+    body.classList.add("no-main-scrollbar");
+    html.classList.add("no-main-scrollbar");
+    return () => {
+      body.classList.remove("no-main-scrollbar");
+      html.classList.remove("no-main-scrollbar");
+    };
   }, []);
 
   return (
-    <div className="relative w-full h-full overflow-y-auto overflow-x-hidden bg-[var(--page-bg,#f6efe6)]" data-rules-scroll>
+    <div className="relative w-full min-h-screen overflow-x-hidden bg-[var(--page-bg,#f6efe6)]" data-rules-scroll>
       <div className="hidden lg:block">
         <div className="absolute bg-black w-[1452px] h-[104px] left-[29.01px] top-[121px]" />
         <div className="absolute text-white font-whirlyBirdie font-bold w-[130px] h-[29px] left-[60.01px] top-[157px] text-[24px] leading-[29px]">RULES</div>

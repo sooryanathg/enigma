@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { usePlay } from "../hooks/usePlay";
@@ -54,8 +54,8 @@ const DayBox = ({
         style={{ left, top }}
       />
       <div
-        className={`absolute font-whirlyBirdie font-bold ${textColor} text-center w-[89px] h-[24px] text-[20px] leading-[24px] whitespace-nowrap`}
-        style={{ left: `${parseFloat(left) + 18}px`, top: dayTop }}
+        className={`absolute font-whirlyBirdie font-bold ${textColor} text-center w-[110px] h-[24px] text-[18px] leading-[24px] whitespace-nowrap overflow-hidden`}
+        style={{ left: `${parseFloat(left) + 8}px`, top: dayTop }}
       >
         day {day}
       </div>
@@ -125,43 +125,32 @@ const ImageSquareWithLoader = ({
   );
 };
 
-const DAY_BOXES = [
-  {
-    day: 1,
-    left: "24.99px",
-    top: "114px",
-    dayTop: "139px",
-    statusTop: "161px",
-  },
-  {
-    day: 2,
-    left: "171.07px",
-    top: "114px",
-    dayTop: "139px",
-    statusTop: "161px",
-  },
-  {
-    day: 3,
-    left: "317.15px",
-    top: "114px",
-    dayTop: "139px",
-    statusTop: "161px",
-  },
-  {
-    day: 4,
-    left: "24.99px",
-    top: "228px",
-    dayTop: "253px",
-    statusTop: "275px",
-  },
-  {
-    day: 5,
-    left: "171.07px",
-    top: "228px",
-    dayTop: "253px",
-    statusTop: "275px",
-  },
-];
+// Dynamically generate day box positions in a 3-column grid so it scales
+// with however many questions exist in Firestore.
+const generateDayBoxes = (count: number) => {
+  const baseLeft = 24.99;
+  // Base top is 0 because the scrollable container itself is positioned
+  // at top-[114px] inside the right panel.
+  const baseTop = 0;
+  const colSpacing = 146.08;
+  const rowSpacing = 114;
+
+  return Array.from({ length: count }, (_, i) => {
+    const day = i + 1;
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const top = baseTop + row * rowSpacing;
+    const left = baseLeft + col * colSpacing;
+
+    return {
+      day,
+      left: `${left}px`,
+      top: `${top}px`,
+      dayTop: `${top + 25}px`,
+      statusTop: `${top + 47}px`,
+    };
+  });
+};
 
 function PlayPage() {
   const navigate = useNavigate();
@@ -191,9 +180,45 @@ function PlayPage() {
     submitAnswer,
   } = usePlay(currentUser);
 
+  const dayBoxes = useMemo(
+    () =>
+      generateDayBoxes(
+        progress?.totalDays ?? progress?.progress?.length ?? 5,
+      ),
+    [progress?.totalDays, progress?.progress?.length],
+  );
+
   const { day } = useParams<{ day?: string }>();
   const urlDay = day ? Number(day) : null;
   const loadingRef = useRef(false);
+
+  // Control main page scrollbar depending on route (desktop only):
+  // - /play           → main scrollbar visible
+  // - /play/:day      → main scrollbar hidden on desktop (≥1024px),
+  //                     but still visible on mobile so users can scroll.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const htmlEl = document.documentElement;
+    const bodyEl = document.body;
+
+    const isPlayDetail =
+      urlDay !== null && !Number.isNaN(urlDay) && Number.isFinite(urlDay);
+    const isDesktop = window.innerWidth >= 1024;
+
+    if (isPlayDetail && isDesktop) {
+      htmlEl.style.overflow = "hidden";
+      bodyEl.style.overflow = "hidden";
+    } else {
+      htmlEl.style.overflow = "";
+      bodyEl.style.overflow = "";
+    }
+
+    return () => {
+      htmlEl.style.overflow = "";
+      bodyEl.style.overflow = "";
+    };
+  }, [urlDay]);
 
   useEffect(() => {
     const updateScale = () => {
@@ -357,7 +382,7 @@ function PlayPage() {
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="min-h-screen bg-transparent relative overflow-y-auto"
+      className="min-h-screen bg-transparent relative overflow-hidden"
       ref={containerRef}
     >
       {/* Desktop Layout */}
@@ -490,31 +515,34 @@ function PlayPage() {
         )}
 
         {/* Right Rectangle */}
-        <div className="absolute bg-black w-[514px] h-[675px] left-[968.02px] top-[249px]">
+        <div className="absolute bg-black w-[514px] h-[675px] left-[968.02px] top-[249px] overflow-hidden">
           <div className="absolute font-whirlyBirdie font-bold text-white text-center w-[332px] h-[29px] left-[25px] top-[55px] text-[24px] leading-[29px]">
             Your progress
           </div>
 
-          {/* Day Boxes */}
-          {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }) => {
-            const dayProgress = progress?.progress.find((p) => p.day === day);
-            return (
-              <DayBox
-                key={day}
-                day={day}
-                left={left}
-                top={top}
-                dayTop={dayTop}
-                statusTop={statusTop}
-                isCompleted={dayProgress?.isCompleted}
-                isAccessible={dayProgress?.isAccessible}
-                isDateUnlocked={dayProgress?.isDateUnlocked}
-              />
-            );
-          })}
-
-          {/* Progress Bar */}
-          <div className="absolute bg-white w-[15px] h-[523px] left-[473.99px] top-[114px]" />
+          {/* Scrollable Day Boxes + Progress Bar */}
+          <div className="absolute left-0 top-[114px] w-full h-[523px] overflow-y-auto internal-progress-scroll">
+            <div className="relative w-full h-max">
+              {dayBoxes.map(({ day, left, top, dayTop, statusTop }) => {
+                const dayProgress = progress?.progress.find(
+                  (p) => p.day === day,
+                );
+                return (
+                  <DayBox
+                    key={day}
+                    day={day}
+                    left={left}
+                    top={top}
+                    dayTop={dayTop}
+                    statusTop={statusTop}
+                    isCompleted={dayProgress?.isCompleted}
+                    isAccessible={dayProgress?.isAccessible}
+                    isDateUnlocked={dayProgress?.isDateUnlocked}
+                  />
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -642,7 +670,7 @@ function PlayPage() {
             Your progress
           </div>
           <div className="grid grid-cols-3 gap-3">
-            {DAY_BOXES.map(({ day }) => {
+            {dayBoxes.map(({ day }) => {
               const dayProgress = progress?.progress.find((p) => p.day === day);
               const isCompleted = dayProgress?.isCompleted;
               const isAvailable =
