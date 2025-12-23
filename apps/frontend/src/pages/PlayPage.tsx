@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { usePlay } from "../hooks/usePlay";
@@ -125,43 +125,30 @@ const ImageSquareWithLoader = ({
   );
 };
 
-const DAY_BOXES = [
-  {
-    day: 1,
-    left: "24.99px",
-    top: "114px",
-    dayTop: "139px",
-    statusTop: "161px",
-  },
-  {
-    day: 2,
-    left: "171.07px",
-    top: "114px",
-    dayTop: "139px",
-    statusTop: "161px",
-  },
-  {
-    day: 3,
-    left: "317.15px",
-    top: "114px",
-    dayTop: "139px",
-    statusTop: "161px",
-  },
-  {
-    day: 4,
-    left: "24.99px",
-    top: "228px",
-    dayTop: "253px",
-    statusTop: "275px",
-  },
-  {
-    day: 5,
-    left: "171.07px",
-    top: "228px",
-    dayTop: "253px",
-    statusTop: "275px",
-  },
-];
+// Dynamically generate day box positions in a 3-column grid so it scales
+// with however many questions exist in Firestore.
+const generateDayBoxes = (count: number) => {
+  const baseLeft = 24.99;
+  const baseTop = 114;
+  const colSpacing = 146.08;
+  const rowSpacing = 114;
+
+  return Array.from({ length: count }, (_, i) => {
+    const day = i + 1;
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const top = baseTop + row * rowSpacing;
+    const left = baseLeft + col * colSpacing;
+
+    return {
+      day,
+      left: `${left}px`,
+      top: `${top}px`,
+      dayTop: `${top + 25}px`,
+      statusTop: `${top + 47}px`,
+    };
+  });
+};
 
 function PlayPage() {
   const navigate = useNavigate();
@@ -190,6 +177,14 @@ function PlayPage() {
     fetchProgress,
     submitAnswer,
   } = usePlay(currentUser);
+
+  const dayBoxes = useMemo(
+    () =>
+      generateDayBoxes(
+        progress?.totalDays ?? progress?.progress?.length ?? 5,
+      ),
+    [progress?.totalDays, progress?.progress?.length],
+  );
 
   const { day } = useParams<{ day?: string }>();
   const urlDay = day ? Number(day) : null;
@@ -496,7 +491,7 @@ function PlayPage() {
           </div>
 
           {/* Day Boxes */}
-          {DAY_BOXES.map(({ day, left, top, dayTop, statusTop }) => {
+          {dayBoxes.map(({ day, left, top, dayTop, statusTop }) => {
             const dayProgress = progress?.progress.find((p) => p.day === day);
             return (
               <DayBox
@@ -642,7 +637,7 @@ function PlayPage() {
             Your progress
           </div>
           <div className="grid grid-cols-3 gap-3">
-            {DAY_BOXES.map(({ day }) => {
+            {dayBoxes.map(({ day }) => {
               const dayProgress = progress?.progress.find((p) => p.day === day);
               const isCompleted = dayProgress?.isCompleted;
               const isAvailable =
