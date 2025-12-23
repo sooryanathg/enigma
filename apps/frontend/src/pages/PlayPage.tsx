@@ -192,16 +192,21 @@ function PlayPage() {
   const urlDay = day ? Number(day) : null;
   const loadingRef = useRef(false);
 
-  // Control main page scrollbar depending on route:
+  // Control main page scrollbar depending on route (desktop only):
   // - /play           → main scrollbar visible
-  // - /play/:day      → main scrollbar hidden (only internal scroll)
+  // - /play/:day      → main scrollbar hidden on desktop (≥1024px),
+  //                     but still visible on mobile so users can scroll.
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     const htmlEl = document.documentElement;
     const bodyEl = document.body;
 
-    if (urlDay && !Number.isNaN(urlDay)) {
+    const isPlayDetail =
+      urlDay !== null && !Number.isNaN(urlDay) && Number.isFinite(urlDay);
+    const isDesktop = window.innerWidth >= 1024;
+
+    if (isPlayDetail && isDesktop) {
       htmlEl.style.overflow = "hidden";
       bodyEl.style.overflow = "hidden";
     } else {
