@@ -13,10 +13,25 @@
   --primary:white;
 }
 
-/* Allow normal page scrolling again */
+/* Allow normal page scrolling by default */
 html, body {
   height: auto;
   overflow: auto;
+}
+
+/* Hide main page scrollbar visually (used on specific pages like Rules).
+   We target both html and body because different browsers attach the main
+   scrollbar to different roots. */
+html.no-main-scrollbar,
+body.no-main-scrollbar {
+  /* Firefox */
+  scrollbar-width: none;
+}
+
+html.no-main-scrollbar::-webkit-scrollbar,
+body.no-main-scrollbar::-webkit-scrollbar {
+  /* Chrome, Edge, Safari */
+  display: none;
 }
 }
 
