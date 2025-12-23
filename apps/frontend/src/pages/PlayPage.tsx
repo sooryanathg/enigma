@@ -494,7 +494,7 @@ function PlayPage() {
             className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center overflow-hidden px-2"
           >
             <span
-              className={`whitespace-nowrap ${submitting ? "text-[20px] leading-[24px]" : "text-[24px] leading-[29px]"}`}
+              className={`whitespace-nowrap font-whirlyBirdie font-bold ${submitting ? "text-[20px] leading-[24px]" : "text-[24px] leading-[29px]"}`}
             >
               {submitting
                 ? "Submitting..."
@@ -641,7 +641,7 @@ function PlayPage() {
             disabled={submitting || cooldownSeconds > 0}
             className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base overflow-hidden px-2"
           >
-            <span className="whitespace-nowrap">
+            <span className="whitespace-nowrap font-whirlyBirdie font-bold">
               {submitting
                 ? "Submitting..."
                 : cooldownSeconds > 0
