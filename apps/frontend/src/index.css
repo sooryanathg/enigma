@@ -6,12 +6,19 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --enigma-ivory-cream: #FFF2E4;
-    --background: var(--enigma-ivory-cream);
-    --foreground: 0 0% 10%;
-    --primary:white;
-  }
+:root {
+  --enigma-ivory-cream: #FFF2E4;
+  --background: var(--enigma-ivory-cream);
+  --foreground: 0 0% 10%;
+  --primary:white;
+}
+
+html, body {
+  /* Prevent global page scroll; only internal scroll areas (like Play progress)
+     should scroll. */
+  height: 100%;
+  overflow: hidden;
+}
 }
 
 * {
