@@ -54,8 +54,8 @@ const DayBox = ({
         style={{ left, top }}
       />
       <div
-        className={`absolute font-whirlyBirdie font-bold ${textColor} text-center w-[89px] h-[24px] text-[20px] leading-[24px] whitespace-nowrap`}
-        style={{ left: `${parseFloat(left) + 18}px`, top: dayTop }}
+        className={`absolute font-whirlyBirdie font-bold ${textColor} text-center w-[110px] h-[24px] text-[18px] leading-[24px] whitespace-nowrap overflow-hidden`}
+        style={{ left: `${parseFloat(left) + 8}px`, top: dayTop }}
       >
         day {day}
       </div>
