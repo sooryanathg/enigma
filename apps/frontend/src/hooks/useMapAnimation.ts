@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef } from "react";
 
 const screenParams = {
   mobile: {
-    baseXOffset: 50,
+    // Slightly more right-shift on mobile so the top (tutorial) tile
+    // isn't hugging the left edge of narrow viewports.
+    baseXOffset: 55,
     driftFactor: 0.3,
     mapRotationDeg: 55,
   },
@@ -50,7 +52,14 @@ export const useMapAnimation = (rowCount: number) => {
     const xValue = baseTranslateX - y * 0.5 * driftFactor;
 
     // 2. Vertical Space Compression Logic
-    const verticalCompression = Math.min(-10, -rowCount * 0.45);
+    // On desktop we pull the grid up a bit as rowCount grows so it stays centered.
+    // On small mobile screens this can push the first (tutorial) row too high,
+    // so we reduce the upward shift there to keep the top row visible.
+    let verticalCompression = Math.min(-10, -rowCount * 0.45);
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      // Gentle lift only on mobile so the top row isn't clipped by the viewport.
+      verticalCompression = -2;
+    }
 
     // 3. Apply everything in a single GPU-accelerated string
     mapRef.current.style.transform = `
