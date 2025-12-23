@@ -573,7 +573,7 @@ function PlayPage() {
 
         {/* Question Section */}
         <div className="bg-black text-white p-4 rounded-lg">
-          <div className="font-whirlyBirdie font-bold text-lg mb-3">
+          <div className="font-whirlyBirdie font-bold text-[10.69px] mb-3 leading-snug">
             {question?.question ||
               "I hold two people inside me forever, but i'm not a home. What am i ?"}
           </div>
