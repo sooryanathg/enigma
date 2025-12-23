@@ -67,17 +67,27 @@ const DayMap = () => {
     if (progress && !hasScrolledToActive.current) {
       const activeElement = document.getElementById(`day-tile-${activeDay}`);
       if (activeElement) {
-        activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        // Manually scroll so the active tile (tutorial/day) is comfortably
+        // below the header on mobile devices like iPhone 14 Pro Max.
+        const rect = activeElement.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+        const offset = 140; // pixels from top of viewport
+        window.scrollTo({
+          top: Math.max(absoluteTop - offset, 0),
+          behavior: "smooth",
+        });
         hasScrolledToActive.current = true;
       }
     }
   }, [progress, activeDay]);
 
   return (
-    <div className="min-h-screen flex flex-col container overflow-x-hidden selection:bg-none mx-auto px-4 md:px-6 gap-12 lg:gap-24 py-14">
+    <div className="min-h-screen flex flex-col container overflow-x-hidden selection:bg-none mx-auto px-4 md:px-6 gap-8 lg:gap-24 py-6 md:py-10 lg:py-14">
       <PageExplainer pageTitle="Levels" />
 
-      <div className="flex-1 w-full flex justify-center items-start overflow-visible min-h-[80vh]">
+      {/* Extra top margin so the first (tutorial) row is fully visible
+          below the header on tall mobile screens. */}
+      <div className="flex-1 w-full flex justify-center items-start overflow-visible min-h-[80vh] mt-6 md:mt-10">
         <div
           ref={mapRef}
           className="relative map-area"
@@ -110,10 +120,11 @@ const DayMap = () => {
                   return (
                     <div
                       key={`cell-${rowIndex}-${cellIndex}`}
+                      id={cell.type === "day" ? `day-tile-${cell.day}` : undefined}
                       style={{ zIndex }}
                       className={`flex w-full h-full min-h-[90px] lg:min-h-[120px] relative overflow-visible ${
-                        cell.type === "empty" ? "no-shadow" : ""
-                      }`}
+                        cell.type === "day" ? "scroll-mt-32" : ""
+                      } ${cell.type === "empty" ? "no-shadow" : ""}`}
                     >
                       {cell.type === "day" &&
                         (cell.day === 0 ? (
