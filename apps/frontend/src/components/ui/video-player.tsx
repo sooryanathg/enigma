@@ -57,7 +57,8 @@ const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "" }: Vi
 
   const handleTimeUpdate = React.useCallback(() => {
     if (!videoRef.current) return;
-    if (videoRef.current.paused) videoRef.current.play().catch(() => {});
+    if (videoRef.current.paused) videoRef.current.play().catch(() => { });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleSeeking = React.useCallback(() => {
@@ -69,25 +70,25 @@ const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "" }: Vi
     if (!videoRef.current) return;
     const video = videoRef.current;
     video.playbackRate = targetRateRef.current;
-    if (video.paused) video.play().catch(() => {});
+    if (video.paused) video.play().catch(() => { });
   }, []);
 
-  const handleMouseEnter = (_e: React.MouseEvent<HTMLVideoElement>) => {
+  const handleMouseEnter = () => {
     isHoveringRef.current = true;
     transitionPlaybackRate(FAST_PLAYBACK_RATE);
   };
 
-  const handleMouseLeave = (_e: React.MouseEvent<HTMLVideoElement>) => {
+  const handleMouseLeave = () => {
     isHoveringRef.current = false;
     transitionPlaybackRate(NORMAL_PLAYBACK_RATE);
   };
 
-  const handleTouchStart = (_e: React.TouchEvent<HTMLVideoElement>) => {
+  const handleTouchStart = () => {
     isHoveringRef.current = true;
     transitionPlaybackRate(FAST_PLAYBACK_RATE);
   };
 
-  const handleTouchEnd = (_e: React.TouchEvent<HTMLVideoElement>) => {
+  const handleTouchEnd = () => {
     isHoveringRef.current = false;
     transitionPlaybackRate(NORMAL_PLAYBACK_RATE);
   };
