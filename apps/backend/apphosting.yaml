@@ -1,11 +1,11 @@
 runConfig:
-  # This tells Firebase to look inside the folder immediately
+  # This tells the Cloud Builder to "cd" into the backend folder before building
   baseDirectory: apps/backend
   command: node dist/src/index.js
-
 scripts:
-  # This command runs AFTER moving into the baseDirectory
-  buildCommand: pnpm install && pnpm build
+  # Adding --dir . forces pnpm to stay inside the backend folder
+  # Run install at the repo root so pnpm workspace is detected, then build from backend
+  buildCommand: pnpm install --dir ../.. --store-dir .pnpm-store && pnpm --dir . build
 
 env:
   - variable: FIREBASE_PROJECT_ID
