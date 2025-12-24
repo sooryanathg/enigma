@@ -42,6 +42,7 @@ export type CircularTextConfig = {
  * @param startAngleOffset - Starting angle offset in degrees
  * @returns Array of letter definitions with position and rotation
  */
+// eslint-disable-next-line react-refresh/only-export-components
 export const generateCircularLetters = (
   word: string,
   repetitions: number,
@@ -122,12 +123,12 @@ export const CircularText = ({ config }: CircularTextProps) => {
 
   React.useEffect(() => {
     if (typeof radius === 'number') return;
-    
+
     const mediaQuery = window.matchMedia('(min-width: 768px)');
     const updateRadius = () => {
       setCurrentRadius(mediaQuery.matches ? radius.desktop : radius.mobile);
     };
-    
+
     updateRadius();
     mediaQuery.addEventListener('change', updateRadius);
     return () => mediaQuery.removeEventListener('change', updateRadius);
@@ -135,12 +136,12 @@ export const CircularText = ({ config }: CircularTextProps) => {
 
   React.useEffect(() => {
     if (typeof letterSpacing === 'number') return;
-    
+
     const mediaQuery = window.matchMedia('(min-width: 768px)');
     const updateLetterSpacing = () => {
       setCurrentLetterSpacing(mediaQuery.matches ? letterSpacing.desktop : letterSpacing.mobile);
     };
-    
+
     updateLetterSpacing();
     mediaQuery.addEventListener('change', updateLetterSpacing);
     return () => mediaQuery.removeEventListener('change', updateLetterSpacing);
