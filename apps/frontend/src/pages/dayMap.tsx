@@ -74,13 +74,13 @@ const DayMap = () => {
   }, [progress, activeDay]);
 
   return (
-    <div className="min-h-screen flex flex-col container overflow-x-hidden selection:bg-none mx-auto px-4 md:px-6 gap-12 lg:gap-24 py-14">
+    <div className="min-h-screen flex flex-col md:overflow-x-hidden overflow-x-scroll container selection:bg-none mx-auto py-12 md:py-14">
       <PageExplainer pageTitle="Levels" />
 
-      <div className="flex-1 w-full flex justify-center items-start overflow-visible min-h-[80vh]">
+      <div className="w-full flex justify-center overflow-visible">
         <div
           ref={mapRef}
-          className="relative map-area"
+          className=""
           style={{
             willChange: "transform",
             transformStyle: "preserve-3d",
@@ -96,7 +96,7 @@ const DayMap = () => {
             return (
               <div
                 key={`row-${rowIndex}`}
-                className={`grid gap-0 items-center justify-center max-w-4xl overflow-visible ${
+                className={`grid gap-0 items-center max-w-3xl overflow-visible ${
                   isReversed ? "direction-reverse" : ""
                 }`}
                 style={{
@@ -111,7 +111,7 @@ const DayMap = () => {
                     <div
                       key={`cell-${rowIndex}-${cellIndex}`}
                       style={{ zIndex }}
-                      className={`flex w-full h-full min-h-[90px] lg:min-h-[120px] relative overflow-visible ${
+                      className={`w-full h-full min-h-[60px] lg:min-h-[120px] overflow-visible ${
                         cell.type === "empty" ? "no-shadow" : ""
                       }`}
                     >
