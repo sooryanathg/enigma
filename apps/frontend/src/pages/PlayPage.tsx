@@ -549,10 +549,10 @@ function PlayPage() {
       {/* Mobile/Tablet Layout */}
       <div className="lg:hidden px-4 py-6 space-y-6 pb-20">
         {/* Top Bar */}
-        <div className="flex items-center justify-between bg-black text-white p-4 rounded-lg">
+        <div className="flex items-center justify-between bg-black text-white px-4 pt-3 pb-1 rounded-lg">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center justify-center w-8 h-8"
+            className="flex items-center justify-center w-8 h-8 mt-2"
           >
             <img
               src={leftArrow}
@@ -560,12 +560,12 @@ function PlayPage() {
               className="w-full h-full object-contain brightness-0 invert"
             />
           </button>
-          <div className="font-whirlyBirdie font-bold text-[13px] whitespace-nowrap">
+          <div className="font-whirlyBirdie font-bold text-[11px] whitespace-nowrap mt-2">
             Day {displayDay} Of {progress?.progress.length || 10}
           </div>
           <button
             onClick={() => setIsOpen(true)}
-            className="bg-transparent border border-white px-3 py-1.5 rounded text-sm hover:bg-gray-800 transition-colors"
+            className="bg-transparent border border-white px-3 py-1.5 rounded text-sm hover:bg-gray-800 transition-colors mt-2"
           >
             Tutorial
           </button>
@@ -573,7 +573,7 @@ function PlayPage() {
 
         {/* Question Section */}
         <div className="bg-black text-white p-4 rounded-lg">
-          <div className="font-whirlyBirdie font-bold text-[13px] mb-2">
+          <div className="font-whirlyBirdie font-bold text-[11px] mb-2">
             {question?.question ||
               "I hold two people inside me forever, but i'm not a home. What am i ?"}
           </div>
@@ -581,7 +581,7 @@ function PlayPage() {
 
           {/* Image Grid - Dynamic */}
           <div
-            className="mt-4"
+            className="mt-4 max-w-[200px] mx-auto"
             style={{
               display: "grid",
               gridTemplateColumns:
