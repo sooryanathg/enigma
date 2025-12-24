@@ -1,12 +1,14 @@
+runConfig:
+  # This tells Firebase to look inside the folder immediately
+  baseDirectory: apps/backend
+  command: node dist/src/index.js
+
+scripts:
+  # This command runs AFTER moving into the baseDirectory
+  buildCommand: pnpm install && pnpm build
+
 env:
   - variable: FIREBASE_PROJECT_ID
     value: "enigma-d05b9"
-    availability:
-      - BUILD
-      - RUNTIME
   - variable: SERVICE_ACCOUNT_JSON
     secret: SERVICE_ACCOUNT_JSON
-
-scripts:
-  buildCommand: cd apps/backend && pnpm install && pnpm build
-  runCommand: node apps/backend/dist/src/index.js

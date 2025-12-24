@@ -1,8 +1,7 @@
 {
+  "name": "enigma-monorepo",
   "private": true,
-  "workspaces": [
-    "apps/*"
-  ],
+  
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
@@ -18,5 +17,12 @@
     "lint": "turbo run lint",
     "dev": "turbo run dev --parallel"
   },
-  "packageManager": "pnpm@10.26.1"
+  "packageManager": "pnpm@9.15.4",
+  "pnpm": {
+    "overrides": {
+      "typescript": "5.9.2",
+      "@types/node": "22.18.4"
+    }
+  }
 }
+
