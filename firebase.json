@@ -1,13 +1,14 @@
 {
   "apphosting": {
     "backendId": "enigma-backend",
-    "rootDir": "apps/backend",
     "ignore": [
       "node_modules",
       ".git",
       "firebase-debug.log",
       "firebase-debug.*.log",
-      "functions"
+      "functions",
+      "apps/frontend",
+      "apps/admin-dashboard"
     ],
     "alwaysDeployFromSource": true
   },
