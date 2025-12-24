@@ -1,14 +1,12 @@
-runConfig:
-  # This tells the Cloud Builder to "cd" into the backend folder before building
-  baseDirectory: apps/backend
-  command: node dist/src/index.js
-scripts:
-  # Adding --dir . forces pnpm to stay inside the backend folder
-  # Run install at the repo root so pnpm workspace is detected, then build from backend
-  buildCommand: pnpm install --dir ../.. --store-dir .pnpm-store && pnpm --dir . build
-
 env:
   - variable: FIREBASE_PROJECT_ID
     value: "enigma-d05b9"
+    availability:
+      - BUILD
+      - RUNTIME
   - variable: SERVICE_ACCOUNT_JSON
     secret: SERVICE_ACCOUNT_JSON
+
+scripts:
+  buildCommand: cd apps/backend && pnpm install && pnpm build
+  runCommand: node apps/backend/dist/src/index.js

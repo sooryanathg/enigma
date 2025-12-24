@@ -1,7 +1,7 @@
 {
   "apphosting": {
     "backendId": "enigma-backend",
-    "rootDir": "apps/backend",
+    "rootDir": "/apps/backend/",
     "ignore": [
       "node_modules",
       ".git",
