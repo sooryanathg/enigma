@@ -32,7 +32,7 @@ const DayBox = ({
   // A day is available if it's accessible AND date is unlocked
   // Use truthy check for isAccessible (true), and ensure isDateUnlocked is not explicitly false
   const isAvailable = isAccessible === true && (isDateUnlocked !== false);
-  
+
   let bgColor = "bg-gray-400"; // default for locked
   let textColor = "text-white";
   let statusText = "Locked";
@@ -70,21 +70,21 @@ const DayBox = ({
 };
 
 // Component to handle individual image loading with cached image detection
-const ImageSquareWithLoader = ({ 
-  image, 
-  index, 
-  isLoaded, 
+const ImageSquareWithLoader = ({
+  image,
+  index,
+  isLoaded,
   onLoad,
   isSingleImage
-}: { 
-  image: string; 
-  index: number; 
-  isLoaded: boolean; 
+}: {
+  image: string;
+  index: number;
+  isLoaded: boolean;
   onLoad: (index: number) => void;
   isSingleImage: boolean;
 }) => {
   const imgRef = React.useRef<HTMLImageElement>(null);
-  
+
   // Check if image is already loaded (cached) when component mounts or image changes
   React.useEffect(() => {
     // Use a small delay to ensure ref is attached
@@ -94,11 +94,11 @@ const ImageSquareWithLoader = ({
         onLoad(index);
       }
     };
-    
+
     // Check immediately and after a short delay to handle cached images
     checkImage();
     const timeout = setTimeout(checkImage, 10);
-    
+
     return () => clearTimeout(timeout);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [image, index]); // Only depend on image URL and index, not onLoad callback
@@ -289,10 +289,10 @@ function PlayPage() {
 
   useEffect(() => {
     if (!currentUser) return;
-    
+
     // Prevent duplicate requests - if already loading, skip
     if (loadingRef.current) return;
-    
+
     // If question is already loaded for this day, skip fetching
     // This check handles the case when navigating back to the same day
     if (question?.day === urlDay && urlDay !== null) {
@@ -360,7 +360,7 @@ function PlayPage() {
           // Navigate to next question URL to update the route
           const nextDay = displayDay + 1;
           const maxDay = progress?.totalDays || 10;
-          
+
           // Wait a brief moment for the hook to process, then navigate
           // This ensures the next question is fetched before URL change
           setTimeout(() => {
@@ -560,7 +560,7 @@ function PlayPage() {
               className="w-full h-full object-contain brightness-0 invert"
             />
           </button>
-          <div className="font-whirlyBirdie font-bold text-lg whitespace-nowrap">
+          <div className="font-whirlyBirdie font-bold text-[13px] whitespace-nowrap">
             Day {displayDay} Of {progress?.progress.length || 10}
           </div>
           <button
@@ -573,7 +573,7 @@ function PlayPage() {
 
         {/* Question Section */}
         <div className="bg-black text-white p-4 rounded-lg">
-          <div className="font-whirlyBirdie font-bold text-lg mb-3">
+          <div className="font-whirlyBirdie font-bold text-[13px] mb-2">
             {question?.question ||
               "I hold two people inside me forever, but i'm not a home. What am i ?"}
           </div>
@@ -633,7 +633,7 @@ function PlayPage() {
               onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
                 e.key === "Enter" && handleSubmit()
               }
-              className="w-full h-12 text-base"
+              className="w-full h-12 text-sm"
             />
           </div>
           <Button
@@ -651,13 +651,12 @@ function PlayPage() {
           </Button>
           {message && (
             <div
-              className={`font-poppins text-sm font-medium p-3 rounded ${
-                message.includes("Correct") ||
+              className={`font-poppins text-sm font-medium p-3 rounded ${message.includes("Correct") ||
                 message.includes("Success") ||
                 message.includes("🎉")
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
+                ? "bg-green-100 text-green-700"
+                : "bg-red-100 text-red-700"
+                }`}
             >
               {message}
             </div>
