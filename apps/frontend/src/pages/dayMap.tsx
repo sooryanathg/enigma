@@ -67,30 +67,20 @@ const DayMap = () => {
     if (progress && !hasScrolledToActive.current) {
       const activeElement = document.getElementById(`day-tile-${activeDay}`);
       if (activeElement) {
-        // Manually scroll so the active tile (tutorial/day) is comfortably
-        // below the header on mobile devices like iPhone 14 Pro Max.
-        const rect = activeElement.getBoundingClientRect();
-        const absoluteTop = rect.top + window.scrollY;
-        const offset = 140; // pixels from top of viewport
-        window.scrollTo({
-          top: Math.max(absoluteTop - offset, 0),
-          behavior: "smooth",
-        });
+        activeElement.scrollIntoView({ behavior: "smooth", block: "center" });
         hasScrolledToActive.current = true;
       }
     }
   }, [progress, activeDay]);
 
   return (
-    <div className="min-h-screen flex flex-col container overflow-x-hidden selection:bg-none mx-auto px-4 md:px-6 gap-8 lg:gap-24 py-6 md:py-10 lg:py-14">
+    <div className="min-h-screen flex flex-col md:overflow-x-hidden overflow-x-scroll container selection:bg-none mx-auto py-12 md:py-14">
       <PageExplainer pageTitle="Levels" />
 
-      {/* Extra top margin so the first (tutorial) row is fully visible
-          below the header on tall mobile screens. */}
-      <div className="flex-1 w-full flex justify-center items-start overflow-visible min-h-[80vh] mt-6 md:mt-10">
+      <div className="w-full flex justify-center overflow-visible">
         <div
           ref={mapRef}
-          className="relative map-area"
+          className=""
           style={{
             willChange: "transform",
             transformStyle: "preserve-3d",
@@ -106,7 +96,7 @@ const DayMap = () => {
             return (
               <div
                 key={`row-${rowIndex}`}
-                className={`grid gap-0 items-center justify-center max-w-4xl overflow-visible ${
+                className={`grid gap-0 items-center max-w-3xl overflow-visible ${
                   isReversed ? "direction-reverse" : ""
                 }`}
                 style={{
@@ -120,11 +110,10 @@ const DayMap = () => {
                   return (
                     <div
                       key={`cell-${rowIndex}-${cellIndex}`}
-                      id={cell.type === "day" ? `day-tile-${cell.day}` : undefined}
                       style={{ zIndex }}
-                      className={`flex w-full h-full min-h-[90px] lg:min-h-[120px] relative overflow-visible ${
-                        cell.type === "day" ? "scroll-mt-32" : ""
-                      } ${cell.type === "empty" ? "no-shadow" : ""}`}
+                      className={`w-full h-full min-h-[60px] lg:min-h-[120px] overflow-visible ${
+                        cell.type === "empty" ? "no-shadow" : ""
+                      }`}
                     >
                       {cell.type === "day" &&
                         (cell.day === 0 ? (

@@ -494,7 +494,7 @@ function PlayPage() {
             className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center overflow-hidden px-2"
           >
             <span
-              className={`whitespace-nowrap font-whirlyBirdie font-bold ${submitting ? "text-[20px] leading-[24px]" : "text-[24px] leading-[29px]"}`}
+              className={`whitespace-nowrap ${submitting ? "text-[20px] leading-[24px]" : "text-[24px] leading-[29px]"}`}
             >
               {submitting
                 ? "Submitting..."
@@ -573,7 +573,7 @@ function PlayPage() {
 
         {/* Question Section */}
         <div className="bg-black text-white p-4 rounded-lg">
-          <div className="font-whirlyBirdie font-bold text-[10.69px] mb-3 leading-snug">
+          <div className="font-whirlyBirdie font-bold text-lg mb-3">
             {question?.question ||
               "I hold two people inside me forever, but i'm not a home. What am i ?"}
           </div>
@@ -641,7 +641,7 @@ function PlayPage() {
             disabled={submitting || cooldownSeconds > 0}
             className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base overflow-hidden px-2"
           >
-            <span className="whitespace-nowrap font-whirlyBirdie font-bold">
+            <span className="whitespace-nowrap">
               {submitting
                 ? "Submitting..."
                 : cooldownSeconds > 0

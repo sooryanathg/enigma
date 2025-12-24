@@ -16,7 +16,7 @@ export const TutorialTile = ({
       <div
         className={`day-cell-side border-2 border-white/20 overflow-visible`}
       />
-      Tutorial
+      <p className="md:text-lg text-[7px]">Tutorial</p> 
       <div
         className={`day-cell-bottom border-2 border-white/20 overflow-visible`}
       />
