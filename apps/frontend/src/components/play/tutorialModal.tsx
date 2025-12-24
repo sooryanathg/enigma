@@ -5,6 +5,8 @@ interface TutorialSlide {
   title?: string;
   text: string;
   answer?: string;
+  guidingThought?: string;
+  questionText?: string;
 }
 
 interface TutorialModalProps {
@@ -23,30 +25,48 @@ import { useState } from "react";
 
 const TUTORIAL_SLIDES: TutorialSlide[] = [
   {
+    image: null,
+    title: "Welcome to the Enigma Tutorial",
+    text: "Let’s walk through how to crack an Enigma question.\n\nDon’t rush to the answer — the magic is in connecting the clues.\n\nWatch how each hint quietly points to the same destination.",
+  },
+  {
     image: alchemist,
     title: "QUESTION",
-    text: "I speak without words, guide without maps, and only those who listen with their heart understand me. I am the actual treasure hunt... Discover where I hide!!",
+    text: "At first glance, this might feel abstract.\nBut Enigma questions are designed so every clue matters — and nothing is random.",
+    questionText:
+      "I SPEAK WITHOUT WORDS, GUIDE WITHOUT MAPS, AND ONLY THOSE WHO LISTEN WITH THEIR HEART UNDERSTAND ME. I AM THE ACTUAL TREASURE HUNT... DISCOVER WHERE I HIDE!!",
   },
   {
     image: rumi,
-    text: '1. Clue of poet Rumi : The novel is deeply influenced by Sufi philosophy and closely resembles the teachings of Jalaluddin Rumi, the 13th century Sufi poet. Both The Alchemist and Rumi emphasize " The Universe helps you when you follow your true path"',
+    title: "CLUE 1 - RUMI",
+    text: 'Jalaluddin Rumi is best known for one powerful belief:\n"When you follow your true path, the universe helps you."\nThis idea is often reused in stories that talk about destiny, purpose, and inner journeys.',
+    guidingThought:
+      "Ask yourself: What kind of work uses this philosophy as its core theme?",
   },
   {
     image: sand_storm,
-    text: "2. Clue of Sand Storm: There are several scenes of Sand storm in The Alchemist also the protagonist himself turns into sandstorm wind",
+    title: "CLUE 2 — SANDSTORM",
+    text: "Sandstorms aren’t just weather — in storytelling, they often represent transformation and tests.\nSome famous stories even go as far as turning the traveler into the wind itself.",
+    guidingThought:
+      "This points toward a symbolic desert journey, not a random setting.",
   },
   {
     image: pyramid,
-    text: "3. Clue of Pyramid : The pyramids are the final destination of Santiago, the protagonist.",
+    title: "CLUE 3 — PYRAMID",
+    text: "The pyramids have long been used as symbols of ultimate truth, hidden treasure, and completion.\nVery few stories make them the literal end goal of a journey.",
+    guidingThought:
+      "Think of a narrative where the journey ends at the pyramids.",
   },
   {
     image: hawkings,
-    text: '4. Clue of Stephen Hawking : His famous book "The Brief History of Time" is also released in the year 1988, the same year Paulo Coelho published "The Alchemist"',
+    title: "CLUE 4 — STEPHEN HAWKING",
+    text: "Stephen Hawking’s A Brief History of Time was released in 1988.\nThat same year saw the release of another book — one that also went on to become globally iconic.",
+    guidingThought: "This clue doesn’t describe the story — it confirms it.",
   },
   {
     image: null,
     title: "CONCLUSION",
-    text: "Each clue converges on The Alchemist: the novel is steeped in Sufi-like wisdom (Rumi-style guidance about following your true path), contains vivid desert imagery and a literal sandstorm sequence, culminates at the Egyptian pyramids (Santiago's final destination), and was first published in 1988 — the same year Hawking's A Brief History of Time came out, giving a neat date-based cross-clue. Put those together and there's only one book that fits all four hints.",
+    text: "A story rooted in destiny and purpose.\nA symbolic desert journey.\nA final destination at the Egyptian pyramids.\nPublished in 1988.\nAll clues converge on one book.",
     answer: "ALCHEMIST",
   },
 ];
@@ -59,10 +79,10 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
 
   const { submitTutorial } = usePlay(currentUser);
 
-  const closeModal = async () => {
-    await submitTutorial();
+  const closeModal = () => {
     onClose();
-    setCurrentSlide(0);
+    submitTutorial();
+    setTimeout(() => setCurrentSlide(0), 300); // Reset slide after animation
   };
 
   const next = () =>
@@ -81,7 +101,7 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
           exit={{ opacity: 0 }}
         >
           <motion.div
-            className="bg-black border border-white w-full max-w-[340px] md:max-w-[500px] h-[500px] md:h-[600px] shadow-2xl flex flex-col"
+            className="bg-black border border-white w-full max-w-[340px] md:max-w-[600px] h-[500px] md:h-[600px] shadow-2xl flex flex-col"
             initial={{ scale: 0.95, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
@@ -102,35 +122,85 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
             </div>
 
             {/* Content */}
-            <div className="p-4 flex flex-col items-center grow overflow-hidden">
+            <div className="p-4 flex flex-col items-center grow overflow-hidden w-full">
               {slide.title && (
-                <div className="text-xs text-gray-400 mb-3 tracking-widest font-whirlyBirdie font-bold">
+                <div className="text-lg md:text-xl text-gray-400 mb-4 font-whirlyBirdie font-bold text-center shrink-0">
                   {slide.title}
                 </div>
               )}
 
-              {slide.image && (
-                <div className="mb-4 h-[160px]">
-                  <div className="border border-white p-2 h-full aspect-square">
-                    <img
-                      src={slide.image}
-                      alt="tutorial"
-                      className="w-full h-full object-cover"
-                    />
+              {/* Special Layout for Question Slide */}
+              {slide.questionText ? (
+                <div className="flex flex-col items-center w-full max-w-sm md:max-w-md overflow-hidden flex-1 justify-center p-1">
+                  <div className="border border-white p-2 md:p-4 mb-2 md:mb-4 w-full flex flex-col items-center shadow-[0_0_15px_rgba(255,255,255,0.1)] shrink-0">
+                    {slide.image && (
+                      <div className="mb-2 w-[100px] md:w-[180px] aspect-square shrink-0">
+                        <img
+                          src={slide.image}
+                          alt="tutorial"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <div className="text-center font-whirlyBirdie font-bold text-white text-[8px] md:text-xs leading-relaxed uppercase">
+                      {slide.questionText}
+                    </div>
+                  </div>
+                  <div className="text-center font-whirlyBirdie font-bold text-white text-[9px] md:text-sm leading-relaxed uppercase whitespace-pre-line shrink-0 px-2 pb-1 md:pb-2">
+                    {slide.text}
                   </div>
                 </div>
-              )}
-
-              <div className="text-center font-whirlyBirdie font-bold text-white text-xs leading-relaxed uppercase overflow-y-auto">
-                {slide.text}
-              </div>
-
-              {slide.answer && (
-                <div className="mt-4 text-center">
-                  <div className="text-xs text-gray-400">ANSWER :</div>
-                  <div className="text-xl tracking-widest text-[#10b981]">
-                    {slide.answer}
+              ) : currentSlide === 0 ? (
+                /* Special Layout for Welcome Slide */
+                <div className="flex flex-col items-center justify-center w-full max-w-lg overflow-y-auto scrollbar-hide h-full px-4">
+                  <div className="font-whirlyBirdie font-bold text-white text-sm md:text-base leading-loose uppercase space-y-6">
+                    {slide.text.split("\n\n").map((point, i) => (
+                      <div key={i} className="flex gap-3 text-left">
+                        <span className="text-[#10b981] shrink-0 transform scale-150">•</span>
+                        <span>{point}</span>
+                      </div>
+                    ))}
                   </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center w-full max-w-sm md:max-w-md flex-1 justify-center overflow-hidden px-2">
+                  {slide.image && (
+                    <div className="mb-1 md:mb-4 w-[80px] md:w-[130px] aspect-square shrink-0">
+                      <div className="border border-white p-1 md:p-2 h-full w-full">
+                        <img
+                          src={slide.image}
+                          alt="tutorial"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-center font-whirlyBirdie font-bold text-white text-[10px] md:text-sm leading-relaxed uppercase whitespace-pre-line shrink-0">
+                    {slide.text}
+                  </div>
+
+                  {slide.guidingThought && (
+                    <div className="mt-1 md:mt-4 text-center w-full shrink-0">
+                      <div className="text-gray-400 font-whirlyBirdie font-bold text-[10px] md:text-xs mb-1">
+                        GUIDING THOUGHT:
+                      </div>
+                      <div className="text-white text-[10px] md:text-sm font-whirlyBirdie leading-relaxed uppercase">
+                        {slide.guidingThought}
+                      </div>
+                    </div>
+                  )}
+
+                  {slide.answer && (
+                    <div className="mt-4 text-center">
+                      <div className="text-xs text-gray-400 font-whirlyBirdie font-bold">
+                        ANSWER :
+                      </div>
+                      <div className="text-2xl tracking-widest text-[#10b981] font-whirlyBirdie font-bold mt-1">
+                        {slide.answer}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -140,9 +210,8 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
               <button
                 onClick={prev}
                 disabled={currentSlide === 0}
-                className={`font-whirlyBirdie font-bold  text-white ${
-                  currentSlide === 0 ? "opacity-0" : "opacity-100"
-                }`}
+                className={`font-whirlyBirdie font-bold text-xs md:text-base text-white ${currentSlide === 0 ? "opacity-0" : "opacity-100"
+                  }`}
               >
                 &lt; BACK
               </button>
@@ -151,9 +220,8 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
                 {TUTORIAL_SLIDES.map((_, i) => (
                   <div
                     key={i}
-                    className={`w-2 h-2 rounded-full border border-white ${
-                      i === currentSlide ? "bg-white" : ""
-                    }`}
+                    className={`w-1.5 h-1.5 md:w-2 md:h-2 rounded-full border border-white ${i === currentSlide ? "bg-white" : ""
+                      }`}
                   />
                 ))}
               </div>
@@ -161,7 +229,7 @@ export default function TutorialModal({ isOpen, onClose }: TutorialModalProps) {
               {currentSlide < TUTORIAL_SLIDES.length - 1 ? (
                 <button
                   onClick={next}
-                  className="font-whirlyBirdie font-bold text-white"
+                  className="font-whirlyBirdie font-bold text-xs md:text-base text-white"
                 >
                   NEXT &gt;
                 </button>
