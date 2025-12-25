@@ -38,6 +38,7 @@
   perspective: 1500px;
   transform: translateZ(0);
   z-index: 1;
+  border-radius: 3.5px;
 }
 
 .day-cell-side {
@@ -45,12 +46,13 @@
   position: absolute;
   top: 0;
   left: 0;
-  height: 100%;
+  height: 101%;
   width: 0;
   background-color: black;
   z-index: -1;
-  transform: rotateY(118deg) skewY(23deg) translateY(2px);
+  transform: rotateY(118deg) skewY(23deg) translateY(0px);
   transform-origin: left center;
+  
 }
 
 .day-cell-bottom {
@@ -64,6 +66,7 @@
   z-index: -1;
   transform: rotateX(110deg) skewX(20deg);
   transform-origin: bottom center;
+  border-radius: 3px;
 }
 
 .day-cell,
@@ -89,7 +92,7 @@
 }
 
 .day-cell.day-hoverable:hover .day-cell-bottom {
-  height: 100%;
+  height: 95%;
   cursor: pointer;
 }
 
@@ -106,6 +109,6 @@
 }
 
 .day-cell.day-complete .day-cell-bottom {
-  height: 100%;
+  height: 95%;
   cursor: pointer;
 }
