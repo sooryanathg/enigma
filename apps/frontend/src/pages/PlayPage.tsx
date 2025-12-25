@@ -638,7 +638,7 @@ function PlayPage() {
         {/* Answer Section - Show input if not completed, feedback if completed */}
         {!question?.isCompleted ? (
           <div className="space-y-3">
-            <div className="font-whirlyBirdie font-bold text-black text-lg">
+            <div className="font-whirlyBirdie font-bold text-black text-base">
               ANSWER :
             </div>
             <div className="relative">
@@ -659,7 +659,7 @@ function PlayPage() {
             <Button
               onClick={handleSubmit}
               disabled={submitting || cooldownSeconds > 0}
-              className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base overflow-hidden px-2"
+              className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-sm overflow-hidden px-2"
             >
               <span className="whitespace-nowrap">
                 {submitting
@@ -688,7 +688,7 @@ function PlayPage() {
             <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 flex items-start gap-3">
               <div className="text-2xl">🎉</div>
               <div className="flex-1">
-                <div className="font-whirlyBirdie font-bold text-green-700 text-lg mb-1">
+                <div className="font-whirlyBirdie font-bold text-green-700 text-base mb-1">
                   Question Completed!
                 </div>
                 <div className="font-poppins text-sm text-green-600">
@@ -701,7 +701,7 @@ function PlayPage() {
 
         {/* Progress Section */}
         <div className="bg-black text-white p-4 rounded-lg">
-          <div className="font-whirlyBirdie font-bold text-lg mb-4 text-center">
+          <div className="font-whirlyBirdie font-bold text-base mb-4 text-center">
             Your progress
           </div>
           <div className="grid grid-cols-3 gap-3">
@@ -727,12 +727,12 @@ function PlayPage() {
               return (
                 <div key={day} className={`${bgColor} rounded p-3 text-center`}>
                   <div
-                    className={`font-whirlyBirdie font-bold ${textColor} text-sm mb-1 whitespace-nowrap`}
+                    className={`font-whirlyBirdie font-bold ${textColor} text-xs mb-1 whitespace-nowrap`}
                   >
                     day {day}
                   </div>
                   <div
-                    className={`font-poppins font-medium ${textColor} text-xs`}
+                    className={`font-poppins font-medium ${textColor} text-[10px]`}
                   >
                     {isCompleted ? "Completed" : isAvailable ? "In Progress" : "Locked"}
                   </div>
