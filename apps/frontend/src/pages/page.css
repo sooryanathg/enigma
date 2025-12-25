@@ -9,3 +9,11 @@
   backface-visibility: hidden;
   transform-style: preserve-3d;
 }
+
+/* Remove left and right padding from container on mobile */
+@media (max-width: 767px) {
+  .container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
