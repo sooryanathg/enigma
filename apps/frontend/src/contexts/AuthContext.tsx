@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { 
-  onAuthStateChanged, 
+import {
+  onAuthStateChanged,
   signInWithPopup,
   GoogleAuthProvider,
   signOut as firebaseSignOut,
@@ -43,10 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Add additional scopes here if needed
     provider.addScope('profile');
     provider.addScope('email');
-    
+
     try {
       const result = await signInWithPopup(auth, provider);
-      
+
       await createOrUpdateUser(result.user.uid, {
         name: result.user.displayName || '',
         email: result.user.email || '',
@@ -106,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
