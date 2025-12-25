@@ -112,3 +112,22 @@
   height: 95%;
   cursor: pointer;
 }
+
+/* Mobile: Increase cell side width and bottom height */
+@media (max-width: 767px) {
+  .day-cell.day-hoverable:hover .day-cell-side {
+    width: 100%;
+  }
+
+  .day-cell.day-complete .day-cell-side {
+    width: 100%;
+  }
+
+  .day-cell.day-hoverable:hover .day-cell-bottom {
+    height: 100%;
+  }
+
+  .day-cell.day-complete .day-cell-bottom {
+    height: 150%;
+  }
+}
