@@ -457,53 +457,72 @@ function PlayPage() {
             ),
         )}
 
-        {/* ANSWER Text */}
-        <div className="absolute font-whirlyBirdie font-bold text-black text-center w-[191px] h-[29px] left-[29px] top-[808px] text-[24px] leading-[29px]">
-          ANSWER :
-        </div>
+        {/* ANSWER Text - Only show if not completed */}
+        {!question?.isCompleted ? (
+          <>
+            <div className="absolute font-whirlyBirdie font-bold text-black text-center w-[191px] h-[29px] left-[29px] top-[808px] text-[24px] leading-[29px]">
+              ANSWER :
+            </div>
 
-        {/* Answer Input */}
-        <div className="absolute w-[701px] h-[73px] left-[29.01px] top-[851px]">
-          <Input
-            id="answer-input"
-            placeholder=""
-            value={answer}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setAnswer(e.target.value)
-            }
-            disabled={cooldownSeconds > 0 || submitting}
-            onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
-              e.key === "Enter" && handleSubmit()
-            }
-            className="w-full h-full"
-          />
-        </div>
+            {/* Answer Input */}
+            <div className="absolute w-[701px] h-[73px] left-[29.01px] top-[851px]">
+              <Input
+                id="answer-input"
+                placeholder=""
+                value={answer}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setAnswer(e.target.value)
+                }
+                disabled={cooldownSeconds > 0 || submitting}
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  e.key === "Enter" && handleSubmit()
+                }
+                className="w-full h-full"
+              />
+            </div>
 
-        {/* Placeholder Text */}
-        {!answer && (
-          <div className="absolute pointer-events-none font-poppins font-medium w-[218px] h-[36px] left-[60px] top-[872px] text-[24px] leading-[36px] text-[#6B6B6B]">
-            Enter Your Answer
+            {/* Placeholder Text */}
+            {!answer && (
+              <div className="absolute pointer-events-none font-poppins font-medium w-[218px] h-[36px] left-[60px] top-[872px] text-[24px] leading-[36px] text-[#6B6B6B]">
+                Enter Your Answer
+              </div>
+            )}
+
+            {/* Submit Button */}
+            <div className="absolute w-[216px] h-[73px] left-[731px] top-[851px]">
+              <Button
+                onClick={handleSubmit}
+                disabled={submitting || cooldownSeconds > 0}
+                className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center overflow-hidden px-2"
+              >
+                <span
+                  className={`whitespace-nowrap ${submitting ? "text-[20px] leading-[24px]" : "text-[24px] leading-[29px]"}`}
+                >
+                  {submitting
+                    ? "Submitting..."
+                    : cooldownSeconds > 0
+                      ? `Wait ${cooldownSeconds}s`
+                      : "SUBMIT"}
+                </span>
+              </Button>
+            </div>
+          </>
+        ) : (
+          /* Completion Feedback */
+          <div className="absolute left-[29px] top-[808px] max-w-[900px]">
+            <div className="flex items-center gap-3 bg-[#10b981] bg-opacity-10 border-2 border-[#10b981] rounded-lg px-6 py-4">
+              <div className="text-3xl">🎉</div>
+              <div className="flex flex-col">
+                <div className="font-whirlyBirdie font-bold text-[#10b981] text-[24px] leading-[29px]">
+                  Question Completed!
+                </div>
+                <div className="font-poppins text-base text-[#10b981] mt-1">
+                  You've already submitted the correct answer for this day.
+                </div>
+              </div>
+            </div>
           </div>
         )}
-
-        {/* Submit Button */}
-        <div className="absolute w-[216px] h-[73px] left-[731px] top-[851px]">
-          <Button
-            onClick={handleSubmit}
-            disabled={submitting || cooldownSeconds > 0}
-            className="w-full h-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 flex items-center justify-center overflow-hidden px-2"
-          >
-            <span
-              className={`whitespace-nowrap ${submitting ? "text-[20px] leading-[24px]" : "text-[24px] leading-[29px]"}`}
-            >
-              {submitting
-                ? "Submitting..."
-                : cooldownSeconds > 0
-                  ? `Wait ${cooldownSeconds}s`
-                  : "SUBMIT"}
-            </span>
-          </Button>
-        </div>
 
         {/* Message Display */}
         {message && (
@@ -616,52 +635,69 @@ function PlayPage() {
           </div>
         </div>
 
-        {/* Answer Section */}
-        <div className="space-y-3">
-          <div className="font-whirlyBirdie font-bold text-black text-lg">
-            ANSWER :
-          </div>
-          <div className="relative">
-            <Input
-              id="answer-input-mobile"
-              placeholder="Enter Your Answer"
-              value={answer}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setAnswer(e.target.value)
-              }
-              disabled={cooldownSeconds > 0 || submitting}
-              onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
-                e.key === "Enter" && handleSubmit()
-              }
-              className="w-full h-12 text-sm"
-            />
-          </div>
-          <Button
-            onClick={handleSubmit}
-            disabled={submitting || cooldownSeconds > 0}
-            className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base overflow-hidden px-2"
-          >
-            <span className="whitespace-nowrap">
-              {submitting
-                ? "Submitting..."
-                : cooldownSeconds > 0
-                  ? `Wait ${cooldownSeconds}s`
-                  : "SUBMIT"}
-            </span>
-          </Button>
-          {message && (
-            <div
-              className={`font-poppins text-sm font-medium p-3 rounded ${message.includes("Correct") ||
-                message.includes("Success") ||
-                message.includes("🎉")
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-                }`}
-            >
-              {message}
+        {/* Answer Section - Show input if not completed, feedback if completed */}
+        {!question?.isCompleted ? (
+          <div className="space-y-3">
+            <div className="font-whirlyBirdie font-bold text-black text-lg">
+              ANSWER :
             </div>
-          )}
-        </div>
+            <div className="relative">
+              <Input
+                id="answer-input-mobile"
+                placeholder="Enter Your Answer"
+                value={answer}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setAnswer(e.target.value)
+                }
+                disabled={cooldownSeconds > 0 || submitting}
+                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) =>
+                  e.key === "Enter" && handleSubmit()
+                }
+                className="w-full h-12 text-sm"
+              />
+            </div>
+            <Button
+              onClick={handleSubmit}
+              disabled={submitting || cooldownSeconds > 0}
+              className="w-full bg-black text-white font-whirlyBirdie font-bold hover:bg-gray-800 disabled:opacity-50 h-12 text-base overflow-hidden px-2"
+            >
+              <span className="whitespace-nowrap">
+                {submitting
+                  ? "Submitting..."
+                  : cooldownSeconds > 0
+                    ? `Wait ${cooldownSeconds}s`
+                    : "SUBMIT"}
+              </span>
+            </Button>
+            {message && (
+              <div
+                className={`font-poppins text-sm font-medium p-3 rounded ${message.includes("Correct") ||
+                  message.includes("Success") ||
+                  message.includes("🎉")
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-700"
+                  }`}
+              >
+                {message}
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Completion Feedback for Mobile */
+          <div className="space-y-3">
+            <div className="bg-green-50 border-2 border-green-500 rounded-lg p-4 flex items-start gap-3">
+              <div className="text-2xl">🎉</div>
+              <div className="flex-1">
+                <div className="font-whirlyBirdie font-bold text-green-700 text-lg mb-1">
+                  Question Completed!
+                </div>
+                <div className="font-poppins text-sm text-green-600">
+                  You've already submitted the correct answer for this day.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Progress Section */}
         <div className="bg-black text-white p-4 rounded-lg">
