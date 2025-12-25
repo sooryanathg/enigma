@@ -120,7 +120,7 @@
   }
 
   .day-cell.day-complete .day-cell-side {
-    width: 175%;
+    width: 120%;
   }
 
   .day-cell.day-hoverable:hover .day-cell-bottom {
