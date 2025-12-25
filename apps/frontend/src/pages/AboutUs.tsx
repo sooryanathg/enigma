@@ -90,11 +90,11 @@ interface MobileSectionProps { content: ContentSection; CircularTextComponent: R
 const MobileSection = ({ content, CircularTextComponent, showVerticalTitle = false, isFirst = false }: MobileSectionProps) => (
   <section className={`relative bg-black text-white px-4 xs:px-5 sm:px-6 md:px-8 lg:px-10 py-6 xs:py-7 sm:py-8 md:py-10 lg:py-12 overflow-hidden ${isFirst ? 'rounded-t-lg' : 'rounded-b-lg'}`}>
     {/* Header: Logo + Intro + Vertical Title */}
-    <div className="flex flex-col xs:flex-row items-center xs:items-start gap-4 xs:gap-5 sm:gap-6 md:gap-8">
+    <div className={`flex flex-col xs:flex-row items-center xs:items-start gap-4 xs:gap-5 sm:gap-6 md:gap-8 ${!showVerticalTitle ? 'mt-4 xs:mt-5 sm:mt-6 md:mt-8' : ''}`}>
       {/* Logo Container - responsive sizing */}
       <div className={`relative shrink-0 ${showVerticalTitle 
-        ? "w-[90px] h-[90px] xs:w-[100px] xs:h-[100px] sm:w-[120px] sm:h-[120px] md:w-[140px] md:h-[140px] lg:w-[160px] lg:h-[160px]" 
-        : "w-[100px] h-[100px] xs:w-[110px] xs:h-[110px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px] lg:w-[180px] lg:h-[180px]"}`}>
+        ? "w-[90px] h-[90px] xs:w-[100px] xs:h-[100px] sm:w-[120px] sm:h-[120px] md:w-[140px] md:h-[140px] lg:w-[160px] lg:h-[160px] mb-4 xs:mb-5 sm:mb-6 md:mb-7" 
+        : "w-[100px] h-[100px] xs:w-[110px] xs:h-[110px] sm:w-[130px] sm:h-[130px] md:w-[150px] md:h-[150px] lg:w-[180px] lg:h-[180px] mb-4 xs:mb-5 sm:mb-6 md:mb-7"}`}>
         <CircularTextComponent />
         <img 
           src={content.logo} 
@@ -122,17 +122,17 @@ const MobileSection = ({ content, CircularTextComponent, showVerticalTitle = fal
           </div>
         </div>
       ) : (
-        <div className="hidden xs:block flex-1 text-[13px] xs:text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed">
+        <div className="hidden xs:block flex-1 text-[13px] xs:text-sm sm:text-base md:text-lg lg:text-xl leading-relaxed mb-4 xs:mb-5 sm:mb-6 md:mb-7">
           <p>{content.intro}</p>
         </div>
       )}
     </div>
     
     {/* Content paragraphs */}
-    <div className={`leading-relaxed space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6 ${showVerticalTitle ? "mt-5 xs:mt-6 sm:mt-8 md:mt-10" : "mt-5 xs:mt-6 sm:mt-8"}`}>
+    <div className={`leading-relaxed space-y-3 xs:space-y-4 sm:space-y-5 md:space-y-6 ${showVerticalTitle ? "mt-7 xs:mt-8 sm:mt-10 md:mt-12" : "mt-5 xs:mt-6 sm:mt-8"}`}>
       {/* Show intro on smallest screens only for non-vertical title variant */}
       {!showVerticalTitle && (
-        <p className="xs:hidden text-[13px] leading-relaxed text-center">{content.intro}</p>
+        <p className="xs:hidden text-[13px] leading-relaxed text-center mb-4">{content.intro}</p>
       )}
       {content.paragraphs.map((paragraph, index) => (
         <p 
@@ -152,7 +152,7 @@ const MobileSection = ({ content, CircularTextComponent, showVerticalTitle = fal
     {/* Video/Media Section */}
     {showVerticalTitle ? (
       <div className="mt-5 xs:mt-6 sm:mt-8 md:mt-10 w-full aspect-video xs:aspect-[4/3] sm:aspect-video overflow-hidden rounded-lg bg-black relative">
-        <div className="absolute inset-0 w-full h-full mix-blend-screen">
+        <div className="absolute inset-0 w-full h-full mix-blend-screen" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}>
           <VideoPlayer 
             src={content.videoSrc} 
             staticImageSrc={content.staticImageSrc} 
@@ -164,7 +164,7 @@ const MobileSection = ({ content, CircularTextComponent, showVerticalTitle = fal
     ) : (
       <div className="mt-5 xs:mt-6 sm:mt-8 md:mt-10 space-y-4 xs:space-y-5 sm:space-y-6 md:space-y-8">
         <div className="w-full aspect-video xs:aspect-[4/3] sm:aspect-video overflow-hidden rounded-lg bg-black relative">
-          <div className="absolute inset-0 w-full h-full mix-blend-screen">
+          <div className="absolute inset-0 w-full h-full mix-blend-screen" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}>
             <VideoPlayer 
               src={content.videoSrc} 
               staticImageSrc={content.staticImageSrc} 
