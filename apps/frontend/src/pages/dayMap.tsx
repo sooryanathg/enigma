@@ -74,10 +74,12 @@ const DayMap = () => {
   }, [progress, activeDay]);
 
   return (
-    <div className="min-h-screen flex flex-col md:overflow-x-hidden overflow-x-scroll container selection:bg-none mx-auto py-12 md:py-14">
-      <PageExplainer pageTitle="Levels" />
+    <div className="min-h-screen flex flex-col container selection:bg-none mx-auto py-12 md:py-14">
+      <div className="w-full">
+        <PageExplainer pageTitle="Levels" />
+      </div>
 
-      <div className="w-full flex justify-center overflow-visible">
+      <div className="w-full md:overflow-x-hidden overflow-x-scroll flex justify-center overflow-visible">
         <div
           ref={mapRef}
           className=""
