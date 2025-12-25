@@ -75,11 +75,11 @@ const DayMap = () => {
 
   return (
     <div className="min-h-screen flex flex-col container selection:bg-none mx-auto py-12 md:py-14">
-      <div className="w-full">
+      <div className="w-full daymap-heading-wrapper">
         <PageExplainer pageTitle="Levels" />
       </div>
 
-      <div className="w-full md:overflow-x-hidden overflow-x-scroll flex justify-center overflow-visible">
+      <div className="w-full md:overflow-x-hidden overflow-x-scroll flex justify-center overflow-visible daymap-map-wrapper">
         <div
           ref={mapRef}
           className=""

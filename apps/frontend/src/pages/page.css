@@ -10,10 +10,18 @@
   transform-style: preserve-3d;
 }
 
-/* Remove left and right padding from container on mobile */
+/* On mobile: keep padding for heading, remove padding for map area */
 @media (max-width: 767px) {
-  .container {
-    padding-left: 0;
-    padding-right: 0;
+  /* Add padding to heading wrapper to maintain spacing */
+  .daymap-heading-wrapper {
+    padding-left: 0rem;
+    padding-right: 0rem;
+  }
+  
+  /* Extend map area to edges using negative margins */
+  .daymap-map-wrapper {
+    margin-left: -2rem;
+    margin-right: -2rem;
+    width: calc(100% + 4rem);
   }
 }
