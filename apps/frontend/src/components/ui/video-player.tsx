@@ -1,8 +1,8 @@
 import React from "react";
 
-interface VideoPlayerProps { src: string; staticImageSrc: string; staticImageAlt: string; className?: string; }
+interface VideoPlayerProps { src: string; staticImageSrc: string; staticImageAlt: string; className?: string; overflowVisible?: boolean; objectFit?: "cover" | "contain"; }
 
-const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "" }: VideoPlayerProps) => {
+const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "", overflowVisible = false, objectFit = "cover" }: VideoPlayerProps) => {
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const animationFrameRef = React.useRef<number | null>(null);
   const isHoveringRef = React.useRef<boolean>(false);
@@ -107,9 +107,9 @@ const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "" }: Vi
   }, []);
 
   return (
-    <div className={`overflow-hidden ${className}`} style={{ imageRendering: "crisp-edges" as const, transform: "translateZ(0)" }}>
-      <img src={staticImageSrc} alt={staticImageAlt} className="w-full h-full object-cover absolute top-0 left-0" style={{ imageRendering: "auto" as const, transform: "scale(1.02)", transformOrigin: "center" }} loading="eager" />
-      <video ref={videoRef} src={src} autoPlay loop={true} muted playsInline preload="auto" className="w-full h-full object-cover absolute inset-0 opacity-0 transition-opacity duration-500 z-10" style={{ willChange: "opacity", transform: "translateZ(0) scale(1.02)", transformOrigin: "center", backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", imageRendering: "auto" as const }} onLoadedData={handleLoadedData} onCanPlay={handleCanPlay} onError={handleError} onTimeUpdate={handleTimeUpdate} onSeeking={handleSeeking} onSeeked={handleSeeked} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} />
+    <div className={`${overflowVisible ? 'overflow-visible' : 'overflow-hidden'} ${className}`} style={{ imageRendering: "crisp-edges" as const, transform: "translateZ(0)" }}>
+      <img src={staticImageSrc} alt={staticImageAlt} className="w-full h-full absolute top-0 left-0" style={{ imageRendering: "auto" as const, transform: "scale(1.02)", transformOrigin: "center", objectFit: objectFit }} loading="eager" />
+      <video ref={videoRef} src={src} autoPlay loop={true} muted playsInline preload="auto" className="w-full h-full absolute inset-0 opacity-0 transition-opacity duration-500 z-10" style={{ willChange: "opacity", transform: "translateZ(0) scale(1.02)", transformOrigin: "center", backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", imageRendering: "auto" as const, objectFit: objectFit }} onLoadedData={handleLoadedData} onCanPlay={handleCanPlay} onError={handleError} onTimeUpdate={handleTimeUpdate} onSeeking={handleSeeking} onSeeked={handleSeeked} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} />
     </div>
   );
 };

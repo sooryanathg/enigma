@@ -79,8 +79,10 @@ const DesktopSection = ({ content, top, CircularTextComponent, logoSize }: Deskt
     <TextBlock className="absolute w-[39%] max-w-[567px] top-[64%] left-[1.5%]">{content.paragraphs[1]}</TextBlock>
     {content.cta && <TextBlock className="absolute w-[18%] max-w-[258px] top-[84%] left-[1.5%] text-xl 2xl:text-[30px] font-semibold leading-tight 2xl:leading-[34px]">{content.cta}</TextBlock>}
     <p className="absolute w-[34%] max-w-[489px] top-[75%] left-[55%] font-whirlyBirdie text-4xl xl:text-6xl 2xl:text-[80px] font-bold leading-tight xl:leading-[80px] tracking-[-0.02em] text-center text-white antialiased">{content.title}</p>
-    <div className="absolute w-[45%] max-w-[650px] h-[60%] max-h-[486px] top-0 left-[55%] mix-blend-screen overflow-hidden">
-      <VideoPlayer src={content.videoSrc} staticImageSrc={content.staticImageSrc} staticImageAlt={content.staticImageAlt} className="w-full h-full" />
+    <div className={`absolute w-[45%] max-w-[650px] h-[60%] max-h-[486px] top-0 left-[55%] mix-blend-screen ${content.videoSrc === Invento3D ? 'overflow-visible' : 'overflow-hidden'}`}>
+      <div className="w-full h-full flex items-center justify-center" style={{ transform: content.videoSrc === Invento3D ? 'scale(1.05)' : 'scale(1)', transformOrigin: 'center center' }}>
+        <VideoPlayer src={content.videoSrc} staticImageSrc={content.staticImageSrc} staticImageAlt={content.staticImageAlt} className="w-full h-full" overflowVisible={content.videoSrc === Invento3D} objectFit={content.videoSrc === Invento3D ? "contain" : "cover"} />
+      </div>
     </div>
   </section>
 );
@@ -151,25 +153,29 @@ const MobileSection = ({ content, CircularTextComponent, showVerticalTitle = fal
     
     {/* Video/Media Section */}
     {showVerticalTitle ? (
-      <div className="mt-5 xs:mt-6 sm:mt-8 md:mt-10 w-full aspect-video xs:aspect-[4/3] sm:aspect-video overflow-hidden rounded-lg bg-black relative">
-        <div className="absolute inset-0 w-full h-full mix-blend-screen" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}>
+      <div className={`mt-5 xs:mt-6 sm:mt-8 md:mt-10 w-full aspect-video xs:aspect-[4/3] sm:aspect-video ${content.videoSrc === Invento3D ? 'overflow-visible' : 'overflow-hidden'} rounded-lg bg-black relative`}>
+        <div className="absolute inset-0 w-full h-full flex items-center justify-center mix-blend-screen" style={{ transform: content.videoSrc === Invento3D ? 'scale(1.18)' : 'scale(1.15)', transformOrigin: 'center center' }}>
           <VideoPlayer 
             src={content.videoSrc} 
             staticImageSrc={content.staticImageSrc} 
             staticImageAlt={content.staticImageAlt} 
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover"
+            overflowVisible={content.videoSrc === Invento3D}
+            objectFit={content.videoSrc === Invento3D ? "contain" : "cover"}
           />
         </div>
       </div>
     ) : (
       <div className="mt-5 xs:mt-6 sm:mt-8 md:mt-10 space-y-4 xs:space-y-5 sm:space-y-6 md:space-y-8">
-        <div className="w-full aspect-video xs:aspect-[4/3] sm:aspect-video overflow-hidden rounded-lg bg-black relative">
-          <div className="absolute inset-0 w-full h-full mix-blend-screen" style={{ transform: 'scale(1.15)', transformOrigin: 'center center' }}>
+        <div className={`w-full aspect-video xs:aspect-[4/3] sm:aspect-video ${content.videoSrc === Invento3D ? 'overflow-visible' : 'overflow-hidden'} rounded-lg bg-black relative`}>
+          <div className="absolute inset-0 w-full h-full flex items-center justify-center mix-blend-screen" style={{ transform: content.videoSrc === Invento3D ? 'scale(1.18)' : 'scale(1.15)', transformOrigin: 'center center' }}>
             <VideoPlayer 
               src={content.videoSrc} 
               staticImageSrc={content.staticImageSrc} 
               staticImageAlt={content.staticImageAlt} 
-              className="w-full h-full object-cover" 
+              className="w-full h-full object-cover"
+              overflowVisible={content.videoSrc === Invento3D}
+              objectFit={content.videoSrc === Invento3D ? "contain" : "cover"}
             />
           </div>
         </div>
