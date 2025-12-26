@@ -6,6 +6,7 @@ const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "", over
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const animationFrameRef = React.useRef<number | null>(null);
   const isHoveringRef = React.useRef<boolean>(false);
+  const [isVideoLoaded, setIsVideoLoaded] = React.useState(false);
   const NORMAL_PLAYBACK_RATE = 1.0;
   const FAST_PLAYBACK_RATE = 5.0;
   const targetRateRef = React.useRef<number>(NORMAL_PLAYBACK_RATE);
@@ -40,6 +41,7 @@ const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "", over
     const video = e.currentTarget;
     video.style.opacity = "1";
     video.playbackRate = NORMAL_PLAYBACK_RATE;
+    setIsVideoLoaded(true);
     video.play().catch((err) => console.warn("Video autoplay failed:", err));
   };
 
@@ -47,6 +49,7 @@ const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "", over
     const video = e.currentTarget;
     video.style.opacity = "1";
     video.playbackRate = NORMAL_PLAYBACK_RATE;
+    setIsVideoLoaded(true);
     video.play().catch((err) => console.warn("Video autoplay failed:", err));
   };
 
@@ -108,7 +111,7 @@ const VideoPlayer = ({ src, staticImageSrc, staticImageAlt, className = "", over
 
   return (
     <div className={`${overflowVisible ? 'overflow-visible' : 'overflow-hidden'} ${className}`} style={{ imageRendering: "crisp-edges" as const, transform: "translateZ(0)" }}>
-      <img src={staticImageSrc} alt={staticImageAlt} className="w-full h-full absolute top-0 left-0" style={{ imageRendering: "auto" as const, transform: "scale(1.02)", transformOrigin: "center", objectFit: objectFit }} loading="eager" />
+      <img src={staticImageSrc} alt={staticImageAlt} className={`w-full h-full absolute top-0 left-0 transition-opacity duration-500 ${isVideoLoaded ? 'opacity-0' : 'opacity-100'}`} style={{ imageRendering: "auto" as const, transform: "scale(1.02)", transformOrigin: "center", objectFit: objectFit }} loading="eager" />
       <video ref={videoRef} src={src} autoPlay loop={true} muted playsInline preload="auto" className="w-full h-full absolute inset-0 opacity-0 transition-opacity duration-500 z-10" style={{ willChange: "opacity", transform: "translateZ(0) scale(1.02)", transformOrigin: "center", backfaceVisibility: "hidden", WebkitBackfaceVisibility: "hidden", imageRendering: "auto" as const, objectFit: objectFit }} onLoadedData={handleLoadedData} onCanPlay={handleCanPlay} onError={handleError} onTimeUpdate={handleTimeUpdate} onSeeking={handleSeeking} onSeeked={handleSeeked} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd} />
     </div>
   );
