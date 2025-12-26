@@ -9,7 +9,7 @@ interface QuestionsGridProps {
 }
 
 const QuestionsGrid: React.FC<QuestionsGridProps> = ({ questions, onEdit, onDelete }) => {
-  const allDays = Array.from({ length: 10 }, (_, i) => i + 1);
+  const allDays = Array.from({ length: 30 }, (_, i) => i + 1);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

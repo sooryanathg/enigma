@@ -5,6 +5,7 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { getAllQuestions, Question } from "./lib/firestoreService";
 import QuestionsGrid from "./components/QuestionsGrid";
 import QuestionForm from "./components/QuestionForm";
+import SwapQuestions from "./components/SwapQuestions";
 import toast, { Toaster } from "react-hot-toast";
 import Login from "./components/Login";
 import { getDoc, doc } from "firebase/firestore";
@@ -16,6 +17,7 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingDay, setEditingDay] = useState<number | null>(null);
+  const [showSwap, setShowSwap] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
 
@@ -135,6 +137,14 @@ function App() {
               New Question
             </button>
           )}
+          <div className="ml-4">
+            <button
+              onClick={() => setShowSwap(true)}
+              className="ml-3 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg transition font-medium"
+            >
+              Swap Questions
+            </button>
+          </div>
         </div>
 
         {/* Form Section */}
@@ -165,6 +175,12 @@ function App() {
               window.scrollTo({ top: 0, behavior: "smooth" });
             }}
             onDelete={() => loadQuestions()}
+          />
+        )}
+        {showSwap && (
+          <SwapQuestions
+            onClose={() => setShowSwap(false)}
+            onSuccess={() => loadQuestions()}
           />
         )}
       </main>
