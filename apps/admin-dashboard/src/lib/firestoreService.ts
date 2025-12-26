@@ -9,6 +9,7 @@ import {
   query,
   orderBy,
   Timestamp,
+  runTransaction,
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from './firebase';
@@ -141,6 +142,59 @@ export const deleteQuestion = async (day: number): Promise<void> => {
     await deleteDoc(docRef);
   } catch (error) {
     console.error('Error deleting question:', error);
+    throw error;
+  }
+};
+
+// Swap only the image and answer fields between two days while preserving day and unlockDate
+export const swapQuestions = async (
+  dayA: number,
+  dayB: number
+): Promise<void> => {
+  const refA = doc(db, 'questions', `day${dayA}`);
+  const refB = doc(db, 'questions', `day${dayB}`);
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const snapA = await transaction.get(refA);
+      const snapB = await transaction.get(refB);
+
+      if (!snapA.exists() || !snapB.exists()) {
+        throw new Error('Both days must have existing questions to swap');
+      }
+
+      const dataA = snapA.data();
+      const dataB = snapB.data();
+
+      // fields we WANT to swap
+      const swapFields = {
+        text: dataA.text,
+        hint: dataA.hint,
+        difficulty: dataA.difficulty,
+        answer: dataA.answer,
+        image: dataA.image || null,
+      };
+
+      const swapFieldsReverse = {
+        text: dataB.text,
+        hint: dataB.hint,
+        difficulty: dataB.difficulty,
+        answer: dataB.answer,
+        image: dataB.image || null,
+      };
+
+      transaction.update(refA, {
+        ...swapFieldsReverse,
+        updatedAt: Timestamp.now(),
+      });
+
+      transaction.update(refB, {
+        ...swapFields,
+        updatedAt: Timestamp.now(),
+      });
+    });
+  } catch (error) {
+    console.error('Error swapping questions:', error);
     throw error;
   }
 };

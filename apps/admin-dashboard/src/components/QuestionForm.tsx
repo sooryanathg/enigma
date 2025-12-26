@@ -125,7 +125,7 @@ const QuestionForm: React.FC<QuestionFormProps> = ({ editingDay, onSuccess, onCa
             <input
               type="number"
               min="1"
-              max="10"
+              max="30"
               value={day}
               onChange={(e) => setDay(Math.min(30, Math.max(1, parseInt(e.target.value))))}
               disabled={!!editingDay}
