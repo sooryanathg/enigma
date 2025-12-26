@@ -61,16 +61,42 @@ const HowItWorksSection = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const mq = window.matchMedia("(hover: none)");
-    const update = () => setIsTouchDevice(mq.matches);
+    // Multiple methods to detect touch devices
+    const checkTouchDevice = () => {
+      // Check for touch capability
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      // Check media query for hover capability
+      const mq = window.matchMedia("(hover: none)");
+      // Check screen width (mobile is typically < 768px)
+      const isSmallScreen = window.innerWidth < 768;
+      
+      // Consider it a touch device if any of these conditions are true
+      return hasTouch || mq.matches || isSmallScreen;
+    };
+
+    const update = () => setIsTouchDevice(checkTouchDevice());
 
     update();
+    
+    // Listen to multiple events
+    const mq = window.matchMedia("(hover: none)");
     mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
+    window.addEventListener("resize", update);
+    
+    return () => {
+      mq.removeEventListener("change", update);
+      window.removeEventListener("resize", update);
+    };
   }, []);
 
   const handleTileClick = (id: number) => {
-    if (!isTouchDevice) return; // desktop: click should not lock state
+    // Always allow click to toggle on small screens (< 768px)
+    // On larger screens, only allow if it's a touch device
+    const isSmallScreen = typeof window !== "undefined" && window.innerWidth < 768;
+    if (!isSmallScreen && !isTouchDevice) {
+      // On desktop with hover, don't lock the state on click
+      return;
+    }
     setActiveStepId((prev) => (prev === id ? null : id));
   };
 
@@ -111,7 +137,8 @@ const HowItWorksSection = () => {
           animate={controls}
         >
           {steps.map((step) => {
-            const isActive = isTouchDevice && activeStepId === step.id;
+            // Show description if active OR if on small screen and clicked
+            const isActive = activeStepId === step.id;
 
             return (
               <motion.div
@@ -119,6 +146,7 @@ const HowItWorksSection = () => {
                 variants={tileVariants}
                 className="group relative bg-black border-[3px] border-white text-white overflow-hidden cursor-pointer flex items-center justify-center min-h-[16rem]"
                 onClick={() => handleTileClick(step.id)}
+                data-active={isActive}
               >
                 <div className="relative z-10 flex flex-col items-center justify-center text-center px-4 py-6 w-full h-full">
                   <div
@@ -139,8 +167,6 @@ const HowItWorksSection = () => {
                     className={`text-sm md:text-base text-white/90 max-w-[160px] mx-auto transition-all duration-700 ${
                       isActive 
                         ? "opacity-100 translate-y-0" 
-                        : isTouchDevice 
-                        ? "opacity-0 translate-y-4" 
                         : "opacity-0 translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0"
                     }`}
                   >
