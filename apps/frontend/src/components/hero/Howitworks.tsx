@@ -136,12 +136,13 @@ const HowItWorksSection = () => {
                   </div>
 
                   <p
-                    className={[
-                      "text-sm md:text-base text-white/90 max-w-[160px] mx-auto transition-all duration-700",
-                      isActive ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4",
-                      // desktop hover only (no focus)
-                      "md:group-hover:opacity-100 md:group-hover:translate-y-0"
-                    ].join(" ")}
+                    className={`text-sm md:text-base text-white/90 max-w-[160px] mx-auto transition-all duration-700 ${
+                      isActive 
+                        ? "opacity-100 translate-y-0" 
+                        : isTouchDevice 
+                        ? "opacity-0 translate-y-4" 
+                        : "opacity-0 translate-y-4 md:group-hover:opacity-100 md:group-hover:translate-y-0"
+                    }`}
                   >
                     {step.description}
                   </p>
