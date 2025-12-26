@@ -122,7 +122,7 @@ const HowItWorksSection = () => {
             variants={subheadingVariants}
           >
             <p className="text-2xl md:text-2xl font-normal text-black">
-              Join our 10-day treasure hunt!!
+              Join our 30-day treasure hunt!!
             </p>
             <p className="text-md md:text-2xl font-normal text-black mt-4">
               One question per day, compete for the fastest completion time, and climb the daily leaderboard
