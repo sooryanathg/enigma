@@ -166,8 +166,8 @@ export default function LeaderboardPage() {
                     </div>
 
                     {/* Name */}
-                    <div className="border-r border-white p-4 lg:p-6 flex-1">
-                      <h3 className="font-whirlyBirdie text-[10.59px] lg:text-lg font-semibold">
+                    <div className="border-r border-white p-4 lg:p-6 flex-1 flex justify-center items-center">
+                      <h3 className="font-whirlyBirdie text-[12px] lg:text-xl font-semibold text-center">
                         {entry.name || "Anonymous"}
                         {currentUser &&
                           entry.id === currentUser.uid &&
