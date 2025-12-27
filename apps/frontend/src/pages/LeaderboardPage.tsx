@@ -12,7 +12,6 @@ interface LeaderboardEntry {
   id: string;
   rank: number;
   name: string;
-  attempts: number;
   completedAt: any;
 }
 
@@ -41,7 +40,6 @@ export default function LeaderboardPage() {
   const fetchLeaderboard = async (day: number) => {
     setLoading(true);
     try {
-      // Use enhanced leaderboard with attempts tracking
       const data = await getEnhancedDailyLeaderboard(day, 20);
       setLeaderboard(data);
     } catch (error) {
@@ -157,7 +155,7 @@ export default function LeaderboardPage() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className={`grid grid-cols-[40px_0.8fr_0.4fr] lg:grid-cols-[100px_0.8fr_0.2fr] justify-center transition-colors ${
+                    className={`grid grid-cols-[40px_1fr_0.4fr] lg:grid-cols-[100px_1fr_0.2fr] justify-center transition-colors ${
                       currentUser && entry.id === currentUser.uid
                         ? "bg-white/15"
                         : "hover:bg-white/5"
@@ -167,7 +165,7 @@ export default function LeaderboardPage() {
                       {entry.rank}
                     </div>
 
-                    {/* Name and attempts */}
+                    {/* Name */}
                     <div className="border-r border-white p-4 lg:p-6 flex-1">
                       <h3 className="font-whirlyBirdie text-[10.59px] lg:text-lg font-semibold">
                         {entry.name || "Anonymous"}
@@ -175,12 +173,9 @@ export default function LeaderboardPage() {
                           entry.id === currentUser.uid &&
                           " (You)"}
                       </h3>
-                      <p className="text-[10.59px] lg:text-lg mt-1">
-                        Attempts: {entry.attempts}
-                      </p>
                     </div>
 
-                    {/* Completetion time */}
+                    {/* Completion time */}
                     <div className="border-r border-white p-4 lg:p-6 flex flex-col gap-1">
                       <p className="font-whirlyBirdie text-[6.58px] lg:text-lg font-bold">
                         {formatTime(entry.completedAt)[0]}

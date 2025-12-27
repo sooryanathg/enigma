@@ -49,7 +49,6 @@ export interface LeaderboardEntry {
   name: string;
   email: string;
   completedAt: Timestamp;
-  attempts: number; // Add attempts to leaderboard for more detailed ranking
   rank: number;
 }
 
@@ -272,7 +271,6 @@ export const getDailyLeaderboard = async (day: number, limitCount: number = 10):
         name: userData.name,
         email: userData.email,
         completedAt: completedData.timestamp,
-        attempts: completedData.attempts || 1,
         rank: leaderboard.length + 1
       });
     }
@@ -281,7 +279,7 @@ export const getDailyLeaderboard = async (day: number, limitCount: number = 10):
   return leaderboard;
 };
 
-// Get enhanced leaderboard with attempts-based secondary sorting
+// Get enhanced leaderboard sorted by completion time
 export const getEnhancedDailyLeaderboard = async (day: number, limitCount: number = 10): Promise<LeaderboardEntry[]> => {
   const usersRef = collection(db, 'users');
   const q = query(
@@ -296,25 +294,20 @@ export const getEnhancedDailyLeaderboard = async (day: number, limitCount: numbe
     const userData = doc.data() as User;
     const completedData = userData.completed[`day${day}`];
 
-    
-    
     if (completedData?.timestamp) {
       entries.push({
         id: doc.id,
         name: userData.name,
         email: userData.email,
         completedAt: completedData.timestamp,
-        attempts: completedData.attempts || 1,
         rank: 0 // Will be set after sorting
       });
     }
   });
   
-  // Sort by completion time first, then by fewer attempts as tiebreaker
+  // Sort by completion time
   entries.sort((a, b) => {
-    const timeComparison = a.completedAt.toMillis() - b.completedAt.toMillis();
-    if (timeComparison !== 0) return timeComparison;
-    return a.attempts - b.attempts; // Fewer attempts is better
+    return a.completedAt.toMillis() - b.completedAt.toMillis();
   });
   
   // Assign ranks and limit results
