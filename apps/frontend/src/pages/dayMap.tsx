@@ -45,9 +45,32 @@ const DayMap = () => {
   const isDayAccessible = useCallback(
     (day: number): boolean => {
       if (day === 0) return true;
-      return isDayComplete(day - 1);
+      const dayProgress = completedDays[day - 1];
+      // Use isAccessible from backend which checks both date unlock and serial progression
+      return dayProgress?.isAccessible === true;
     },
-    [isDayComplete],
+    [completedDays],
+  );
+
+  // Helper to determine target day for an arrow
+  const getArrowTargetDay = useCallback(
+    (fromDay: number, direction: string): number => {
+      if (direction === "right") return fromDay + 1;
+      if (direction === "left") return fromDay - 1;
+      if (direction === "down") return fromDay + 1; // Down arrows connect to next day in sequence
+      return fromDay + 1; // Default to next day
+    },
+    [],
+  );
+
+  // Check if arrow should be active (from day complete AND target day accessible)
+  const isArrowActive = useCallback(
+    (fromDay: number, direction: string): boolean => {
+      const targetDay = getArrowTargetDay(fromDay, direction);
+      // Arrow is active only if from day is complete AND target day is accessible
+      return isDayComplete(fromDay) && isDayAccessible(targetDay);
+    },
+    [isDayComplete, isDayAccessible, getArrowTargetDay],
   );
 
   const rows = useMemo(
@@ -133,7 +156,7 @@ const DayMap = () => {
 
                       {cell.type === "arrow" && (
                         <ArrowTile
-                          isActive={isDayComplete(cell.fromDay)}
+                          isActive={isArrowActive(cell.fromDay, cell.arrow)}
                           direction={cell.arrow}
                         />
                       )}
